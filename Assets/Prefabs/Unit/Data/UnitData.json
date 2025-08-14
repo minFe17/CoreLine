@@ -26,14 +26,14 @@
           "_attackDamage": 17,
           "_attackSpeed": 1.4,
           "_attackRange": 3.7,
-          "_cost": 90
+          "_cost": 50
         },
         {
           "_hp": 100,
           "_attackDamage": 20,
           "_attackSpeed": 1.4,
           "_attackRange": 4.0,
-          "_cost": 100
+          "_cost": 50
         }
       ]
     },
@@ -52,15 +52,96 @@
           "_hp": 90,
           "_attackDamage": 23,
           "_attackSpeed": 1.7,
-          "_attackRange": 2.3,
-          "_cost": 75
+          "_attackRange": 2.0,
+          "_cost": 40
         },
         {
           "_hp": 100,
           "_attackDamage": 25,
           "_attackSpeed": 1.7,
           "_attackRange": 2.3,
-          "_cost": 90
+          "_cost": 40
+        }
+      ]
+    },
+    {
+      "_unitType": "Wizard",
+      "_levelData": 
+      [
+        {
+          "_hp": 70,
+          "_attackDamage": 20,
+          "_attackSpeed": 2.7,
+          "_attackRange": 4.0,
+          "_cost": 80
+        },
+        {
+          "_hp": 75,
+          "_attackDamage": 25,
+          "_attackSpeed": 2.7,
+          "_attackRange": 4.3,
+          "_cost": 50
+        },
+        {
+          "_hp": 85,
+          "_attackDamage": 27,
+          "_attackSpeed": 2.5,
+          "_attackRange": 4.5,
+          "_cost": 50
+        }
+      ]
+    },
+    {
+      "_unitType": "Chef",
+      "_levelData": 
+      [
+        {
+          "_hp": 90,
+          "_attackDamage": 20,
+          "_attackSpeed": 2.5,
+          "_attackRange": 2.3,
+          "_cost": 100
+        },
+        {
+          "_hp": 100,
+          "_attackDamage": 23,
+          "_attackSpeed": 2.5,
+          "_attackRange": 2.3,
+          "_cost": 55
+        },
+        {
+          "_hp": 115,
+          "_attackDamage": 25,
+          "_attackSpeed": 2.3,
+          "_attackRange": 2.5,
+          "_cost": 55
+        }
+      ]
+    },
+    {
+      "_unitType": "Pirate",
+      "_levelData": 
+      [
+        {
+          "_hp": 70,
+          "_attackDamage": 20,
+          "_attackSpeed": 2.0,
+          "_attackRange": 3.0,
+          "_cost": 110
+        },
+        {
+          "_hp": 75,
+          "_attackDamage": 23,
+          "_attackSpeed": 1.7,
+          "_attackRange": 3.3,
+          "_cost": 55
+        },
+        {
+          "_hp": 90,
+          "_attackDamage": 25,
+          "_attackSpeed": 1.5,
+          "_attackRange": 3.5,
+          "_cost": 55
         }
       ]
     }
