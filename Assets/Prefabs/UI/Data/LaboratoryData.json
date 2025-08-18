@@ -1,0 +1,34 @@
+{
+    "_laboratoryList":
+    [
+    {
+        "_id" : "Attack_Num1",
+        "_name" : "공격 속도 증가 Lv.1",
+        "_type" : "Attack",
+        "_cost" : 1000,
+        "_value" : 5,
+        "_valueType" : "Add",
+        "_prerequisite": null
+    },
+
+    {
+        "_id" : "Attack_Num2",
+        "_name" : "공격 속도 증가 Lv.2",
+        "_type" : "Attack",
+        "_cost" : 1000,
+        "_value" : 10,
+        "_valueType" : "Add",
+        "_prerequisite": "Attack_Num1"
+    },
+
+    {
+        "_id" : "Defense_Num1",
+        "_name" : "기지 방어력 증가 Lv.1",
+        "_type" : "Defense",
+        "_cost" : 1000,
+        "_value" : 50,
+        "_valueType" : "Add",
+        "_prerequisite": null
+    }
+    ]
+}
