@@ -2,14 +2,17 @@ using UnityEngine;
 
 public abstract class AttackBase : MonoBehaviour
 {
-    [SerializeField] protected EUnitType _unitType;
+    Unit _unit;
+    Animator _animator;
+    float _attackTimer;
 
     protected abstract void Attack();
-    bool _isDie;
 
-    void OnEnable()
+    void Start()
     {
-        _isDie = false;
+        _unit = GetComponent<Unit>();
+        _animator = GetComponent<Animator>();
+        //_attackRange.transform.localScale = new Vector2(_unit.Data.AttackRange * 2, _unit.Data.AttackRange * 2);
     }
 
     void Update()
@@ -17,16 +20,20 @@ public abstract class AttackBase : MonoBehaviour
         AttackTimer();
     }
 
-    void AttackTimer()
+    void OnMouseDown()
     {
-        if(_isDie)
-            return;
+        //_attackRange.SetActive(true);
     }
 
-    #region Animation Event
-    public void OnDieEvent()
+    void AttackTimer()
     {
-        _isDie = true;
+        if(_unit.IsDie)
+            return;
+        _attackTimer += Time.deltaTime;
+        if(_unit.Data.AttackSpeed <= _attackTimer)
+        {
+            _attackTimer = 0;
+            _animator.SetTrigger("doAttack");
+        }
     }
-    #endregion
 }

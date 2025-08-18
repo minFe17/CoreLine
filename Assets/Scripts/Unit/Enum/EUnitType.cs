@@ -1,7 +1,7 @@
 public enum EUnitType
 {
     King,
-    Archor,
+    Archer,
     Warrior,
     Wizard,
     Chef,

@@ -12579,7 +12579,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3390825726640059803}
   - component: {fileID: -2141115473244889095}
-  - component: {fileID: 8882653589885227743}
+  - component: {fileID: -6834645265985742043}
   m_Layer: 0
   m_Name: King
   m_TagString: Untagged
@@ -12629,7 +12629,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8882653589885227743
+--- !u!114 &-6834645265985742043
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12638,11 +12638,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 5715341133562653188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 400baf305ca32524b92277a0d127584f, type: 3}
+  m_Script: {fileID: 11500000, guid: b8c427466f91fd84e9ca9e147e441954, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _unitType: 0
-  _level: 0
+  _level: 1
 --- !u!1 &5745541337088216828
 GameObject:
   m_ObjectHideFlags: 0
