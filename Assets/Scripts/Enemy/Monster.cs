@@ -7,7 +7,7 @@ public class Monster : MonoBehaviour
     private Rigidbody2D _rigid;
     private SpriteRenderer _spriteRenderer;
 
-   
+    private bool _isClicked = false;
 
     private void Awake()
     {
@@ -56,4 +56,11 @@ public class Monster : MonoBehaviour
             transform.localScale = new Vector3(1, 1, 1);
     }
 
+
+    private void OnMouseDown()
+    {
+
+        _isClicked = !_isClicked;
+        _animator.SetBool("isMoving", _isClicked);
+    }
 }
