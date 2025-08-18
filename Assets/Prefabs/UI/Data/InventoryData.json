@@ -1,0 +1,20 @@
+{
+    "_inventoryUnitList":
+    [
+        {
+            "_unitType" : "King",
+            "_unlockPrice":100,
+            "_isUnlocked" : false       
+        },
+        {
+            "_unitType" : "Archer",
+            "_unlockPrice":500,
+            "_isUnlocked" : false
+        },
+        {
+            "_unitType" : "Warrior",
+            "_unlockPrice":1000,
+            "_isUnlocked" : false
+        }
+    ]
+}
