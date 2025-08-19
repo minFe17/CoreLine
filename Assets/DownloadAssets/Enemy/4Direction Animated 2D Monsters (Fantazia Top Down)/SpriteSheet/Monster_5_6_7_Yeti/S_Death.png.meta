@@ -1,0 +1,1846 @@
+fileFormatVersion: 2
+guid: 5a401274838e5c74cbded0f62f7af554
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8742377841872834488
+    second: S_DeathTest_0
+  - first:
+      213: 3522710924904069757
+    second: S_DeathTest_1
+  - first:
+      213: 5390064679399343581
+    second: S_DeathTest_2
+  - first:
+      213: 1672986236043323728
+    second: S_DeathTest_3
+  - first:
+      213: -911422752194983926
+    second: S_DeathTest_4
+  - first:
+      213: 3479160452903535265
+    second: S_DeathTest_5
+  - first:
+      213: -1205118071201388727
+    second: S_DeathTest_6
+  - first:
+      213: 7741642585085630852
+    second: S_DeathTest_7
+  - first:
+      213: -8170094972940408243
+    second: S_DeathTest_8
+  - first:
+      213: -6406139534877730142
+    second: S_DeathTest_9
+  - first:
+      213: -1690467938623682326
+    second: S_DeathTest_10
+  - first:
+      213: -9070990380364345117
+    second: S_DeathTest_11
+  - first:
+      213: 3238956510985845778
+    second: S_DeathTest_12
+  - first:
+      213: 148849569113927110
+    second: S_DeathTest_13
+  - first:
+      213: 8697828457586751133
+    second: S_DeathTest_14
+  - first:
+      213: 8234514989000691762
+    second: S_DeathTest_15
+  - first:
+      213: 7246624127308768594
+    second: S_DeathTest_16
+  - first:
+      213: 8584792010693220209
+    second: S_DeathTest_17
+  - first:
+      213: -8535607469966865185
+    second: S_DeathTest_18
+  - first:
+      213: 6073783748290998698
+    second: S_DeathTest_19
+  - first:
+      213: -6479838979472953610
+    second: S_DeathTest_20
+  - first:
+      213: -8879025523541710994
+    second: S_DeathTest_21
+  - first:
+      213: -445271327157042477
+    second: S_DeathTest_22
+  - first:
+      213: 4102405398559266231
+    second: S_DeathTest_23
+  - first:
+      213: -8506660915648426043
+    second: S_DeathTest_24
+  - first:
+      213: 5136561615970135054
+    second: S_DeathTest_25
+  - first:
+      213: 8782042489164444271
+    second: S_DeathTest_26
+  - first:
+      213: -6192932596765047162
+    second: S_DeathTest_27
+  - first:
+      213: 8719329398309413893
+    second: S_DeathTest_28
+  - first:
+      213: 6493796706531891131
+    second: S_DeathTest_29
+  - first:
+      213: -2519767750262113279
+    second: S_DeathTest_30
+  - first:
+      213: -1814110556944385460
+    second: S_DeathTest_31
+  - first:
+      213: -2739966431989392684
+    second: S_DeathTest_32
+  - first:
+      213: 8404489505269894190
+    second: S_DeathTest_33
+  - first:
+      213: 7426155096267578112
+    second: S_DeathTest_34
+  - first:
+      213: -8454415904523873908
+    second: S_DeathTest_35
+  - first:
+      213: 979333439160969952
+    second: S_DeathTest_36
+  - first:
+      213: 8935449838416071883
+    second: S_DeathTest_37
+  - first:
+      213: -6075770226503591178
+    second: S_DeathTest_38
+  - first:
+      213: -6727809896012877589
+    second: S_DeathTest_39
+  - first:
+      213: -6197416285502497247
+    second: S_DeathTest_40
+  - first:
+      213: 3058839511731829433
+    second: S_DeathTest_41
+  - first:
+      213: 3813895869310519788
+    second: S_DeathTest_42
+  - first:
+      213: 4985352160211758514
+    second: S_DeathTest_43
+  - first:
+      213: 446687575685411594
+    second: S_DeathTest_44
+  - first:
+      213: 2077501890464206138
+    second: S_DeathTest_45
+  - first:
+      213: 5492097474619190270
+    second: S_DeathTest_46
+  - first:
+      213: 2695472967096559167
+    second: S_DeathTest_47
+  - first:
+      213: 4367327290295447672
+    second: S_DeathTest_48
+  - first:
+      213: -9001038700169309902
+    second: S_DeathTest_49
+  - first:
+      213: -1297124457492374238
+    second: S_DeathTest_50
+  - first:
+      213: 134808501707161774
+    second: S_DeathTest_51
+  - first:
+      213: -5479366376753115932
+    second: S_DeathTest_52
+  - first:
+      213: 9133039794415175768
+    second: S_DeathTest_53
+  - first:
+      213: -5163060363623194991
+    second: S_DeathTest_54
+  - first:
+      213: -2095481277200859720
+    second: S_DeathTest_55
+  - first:
+      213: -2960631116483909085
+    second: S_DeathTest_56
+  - first:
+      213: 401362936815065727
+    second: S_DeathTest_57
+  - first:
+      213: 8508306264804866656
+    second: S_DeathTest_58
+  - first:
+      213: -8910721058444713818
+    second: S_DeathTest_59
+  - first:
+      213: -5985654342042435716
+    second: S_DeathTest_60
+  - first:
+      213: -1022216299881727028
+    second: S_DeathTest_61
+  - first:
+      213: 4302371327886366669
+    second: S_DeathTest_62
+  - first:
+      213: -3264285227801698489
+    second: S_DeathTest_63
+  - first:
+      213: -2689460093162383877
+    second: S_DeathTest_64
+  - first:
+      213: -1713581987822404872
+    second: S_DeathTest_65
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 8192
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: S_DeathTest_0
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8407ce20ca5dca680800000000000000
+      internalID: -8742377841872834488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_1
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7a7b4d0cee23e030800000000000000
+      internalID: 3522710924904069757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_2
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd54af3a44b5dca40800000000000000
+      internalID: 5390064679399343581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_3
+      rect:
+        serializedVersion: 2
+        x: 2400
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 059ea792e14a73710800000000000000
+      internalID: 1672986236043323728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_4
+      rect:
+        serializedVersion: 2
+        x: 3000
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a088537f5d9f953f0800000000000000
+      internalID: -911422752194983926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_5
+      rect:
+        serializedVersion: 2
+        x: 3600
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a207ef9ff5784030800000000000000
+      internalID: 3479160452903535265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_6
+      rect:
+        serializedVersion: 2
+        x: 4200
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94723adcf7f864fe0800000000000000
+      internalID: -1205118071201388727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_7
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 489d0160ae6df6b60800000000000000
+      internalID: 7741642585085630852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_8
+      rect:
+        serializedVersion: 2
+        x: 5400
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4aaeacb8edfd9e80800000000000000
+      internalID: -8170094972940408243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_9
+      rect:
+        serializedVersion: 2
+        x: 6000
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2aad602c802d817a0800000000000000
+      internalID: -6406139534877730142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_10
+      rect:
+        serializedVersion: 2
+        x: 6600
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae80626cd504a88e0800000000000000
+      internalID: -1690467938623682326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_11
+      rect:
+        serializedVersion: 2
+        x: 7200
+        y: 5400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e0d5692f4e5d1280800000000000000
+      internalID: -9070990380364345117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21cff3839c513fc20800000000000000
+      internalID: 3238956510985845778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_13
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6cd610cf4e1d01200800000000000000
+      internalID: 148849569113927110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_14
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d96fdbb26e4e4b870800000000000000
+      internalID: 8697828457586751133
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_15
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 230140111cfd64270800000000000000
+      internalID: 8234514989000691762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_16
+      rect:
+        serializedVersion: 2
+        x: 2400
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 255a301ef3e219460800000000000000
+      internalID: 7246624127308768594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_17
+      rect:
+        serializedVersion: 2
+        x: 3000
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1771bfb79de432770800000000000000
+      internalID: 8584792010693220209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_18
+      rect:
+        serializedVersion: 2
+        x: 3600
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdc447aca3e6b8980800000000000000
+      internalID: -8535607469966865185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_19
+      rect:
+        serializedVersion: 2
+        x: 4200
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa1fc67832a6a4450800000000000000
+      internalID: 6073783748290998698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_20
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fee8c2a7ccf216a0800000000000000
+      internalID: -6479838979472953610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_21
+      rect:
+        serializedVersion: 2
+        x: 5400
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e676ba5545d57c480800000000000000
+      internalID: -8879025523541710994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_22
+      rect:
+        serializedVersion: 2
+        x: 6000
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d2432c461412d9f0800000000000000
+      internalID: -445271327157042477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_23
+      rect:
+        serializedVersion: 2
+        x: 6600
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b515c979fbaee830800000000000000
+      internalID: 4102405398559266231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_24
+      rect:
+        serializedVersion: 2
+        x: 7200
+        y: 4800
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cf831aa7f442f980800000000000000
+      internalID: -8506660915648426043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_25
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0c6ec6339bb84740800000000000000
+      internalID: 5136561615970135054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_26
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f62b8095d1510e970800000000000000
+      internalID: 8782042489164444271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_27
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 686c1e36d984e0aa0800000000000000
+      internalID: -6192932596765047162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_28
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5046ad904e7410970800000000000000
+      internalID: 8719329398309413893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_29
+      rect:
+        serializedVersion: 2
+        x: 2400
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb75f60f2b99e1a50800000000000000
+      internalID: 6493796706531891131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_30
+      rect:
+        serializedVersion: 2
+        x: 3000
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10c3429d49cf70dd0800000000000000
+      internalID: -2519767750262113279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_31
+      rect:
+        serializedVersion: 2
+        x: 3600
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4a3b0e5f0cf2d6e0800000000000000
+      internalID: -1814110556944385460
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_32
+      rect:
+        serializedVersion: 2
+        x: 4200
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4da17cc0c0fa9f9d0800000000000000
+      internalID: -2739966431989392684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_33
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2c4c181daeb2a470800000000000000
+      internalID: 8404489505269894190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_34
+      rect:
+        serializedVersion: 2
+        x: 5400
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00b5cffe6b00f0760800000000000000
+      internalID: 7426155096267578112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_35
+      rect:
+        serializedVersion: 2
+        x: 6000
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c81117b3781ebaa80800000000000000
+      internalID: -8454415904523873908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_36
+      rect:
+        serializedVersion: 2
+        x: 6600
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0eae9ddf29a479d00800000000000000
+      internalID: 979333439160969952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_37
+      rect:
+        serializedVersion: 2
+        x: 7200
+        y: 4200
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcc8c173948110c70800000000000000
+      internalID: 8935449838416071883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_38
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fadb587b278eaba0800000000000000
+      internalID: -6075770226503591178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_39
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be07bc78b8402a2a0800000000000000
+      internalID: -6727809896012877589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_40
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12e176149ba5ef9a0800000000000000
+      internalID: -6197416285502497247
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_41
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ba74b9545e237a20800000000000000
+      internalID: 3058839511731829433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_42
+      rect:
+        serializedVersion: 2
+        x: 2400
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce94594161eade430800000000000000
+      internalID: 3813895869310519788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_43
+      rect:
+        serializedVersion: 2
+        x: 3000
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bde5ad40678f2540800000000000000
+      internalID: 4985352160211758514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_44
+      rect:
+        serializedVersion: 2
+        x: 3600
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a033f42cbf3f23600800000000000000
+      internalID: 446687575685411594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_45
+      rect:
+        serializedVersion: 2
+        x: 4200
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3d425956f4c4dc10800000000000000
+      internalID: 2077501890464206138
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_46
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: efb2f760e89d73c40800000000000000
+      internalID: 5492097474619190270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_47
+      rect:
+        serializedVersion: 2
+        x: 5400
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f366571e16e386520800000000000000
+      internalID: 2695472967096559167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_48
+      rect:
+        serializedVersion: 2
+        x: 6000
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 870fdeb080ddb9c30800000000000000
+      internalID: 4367327290295447672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_49
+      rect:
+        serializedVersion: 2
+        x: 6600
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2315dd2edf2e51380800000000000000
+      internalID: -9001038700169309902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_50
+      rect:
+        serializedVersion: 2
+        x: 7200
+        y: 3600
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22d12b9ad20bffde0800000000000000
+      internalID: -1297124457492374238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_51
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea045f83e9feed100800000000000000
+      internalID: 134808501707161774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_52
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ec496faf4165f3b0800000000000000
+      internalID: -5479366376753115932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_53
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8588f99dd431fbe70800000000000000
+      internalID: 9133039794415175768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_54
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19e175054ff1958b0800000000000000
+      internalID: -5163060363623194991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_55
+      rect:
+        serializedVersion: 2
+        x: 2400
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bdf5f671ea5be2e0800000000000000
+      internalID: -2095481277200859720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_56
+      rect:
+        serializedVersion: 2
+        x: 3000
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32a22078fa9b9e6d0800000000000000
+      internalID: -2960631116483909085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_57
+      rect:
+        serializedVersion: 2
+        x: 3600
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7a9edae67de19500800000000000000
+      internalID: 401362936815065727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_58
+      rect:
+        serializedVersion: 2
+        x: 4200
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06abce90873931670800000000000000
+      internalID: 8508306264804866656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_59
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a06fca8862c65480800000000000000
+      internalID: -8910721058444713818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_60
+      rect:
+        serializedVersion: 2
+        x: 5400
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7f394ad61faeeca0800000000000000
+      internalID: -5985654342042435716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_61
+      rect:
+        serializedVersion: 2
+        x: 6000
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccb7fe1f0bb50d1f0800000000000000
+      internalID: -1022216299881727028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_62
+      rect:
+        serializedVersion: 2
+        x: 6600
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc71e728de715bb30800000000000000
+      internalID: 4302371327886366669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_63
+      rect:
+        serializedVersion: 2
+        x: 7200
+        y: 3000
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74f135751ede2b2d0800000000000000
+      internalID: -3264285227801698489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_64
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf5977d6b4e1daad0800000000000000
+      internalID: -2689460093162383877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: S_DeathTest_65
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 2400
+        width: 600
+        height: 600
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fa7652d2422838e0800000000000000
+      internalID: -1713581987822404872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3d9114ec2783ece448fac70df1df54a1
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      S_DeathTest_0: -8742377841872834488
+      S_DeathTest_1: 3522710924904069757
+      S_DeathTest_10: -1690467938623682326
+      S_DeathTest_11: -9070990380364345117
+      S_DeathTest_12: 3238956510985845778
+      S_DeathTest_13: 148849569113927110
+      S_DeathTest_14: 8697828457586751133
+      S_DeathTest_15: 8234514989000691762
+      S_DeathTest_16: 7246624127308768594
+      S_DeathTest_17: 8584792010693220209
+      S_DeathTest_18: -8535607469966865185
+      S_DeathTest_19: 6073783748290998698
+      S_DeathTest_2: 5390064679399343581
+      S_DeathTest_20: -6479838979472953610
+      S_DeathTest_21: -8879025523541710994
+      S_DeathTest_22: -445271327157042477
+      S_DeathTest_23: 4102405398559266231
+      S_DeathTest_24: -8506660915648426043
+      S_DeathTest_25: 5136561615970135054
+      S_DeathTest_26: 8782042489164444271
+      S_DeathTest_27: -6192932596765047162
+      S_DeathTest_28: 8719329398309413893
+      S_DeathTest_29: 6493796706531891131
+      S_DeathTest_3: 1672986236043323728
+      S_DeathTest_30: -2519767750262113279
+      S_DeathTest_31: -1814110556944385460
+      S_DeathTest_32: -2739966431989392684
+      S_DeathTest_33: 8404489505269894190
+      S_DeathTest_34: 7426155096267578112
+      S_DeathTest_35: -8454415904523873908
+      S_DeathTest_36: 979333439160969952
+      S_DeathTest_37: 8935449838416071883
+      S_DeathTest_38: -6075770226503591178
+      S_DeathTest_39: -6727809896012877589
+      S_DeathTest_4: -911422752194983926
+      S_DeathTest_40: -6197416285502497247
+      S_DeathTest_41: 3058839511731829433
+      S_DeathTest_42: 3813895869310519788
+      S_DeathTest_43: 4985352160211758514
+      S_DeathTest_44: 446687575685411594
+      S_DeathTest_45: 2077501890464206138
+      S_DeathTest_46: 5492097474619190270
+      S_DeathTest_47: 2695472967096559167
+      S_DeathTest_48: 4367327290295447672
+      S_DeathTest_49: -9001038700169309902
+      S_DeathTest_5: 3479160452903535265
+      S_DeathTest_50: -1297124457492374238
+      S_DeathTest_51: 134808501707161774
+      S_DeathTest_52: -5479366376753115932
+      S_DeathTest_53: 9133039794415175768
+      S_DeathTest_54: -5163060363623194991
+      S_DeathTest_55: -2095481277200859720
+      S_DeathTest_56: -2960631116483909085
+      S_DeathTest_57: 401362936815065727
+      S_DeathTest_58: 8508306264804866656
+      S_DeathTest_59: -8910721058444713818
+      S_DeathTest_6: -1205118071201388727
+      S_DeathTest_60: -5985654342042435716
+      S_DeathTest_61: -1022216299881727028
+      S_DeathTest_62: 4302371327886366669
+      S_DeathTest_63: -3264285227801698489
+      S_DeathTest_64: -2689460093162383877
+      S_DeathTest_65: -1713581987822404872
+      S_DeathTest_7: 7741642585085630852
+      S_DeathTest_8: -8170094972940408243
+      S_DeathTest_9: -6406139534877730142
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

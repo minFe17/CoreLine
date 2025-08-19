@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2312470746457635389}
   - component: {fileID: 2002774819831669507}
   - component: {fileID: 8754167448134604521}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Dragon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -91,7 +91,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2062526768, guid: c057d60e93cd2bb42b2574f3942206c3, type: 3}
+  m_Sprite: {fileID: 4371639795956164320, guid: 872decd1bd3746e4e85c0697a45f63b3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
