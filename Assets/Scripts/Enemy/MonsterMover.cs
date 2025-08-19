@@ -9,19 +9,19 @@ public class MonsterMover : MonoBehaviour
     public float moveSpeed = 4f;
     public float arriveEps = 0.02f;
 
-    [SerializeField] private PathRenderer pathRenderer; 
-    [SerializeField] private bool trimRuntimePath = true;
+
+    public bool IsFollowingPath { get; private set; }
+    private Monster _monster;
 
     public Vector2Int Cell { get; private set; }
 
     Coroutine moveCo;
-    Camera _cam;
 
     void Start()
     {
         if (!map) map = FindAnyObjectByType<TestMap>();
+        _monster = GetComponent<Monster>();
 
-        _cam = Camera.main;
         Cell = map.WorldToCell(transform.position);
         transform.position = map.CellToWorld(Cell.x, Cell.y);
     }
@@ -34,14 +34,16 @@ public class MonsterMover : MonoBehaviour
 
     public void MoveToCell(Vector2Int dst)
     {
-        var path = AStarPathfinder.FindPath(map.walkable, Cell, dst);
-        if (path == null || path.Count <= 1) return;
+        List<Vector2Int> path = AStarPathfinder.FindPath(map.walkable, Cell, dst);
+        if (path == null || path.Count <= 1) { 
+            IsFollowingPath = false;
+            return; 
+        }
 
-        if (pathRenderer) pathRenderer.SetPath(path);
+        if (moveCo != null) 
+            StopCoroutine(moveCo);
 
-        if (path == null || path.Count <= 1) return;
-
-        if (moveCo != null) StopCoroutine(moveCo);
+        IsFollowingPath = true;
         moveCo = StartCoroutine(Follow(path));
     }
 
@@ -56,18 +58,18 @@ public class MonsterMover : MonoBehaviour
 
             while ((transform.position - target).sqrMagnitude > arriveEps * arriveEps)
             {
+                if (_monster != null)
+                {
+                    Vector3 delta = target - transform.position;
+                    _monster.SetFlip(delta);
+                }
                 transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
                 yield return null;
             }
             transform.position = target;
             Cell = step;
-
-            if (trimRuntimePath && pathRenderer && path != null && i < path.Count)
-            {
-                var remain = path.GetRange(i, path.Count - i);
-                pathRenderer.SetPath(remain);
-            }
         }
+        IsFollowingPath = false;
         moveCo = null;
     }
 
