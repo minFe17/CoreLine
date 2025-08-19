@@ -1,9 +1,44 @@
 using UnityEngine;
+using Utils;
 
-public class AttackRangeManager : MonoBehaviour
+public class AttackRangeManager
 {
     // 싱글턴
+    GameObject _attackRange;
+    Unit _targetUnit;
 
-    // 프리팹 위치 옮기기, 크기 설정 (범위x2로)
-    // 유닛이 아무것도 안 눌리면 그냥 비활성화로
+    float _attctRangeDiameter = 2f;
+
+    bool IsSameUnit(Unit unit) => _targetUnit == unit;
+
+    void HideAttackRange()
+    {
+        if (_attackRange != null)
+            MonoSingleton<ObjectPoolManager>.Instance.Push(EPrefabType.AttackRange, _attackRange);
+
+        _attackRange = null;
+        _targetUnit = null;
+    }
+
+    void ShowAttackRange(Unit unit)
+    {
+        if (_attackRange == null)
+            _attackRange = MonoSingleton<ObjectPoolManager>.Instance.Pull(EPrefabType.AttackRange);
+
+        _attackRange.transform.position = unit.transform.position;
+        float size = unit.Data.AttackRange * _attctRangeDiameter;
+        _attackRange.transform.localScale = new Vector2(size, size);
+
+        _targetUnit = unit;
+    }
+
+    public void CheckAttackRange(Unit unit)
+    {
+        if (IsSameUnit(unit))
+        {
+            HideAttackRange();
+            return;
+        }
+        ShowAttackRange(unit);
+    }
 }
