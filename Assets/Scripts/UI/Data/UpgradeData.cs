@@ -2,13 +2,12 @@
 using UnityEngine;
 
 [System.Serializable]
-public class UpgradeData
+public struct UpgradeData
 {
-    [SerializeField] string _upgradeType;
-    [SerializeField] float _baseMultiplier;
-    [SerializeField] float _maxMultiplier;
-    [SerializeField] int _baseLevel;
-    [SerializeField] int _maxLevel;
-    [SerializeField] List<int> _cost;
-
+    public string UpgradeType;
+    public float BaseMultiplier;
+    public float MaxMultiplier;
+    public int BaseLevel;
+    public int MaxLevel;
+    public List<int> Cost;
 }

@@ -1,0 +1,20 @@
+{
+    "InventoryUnitList":
+    [
+        {
+            "UnitType" : "King",
+            "UnlockPrice":100,
+            "IsUnlocked" : false       
+        },
+        {
+            "UnitType" : "Archer",
+            "UnlockPrice":500,
+            "IsUnlocked" : false
+        },
+        {
+            "UnitType" : "Warrior",
+            "UnlockPrice":1000,
+            "IsUnlocked" : false
+        }
+    ]
+}

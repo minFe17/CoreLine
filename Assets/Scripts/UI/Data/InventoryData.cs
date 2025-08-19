@@ -2,9 +2,9 @@
 using UnityEngine;
 
 [System.Serializable]
-public class InventoryData
+public struct InventoryData
 {
-    [SerializeField] string _unitType;
-    [SerializeField] int _unlockPrice;
-    [SerializeField] bool _isUnlocked;
+    public string UnitType;
+    public int UnlockPrice;
+    public bool IsUnlocked;
 }

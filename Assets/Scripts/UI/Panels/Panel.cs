@@ -26,10 +26,6 @@ public abstract class Panel : MonoBehaviour
         RegisterPanelStatus();
         UIManager.Instance.RegisterPanel(_status, this);
     }
-    protected virtual void Start()
-    {
-        
-    }
     protected virtual void ChangeImage()
     {
         _backGroundImage = GetComponent<Image>();
@@ -43,7 +39,7 @@ public abstract class Panel : MonoBehaviour
 
         foreach (Button btn in _buttons)
         {
-            btn.interactable = false; // ¶Ç´Â false
+            btn.interactable = false;
         }
     }
     protected abstract void RegisterPanelStatus();
