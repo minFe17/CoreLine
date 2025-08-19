@@ -1,20 +1,68 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 public class TowerUnit : Unit, ILevelUp, IFusion
 {
-    void OnMouseDown()
+    [SerializeField] List<GameObject> _levelUnit;
+
+    public event Action OnUpgrade;
+
+    void OnEnable()
     {
-        Debug.Log(1);
-        // UI 소환
+        _level = 0;
+        UpgradeCharacter();
+        SetLevel();
     }
 
-    void ILevelUp.Upgrade()
+    // Test
+    void Update()
     {
-        // 오브젝트 풀에서 찾기?
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            Upgrade();
+    }
+
+    void OnMouseDown()
+    {
+        // UI 소환
+        SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
+    }
+
+    void SetLevel()
+    {
+        for (int i = 0; i < _levelUnit.Count; i++)
+        {
+            if (i == _level)
+                _levelUnit[i].SetActive(true);
+            else
+                _levelUnit[i].SetActive(false);
+        }
+    }
+
+    void UpgradeCharacter()
+    {
+        _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
+        _animator = _levelUnit[_level].GetComponent<Animator>();
+    }
+
+    public GameObject GetCurrentUnit()
+    {
+        return _levelUnit[_level];
+    }
+
+    #region Interface
+    public void Upgrade()
+    {
+        _level++;
+        UpgradeCharacter();
+        SetLevel();
+        OnUpgrade?.Invoke();
     }
 
     void IFusion.Fusion()
     {
 
     }
+    #endregion
 }
