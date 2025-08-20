@@ -1,39 +1,33 @@
-using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(MonsterMover))]
 public class Monster : MonoBehaviour
 {
     private Animator _animator;
-    private Rigidbody2D _rigid;
     private SpriteRenderer _spriteRenderer;
     private MonsterMover _mover;
-
-    public int Row { get; private set; } = -1;
-    public int Col { get; private set; } = -1;
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-        _rigid = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _mover = GetComponent<MonsterMover>();
-      
     }
 
     private void Update()
     {
-        PlayAnimation();
+        // 이동 중 여부를 MonsterMover에서 가져와 애니메이션 제어
+        bool isMoving = _mover != null && _mover.IsFollowingPath;
+        _animator.SetBool("isMoving", isMoving);
     }
 
-    private void PlayAnimation()
+    
+    public void SetFlip(Vector3 delta)
     {
-        bool isMove = _mover != null && _mover.IsFollowingPath; 
-        _animator.SetBool("isMoving", isMove);
-    }
-
-    public void SetFlip(Vector3 param)
-    {
-        if (Mathf.Abs(param.x) > 0.0001f)
-            _spriteRenderer.flipX = (param.x < 0f);
+        // x 변화가 눈에 띌 때만
+        if (Mathf.Abs(delta.x) > 0.0001f)
+            _spriteRenderer.flipX = (delta.x < 0f);
     }
 }

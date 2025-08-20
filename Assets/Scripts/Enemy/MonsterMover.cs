@@ -10,12 +10,15 @@ public class MonsterMover : MonoBehaviour
     public float arriveEps = 0.02f;
 
 
-    public bool IsFollowingPath { get; private set; }
-    private Monster _monster;
 
     public Vector2Int Cell { get; private set; }
 
-    Coroutine moveCo;
+    private Vector2Int _dstCell;
+    private bool _hasDestination;
+    public bool IsFollowingPath { get; private set; }  
+
+    private Monster _monster;
+    private Coroutine moveCo;
 
     void Start()
     {
@@ -34,15 +37,18 @@ public class MonsterMover : MonoBehaviour
 
     public void MoveToCell(Vector2Int dst)
     {
-        List<Vector2Int> path = AStarPathfinder.FindPath(map.walkable, Cell, dst);
-        if (path == null || path.Count <= 1) { 
+        _dstCell = dst;
+        _hasDestination = true;
+
+        var path = AStarPathfinder.FindPath(map.walkable, Cell, dst);
+        if (path == null || path.Count <= 1)
+        {
             IsFollowingPath = false;
-            return; 
+            return;
         }
 
-        if (moveCo != null) 
-            StopCoroutine(moveCo);
-
+        
+        if (moveCo != null) StopCoroutine(moveCo);
         IsFollowingPath = true;
         moveCo = StartCoroutine(Follow(path));
     }
@@ -54,28 +60,61 @@ public class MonsterMover : MonoBehaviour
         for (; i < path.Count; i++)
         {
             Vector2Int step = path[i];
+            if (_hasDestination && !map.IsWalkable(step.x, step.y))
+            {
+                var newPath = AStarPathfinder.FindPath(map.walkable, Cell, _dstCell);
+                if (newPath != null && newPath.Count > 1)
+                {
+                    path = newPath;
+                    i = (path[0] == Cell) ? 1 : 0;
+                    step = path[i];
+                }
+                else
+                {
+                    
+                    IsFollowingPath = false;
+                    moveCo = null;
+                    yield break;
+                }
+            }
+
             Vector3 target = map.CellToWorld(step.x, step.y);
 
+            // 목표 셀로 이동
             while ((transform.position - target).sqrMagnitude > arriveEps * arriveEps)
             {
+                if (_hasDestination && !map.IsWalkable(step.x, step.y))
+                    break;
+                Vector3 prev = transform.position;
+                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+
+                // 진행 방향으로 스프라이트 좌우 반전
                 if (_monster != null)
                 {
-                    Vector3 delta = target - transform.position;
+                    Vector3 delta = transform.position - prev;
                     _monster.SetFlip(delta);
                 }
-                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+
                 yield return null;
             }
+
+            if ((transform.position - target).sqrMagnitude > arriveEps * arriveEps)
+            {
+                i--;   
+                continue;
+            }
+
             transform.position = target;
             Cell = step;
         }
+
         IsFollowingPath = false;
         moveCo = null;
     }
 
-
     void Update()
     {
+        // 테스트용 우클릭 이동(원한다면 유지)
         if (Input.GetMouseButtonDown(1))
         {
             var wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
