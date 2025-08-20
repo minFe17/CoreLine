@@ -23,13 +23,14 @@ public class MapManager : MonoBehaviour
     // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     private void Update()
     {
-        if (Input.GetMouseButtonDown(2)) // ÁÂÅ¬¸¯
+        if (Input.GetMouseButtonDown(2)) // ÁßÅ¬¸¯ Å×½ºÆ®
         {
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mouseWorld.z = 0f; // 2D´Ï±î z °íÁ¤
-            MapManager.Instance.DebugCheckTowerPlace(mouseWorld);
+            DebugCheckTowerPlace(mouseWorld);
         }
     }
+
     public void LoadStage(GameObject stagePrefab)
     {
         UnloadStage();
@@ -37,7 +38,7 @@ public class MapManager : MonoBehaviour
         _stageRoot.name = stagePrefab.name;
 
         CacheMapsFrom(_stageRoot.transform);
-        SetupCollisionLayers();
+        //SetupCollisionLayers();
         WireDestructibleController();
     }
 
@@ -47,13 +48,14 @@ public class MapManager : MonoBehaviour
         _stageRoot = stageRoot.gameObject;
 
         CacheMapsFrom(stageRoot);
-        SetupCollisionLayers();
+        //SetupCollisionLayers();
         WireDestructibleController();
     }
 
     public void UnloadStage()
     {
         _occupied.Clear();
+        _towers.Clear();
         _grid = null;
         _tmBuildable = _tmUnbuildable = _tmWall = _tmDestructible = _tmDeco = null;
 
@@ -80,19 +82,71 @@ public class MapManager : MonoBehaviour
     }
 
     // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ¹èÄ¡ °¡´É ¿©ºÎ & Á¡À¯
+    // °æ·® ±¸Á¶Ã¼ & ÆíÀÇ API (¹èÄ¡/±æÃ£±â Àü¿ë)
     // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    public bool IsBuildableCell(Vector3Int cell)
+
+    public readonly struct PlaceInfo
     {
-        if (!IsReady) return false;
-        if (_tmBuildable == null || !_tmBuildable.HasTile(cell)) return false;   // ºôµå°¡´É Å¸ÀÏ ·¹ÀÌ¾î¿¡ Å¸ÀÏÀÌ ÀÖ¾î¾ß ÇÔ
-        if (_occupied.Contains(cell)) return false;                               // ÀÌ¹Ì Å¸¿ö µîÀ¸·Î Á¡À¯µÊ
-        if ((_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell))) return false; // º®/ÆÄ±«º®ÀÌ¸é ºÒ°¡
-        return true;
+        public readonly Vector3Int cell;
+        public readonly bool placeable; // Áö±Ý Áï½Ã ¼³Ä¡ °¡´ÉÇÑ°¡?
+        public readonly bool occupied;  // Á¡À¯µÅ ÀÖ´Â°¡?
+
+        public PlaceInfo(Vector3Int cell, bool placeable, bool occupied)
+        { this.cell = cell; this.placeable = placeable; this.occupied = occupied; }
     }
 
-    public bool IsTowerPlaceableCell(Vector3Int cell) => IsBuildableCell(cell); // º°Äª
+    public readonly struct NavInfo
+    {
+        public readonly Vector3Int cell;
+        public readonly bool blocked;        // ÀÌµ¿ ºÒ°¡ ÀüÃ¼ ÆÇ´Ü
+        public readonly bool blockedByTower; // Å¸¿ö/Á¡À¯·Î ÀÎÇØ ¸·Èû
+        public readonly bool blockedByWall;  // º®/ÆÄ±«º®À¸·Î ¸·Èû
 
+        public NavInfo(Vector3Int cell, bool blocked, bool blockedByTower, bool blockedByWall)
+        { this.cell = cell; this.blocked = blocked; this.blockedByTower = blockedByTower; this.blockedByWall = blockedByWall; }
+    }
+
+    public PlaceInfo GetPlaceInfo(Vector3Int cell)
+    {
+        bool occupied = _towers.ContainsKey(cell) || _occupied.Contains(cell);
+        bool placeable =
+            (_tmBuildable && _tmBuildable.HasTile(cell)) &&
+            !occupied &&
+            !((_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell)));
+
+        return new PlaceInfo(cell, placeable, occupied);
+    }
+
+    public PlaceInfo GetPlaceInfoWorld(Vector3 worldPos) => GetPlaceInfo(WorldToCell(worldPos));
+
+    public NavInfo GetNavInfo(Vector3Int cell)
+    {
+        bool byWall = (_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell));
+        bool byTower = _towers.ContainsKey(cell) || _occupied.Contains(cell);
+        bool blocked = byWall || byTower;
+        return new NavInfo(cell, blocked, byTower, byWall);
+    }
+
+    public NavInfo GetNavInfoWorld(Vector3 worldPos) => GetNavInfo(WorldToCell(worldPos));
+
+    //
+    //public bool IsTowerPlaceableCell(Vector3Int cell) => GetPlaceInfo(cell).placeable;
+    //public bool IsTowerPlaceableWorld(Vector3 worldPos) => GetPlaceInfoWorld(worldPos).placeable;
+    //
+    //public bool IsBlockedCell(Vector3Int cell) => GetNavInfo(cell).blocked;
+    //public bool IsBlockedWorld(Vector3 worldPos) => GetNavInfoWorld(worldPos).blocked;
+    //
+    //public bool IsBlockedByTower(Vector3Int cell) => GetNavInfo(cell).blockedByTower;
+    //public bool TryGetTowerAt(Vector3Int cell, out GameObject tower) => _towers.TryGetValue(cell, out tower);
+    //
+    //public bool HasTower(Vector3Int cell) => _towers.ContainsKey(cell);
+    //public bool IsWall(Vector3Int cell) => _tmWall && _tmWall.HasTile(cell);
+    //public bool IsDestructible(Vector3Int cell) => _tmDestructible && _tmDestructible.HasTile(cell);
+    //public bool IsBuildable(Vector3Int cell) => _tmBuildable && _tmBuildable.HasTile(cell);
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¹èÄ¡/Á¡À¯ °»½Å
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     public void MarkOccupied(Vector3Int tile)
     {
         _occupied.Add(tile);
@@ -103,140 +157,6 @@ public class MapManager : MonoBehaviour
     {
         _occupied.Remove(tile);
         OnCellChanged?.Invoke(tile);
-    }
-
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ÆÄ±«º® ¡æ ¹Ø¿¡ ±ò·ÁÀÖ´ø Buildable ³ëÃâ
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    public void ConvertDestructibleToBuildable(Vector3Int cell)
-    {
-        if (!IsReady || _tmDestructible == null) return;
-        if (_tmDestructible.HasTile(cell))
-        {
-            _tmDestructible.SetTile(cell, null); // ¹ØÀÇ BuildableÀÌ ±×´ë·Î µå·¯³²
-            _tmDestructible.GetComponent<TilemapCollider2D>()?.ProcessTilemapChanges();
-            OnCellChanged?.Invoke(cell);
-        }
-    }
-
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ³»ºÎ ±¸Çö
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    private void CacheMapsFrom(Transform stageRoot)
-    {
-        _grid = stageRoot.GetComponent<Grid>();
-        if (_grid == null)
-        {
-            Debug.LogError("[MapManager] Grid not found on stage root.");
-            return;
-        }
-
-        _tmBuildable = FindByName(stageRoot, "Buildable")?.GetComponent<Tilemap>();
-        _tmUnbuildable = FindByName(stageRoot, "UnBuildable")?.GetComponent<Tilemap>();
-        _tmWall = FindByName(stageRoot, "Wall")?.GetComponent<Tilemap>();
-        _tmDestructible = FindByName(stageRoot, "DestructibleWall")?.GetComponent<Tilemap>();
-        _tmDeco = FindByName(stageRoot, "Deco")?.GetComponent<Tilemap>();
-    }
-
-    private Transform FindByName(Transform root, string name)
-    {
-        if (root.name == name) return root;
-        for (int i = 0; i < root.childCount; i++)
-        {
-            Transform child = root.GetChild(i);
-            Transform found = FindByName(child, name);
-            if (found) return found;
-        }
-        return null;
-    }
-
-    private void SetupCollisionLayers()
-    {
-        // Buildable: Ãæµ¹ X
-        DisableCollider(_tmBuildable);
-
-        // Wall/Destructible: Ãæµ¹ O
-        SetupCollider(_tmWall, CompositeCollider2D.GeometryType.Outlines);
-        SetupCollider(_tmDestructible, CompositeCollider2D.GeometryType.Outlines);
-
-        // Deco, UnBuildable: Ãæµ¹ X (ÇÊ¿ä ½Ã UnBuildable¿¡ Ãæµ¹ ÄÑµµ µÊ)
-        DisableCollider(_tmDeco);
-        DisableCollider(_tmUnbuildable);
-    }
-
-    private void DisableCollider(Tilemap tilemap)
-    {
-        if (!tilemap) return;
-        TilemapCollider2D collider = tilemap.GetComponent<TilemapCollider2D>();
-        if (collider) collider.enabled = false;
-        Rigidbody2D rigid = tilemap.GetComponent<Rigidbody2D>();
-        if (rigid) rigid.simulated = false;
-        CompositeCollider2D compsite = tilemap.GetComponent<CompositeCollider2D>();
-        if (compsite) compsite.enabled = false;
-    }
-
-    private void SetupCollider(Tilemap tilemap, CompositeCollider2D.GeometryType geoType)
-    {
-        if (!tilemap) return;
-
-        TilemapCollider2D tileCol = tilemap.GetComponent<TilemapCollider2D>() ?? tilemap.gameObject.AddComponent<TilemapCollider2D>();
-        tileCol.isTrigger = false;
-        tileCol.usedByComposite = true;
-
-        CompositeCollider2D compsite = tilemap.GetComponent<CompositeCollider2D>() ?? tilemap.gameObject.AddComponent<CompositeCollider2D>();
-        compsite.geometryType = geoType;
-        compsite.generationType = CompositeCollider2D.GenerationType.Synchronous;
-
-        Rigidbody2D rigid = tilemap.GetComponent<Rigidbody2D>() ?? tilemap.gameObject.AddComponent<Rigidbody2D>();
-        rigid.bodyType = RigidbodyType2D.Static;
-    }
-
-    private void WireDestructibleController()
-    {
-        if (_tmDestructible == null) return;
-        DestructibleWall ctrl = _tmDestructible.GetComponent<DestructibleWall>();
-        if (!ctrl) ctrl = _tmDestructible.gameObject.AddComponent<DestructibleWall>();
-        ctrl.Init(this, _tmDestructible);
-    }
-    //½ÇÇè¿ë
-    public void GetCellFlags( Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied) 
-    { 
-        buildable = _tmBuildable && _tmBuildable.HasTile(c); 
-        unbuildable = _tmUnbuildable && _tmUnbuildable.HasTile(c);
-        wall = _tmWall && _tmWall.HasTile(c);
-        destructible = _tmDestructible && _tmDestructible.HasTile(c);
-        deco = _tmDeco && _tmDeco.HasTile(c); occupied = _occupied.Contains(c);
-    }
-
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ±æÃ£±â/¸ó½ºÅÍ Àü¿ë Å¸¿ö ¹èÄ¡ °¡´É ¿©ºÎ Æ÷ÇÔ
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    public struct CellInfo
-    {
-        public bool buildable;        // Buildable Å¸ÀÏ ·¹ÀÌ¾î¿¡ Å¸ÀÏ Á¸Àç
-        public bool unbuildable;      // UnBuildable Å¸ÀÏ Á¸Àç
-        public bool wall;             // Wall Å¸ÀÏ Á¸Àç
-        public bool destructible;     // DestructibleWall Å¸ÀÏ Á¸Àç(ÆÄ±« Àü true)
-        public bool deco;             // Deco Å¸ÀÏ Á¸Àç
-        public bool occupied;         // Å¸¿ö µîÀ¸·Î Á¡À¯µÊ
-        public bool blocked;          // ÀÌµ¿ ºÒ°¡(= wall || destructible || occupied)
-        public bool towerPlaceable;   // Áö±Ý Áï½Ã Å¸¿ö ¹èÄ¡ °¡´É? (IsBuildableCell °á°ú)
-    }
-
-    public CellInfo GetCellInfo(Vector3Int cell)
-    {
-        CellInfo info = new CellInfo
-        {
-            buildable = _tmBuildable && _tmBuildable.HasTile(cell),
-            unbuildable = _tmUnbuildable && _tmUnbuildable.HasTile(cell),
-            wall = _tmWall && _tmWall.HasTile(cell),
-            destructible = _tmDestructible && _tmDestructible.HasTile(cell),
-            deco = _tmDeco && _tmDeco.HasTile(cell),
-            occupied = _towers.ContainsKey(cell) || _occupied.Contains(cell), // ¡ç Å¸¿ö ±âÁØ ¿ì¼±
-        };
-        info.blocked = info.wall || info.destructible || info.occupied;
-        info.towerPlaceable = IsBuildableCell(cell);
-        return info;
     }
 
     // ¼³Ä¡ Á÷ÈÄ È£Ãâ: RegisterTower(cell, towerInstance);
@@ -254,26 +174,104 @@ public class MapManager : MonoBehaviour
         _occupied.Remove(cell);
         OnCellChanged?.Invoke(cell);
     }
-    public bool IsBlockedCell(Vector3Int cell)
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ÆÄ±«º® Ã³¸®
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    public void ConvertDestructibleToBuildable(Vector3Int cell)
     {
-        if (!IsReady) return true;
-        if ((_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell)))
-            return true;
-        // ¡å Å¸¿ö°¡ ÀÖÀ¸¸é ¸·Èû
-        if (_towers.ContainsKey(cell)) return true;
-        // (±âÁ¸ _occupiedµµ ³²°ÜµÎ°í ½Í´Ù¸é)
-        return _occupied.Contains(cell);
+        if (!IsReady || _tmDestructible == null) return;
+        if (_tmDestructible.HasTile(cell))
+        {
+            _tmDestructible.SetTile(cell, null); // ¹ØÀÇ BuildableÀÌ ±×´ë·Î µå·¯³²
+            //_tmDestructible.GetComponent<TilemapCollider2D>()?.ProcessTilemapChanges();
+            OnCellChanged?.Invoke(cell);
+        }
     }
 
-    public bool IsBlockedByTower(Vector3Int cell) => _towers.ContainsKey(cell);
-    public bool TryGetTowerAt(Vector3Int cell, out GameObject tower) => _towers.TryGetValue(cell, out tower);
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ³»ºÎ ±¸Çö
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    private void CacheMapsFrom(Transform stageRoot)
+    {
+        _grid = stageRoot.GetComponent<Grid>();
+        if (_grid == null)
+        {
+            Debug.LogError("[MapManager] Grid not found on stage root.");
+            return;
+        }
 
-    // ±âÁ¸ HasTower´Â µñ¼Å³Ê¸® ±âÁØÀ¸·Î ¹Ù²ãÄ¡±â
-    public bool HasTower(Vector3Int cell) => _towers.ContainsKey(cell);
-    public bool IsWall(Vector3Int cell) => _tmWall && _tmWall.HasTile(cell);
-    public bool IsDestructible(Vector3Int cell) => _tmDestructible && _tmDestructible.HasTile(cell);
-    public bool IsBuildable(Vector3Int cell) => _tmBuildable && _tmBuildable.HasTile(cell);
+        _tmBuildable = FindByName(stageRoot, "Build")?.GetComponent<Tilemap>();
+        _tmUnbuildable = FindByName(stageRoot, "UnBuild")?.GetComponent<Tilemap>();
+        _tmWall = FindByName(stageRoot, "UnDeWall")?.GetComponent<Tilemap>();
+        _tmDestructible = FindByName(stageRoot, "DeWall")?.GetComponent<Tilemap>();
+        _tmDeco = FindByName(stageRoot, "Decotile")?.GetComponent<Tilemap>();
+    }
 
+    private Transform FindByName(Transform root, string name)
+    {
+        if (root.name == name) return root;
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = root.GetChild(i);
+            Transform found = FindByName(child, name);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    //private void SetupCollisionLayers()
+    //{
+    //    // Buildable: Ãæµ¹ X
+    //    DisableCollider(_tmBuildable);
+    //
+    //    // Wall/Destructible: Ãæµ¹ O
+    //    SetupCollider(_tmWall, CompositeCollider2D.GeometryType.Outlines);
+    //    SetupCollider(_tmDestructible, CompositeCollider2D.GeometryType.Outlines);
+    //
+    //    // Deco, UnBuildable: Ãæµ¹ X (ÇÊ¿ä ½Ã UnBuildable¿¡ Ãæµ¹ ÄÑµµ µÊ)
+    //    DisableCollider(_tmDeco);
+    //    DisableCollider(_tmUnbuildable);
+    //}
+    //
+    //private void DisableCollider(Tilemap tilemap)
+    //{
+    //    if (!tilemap) return;
+    //    TilemapCollider2D collider = tilemap.GetComponent<TilemapCollider2D>();
+    //    if (collider) collider.enabled = false;
+    //    Rigidbody2D rigid = tilemap.GetComponent<Rigidbody2D>();
+    //    if (rigid) rigid.simulated = false;
+    //    CompositeCollider2D composite = tilemap.GetComponent<CompositeCollider2D>();
+    //    if (composite) composite.enabled = false;
+    //}
+    //
+    //private void SetupCollider(Tilemap tilemap, CompositeCollider2D.GeometryType geoType)
+    //{
+    //    if (!tilemap) return;
+    //
+    //    TilemapCollider2D tileCol = tilemap.GetComponent<TilemapCollider2D>() ?? tilemap.gameObject.AddComponent<TilemapCollider2D>();
+    //    tileCol.isTrigger = false;
+    //    tileCol.usedByComposite = true;
+    //
+    //    CompositeCollider2D composite = tilemap.GetComponent<CompositeCollider2D>() ?? tilemap.gameObject.AddComponent<CompositeCollider2D>();
+    //    composite.geometryType = geoType;
+    //    composite.generationType = CompositeCollider2D.GenerationType.Synchronous;
+    //
+    //    Rigidbody2D rigid = tilemap.GetComponent<Rigidbody2D>() ?? tilemap.gameObject.AddComponent<Rigidbody2D>();
+    //    rigid.bodyType = RigidbodyType2D.Static;
+    //}
+    //
+    private void WireDestructibleController()
+    {
+        if (_tmDestructible == null) return;
+        DestructibleWall ctrl = _tmDestructible.GetComponent<DestructibleWall>();
+        if (!ctrl) ctrl = _tmDestructible.gameObject.AddComponent<DestructibleWall>();
+        ctrl.Init(this, _tmDestructible);
+    }
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¸Ê ¹Ù¿îµå/µð¹ö±×
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     public BoundsInt GetNavBounds()
     {
         if (!IsReady) return new BoundsInt(Vector3Int.zero, Vector3Int.zero);
@@ -302,19 +300,22 @@ public class MapManager : MonoBehaviour
 
         return mapbounds;
     }
-    //µð¹ö±×¿ë
+
+    // ½ÇÇè/µð¹ö±×¿ë
+    public void GetCellFlags(Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied)
+    {
+        buildable = _tmBuildable && _tmBuildable.HasTile(c);
+        unbuildable = _tmUnbuildable && _tmUnbuildable.HasTile(c);
+        wall = _tmWall && _tmWall.HasTile(c);
+        destructible = _tmDestructible && _tmDestructible.HasTile(c);
+        deco = _tmDeco && _tmDeco.HasTile(c);
+        occupied = _towers.ContainsKey(c) || _occupied.Contains(c);
+    }
+
     public void DebugCheckTowerPlace(Vector3 worldPos)
     {
         if (!IsReady) return;
-
-        Vector3Int cell = WorldToCell(worldPos);
-        if (IsBuildableCell(cell))
-        {
-            Debug.Log($"¼¿ {cell} : Å¸¿ö ¼³Ä¡ °¡´É");
-        }
-        else
-        {
-            Debug.Log($"¼¿ {cell} : ¼³Ä¡ ºÒ°¡");
-        }
+        var info = GetPlaceInfoWorld(worldPos);
+        Debug.Log($"¼¿ {WorldToCell(worldPos)} : {(info.placeable ? "Å¸¿ö ¼³Ä¡ °¡´É" : "¼³Ä¡ ºÒ°¡")} / Á¡À¯={info.occupied}");
     }
 }

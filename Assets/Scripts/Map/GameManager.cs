@@ -27,29 +27,29 @@ public class GameManager : MonoBehaviour
             Debug.Log("[GameManager_Simple] 스테이지 로드 완료.");
         }
 
-        if (Input.GetMouseButtonDown(1))
-        {
-            // 우클릭: 타일 검사(마우스 위치 셀)
-            if (!MapManager.Instance.IsReady || _cam == null) return;
-
-            Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
-            mouseWorld.z = 0f;
-            var cell = MapManager.Instance.WorldToCell(mouseWorld);
-
-            MapManager.Instance.GetCellFlags(
-                cell,
-                out bool buildable, out bool unbuildable,
-                out bool wall, out bool destructible,
-                out bool deco, out bool occupied
-            );
-
-            string report =
-                $"Cell {cell} → " +
-                $"Buildable:{buildable}, Unbuildable:{unbuildable}, " +
-                $"Wall:{wall}, Destructible:{destructible}, Deco:{deco}, " +
-                $"Occupied:{occupied} | BuildableCell? {MapManager.Instance.IsBuildableCell(cell)}";
-
-            Debug.Log(report);
-        }
+        //if (Input.GetMouseButtonDown(1))
+        //{
+        //    // 우클릭: 타일 검사(마우스 위치 셀)
+        //    if (!MapManager.Instance.IsReady || _cam == null) return;
+        //
+        //    Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
+        //    mouseWorld.z = 0f;
+        //    var cell = MapManager.Instance.WorldToCell(mouseWorld);
+        //
+        //    MapManager.Instance.GetCellFlags(
+        //        cell,
+        //        out bool buildable, out bool unbuildable,
+        //        out bool wall, out bool destructible,
+        //        out bool deco, out bool occupied
+        //    );
+        //
+        //    string report =
+        //        $"Cell {cell} → " +
+        //        $"Buildable:{buildable}, Unbuildable:{unbuildable}, " +
+        //        $"Wall:{wall}, Destructible:{destructible}, Deco:{deco}, " +
+        //        $"Occupied:{occupied} | BuildableCell? {MapManager.Instance.IsBuildableCell(cell)}";
+        //
+        //    Debug.Log(report);
+        //}
     }
 }
