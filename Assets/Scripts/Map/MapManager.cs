@@ -243,7 +243,7 @@ public class MapManager : MonoBehaviour
     public void RegisterTower(Vector3Int cell, GameObject tower)
     {
         _towers[cell] = tower;
-        _occupied.Add(cell);              // 기존 로직과 호환(점유 표기)
+        _occupied.Add(cell);              // 점유 표기
         OnCellChanged?.Invoke(cell);
     }
 
