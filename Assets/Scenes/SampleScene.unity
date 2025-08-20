@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706cfd64218a738449283534c48db7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stagePrefab: {fileID: 2381782382317686310, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+  stagePrefab: {fileID: 1387169178987589946, guid: 98d2610135586a441afd0d4986a9849d, type: 3}
 --- !u!4 &738786009
 Transform:
   m_ObjectHideFlags: 0
