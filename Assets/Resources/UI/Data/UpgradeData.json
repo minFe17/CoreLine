@@ -1,35 +1,31 @@
-{
-    "UpgradeList":
-    [
-        {
-            "UpgradeType" : "AttackDamage",
-            "BaseMultiplier" : 1.0,
-            "MaxMultiplier" : 2.0,
-            "BaseLevel": 0,
-            "MaxLevel" : 10,
-            "Cost":
-            [100,200,300,400,500,600,700,800,900,1000]
-        },
+[
+    {
+        "UpgradeType" : "AttackDamage",
+        "BaseMultiplier" : 1.0,
+        "MaxMultiplier" : 2.0,
+        "BaseLevel": 0,
+        "MaxLevel" : 10,
+        "Cost":
+        [100,200,300,400,500,600,700,800,900,1000]
+    },
 
-        {
-            "UpgradeType" : "HealthPoint",
-            "BaseMultiplier" : 1.0,
-            "MaxMultiplier" : 2.0,
-            "BaseLevel": 0,
-            "MaxLevel" : 10,
-            "Cost":
-            [50,100,150,200,250,300,350,400,450,500]
-        },
+    {
+        "UpgradeType" : "HealthPoint",
+        "BaseMultiplier" : 1.0,
+        "MaxMultiplier" : 2.0,
+        "BaseLevel": 0,
+        "MaxLevel" : 10,
+        "Cost":
+        [50,100,150,200,250,300,350,400,450,500]
+    },
 
-        {
-            "UpgradeType" : "AttackRange",
-            "BaseMultiplier" : 1.0,
-            "MaxMultiplier" : 1.5,
-            "BaseLevel": 0,
-            "MaxLevel" : 10,
-            "Cost":
-            [30,60,90,120,150,180,250,300,450,700]
-        }
-    ]
-
-}
+    {
+        "UpgradeType" : "AttackRange",
+        "BaseMultiplier" : 1.0,
+        "MaxMultiplier" : 1.5,
+        "BaseLevel": 0,
+        "MaxLevel" : 10,
+        "Cost":
+        [30,60,90,120,150,180,250,300,450,700]
+    }
+]

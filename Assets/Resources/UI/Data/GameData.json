@@ -1,0 +1,13 @@
+{
+    "UnlockedUnit" : 
+    [
+        {
+            "Type":"test",
+            "AttackDamageLevel" :0,
+            "HealthPointLevel":0,
+            "AttackRangeLevel":0 
+        }    
+    ],
+    "UnlockedLaboratoryId" : [],
+    "PlayerMoney":0
+}

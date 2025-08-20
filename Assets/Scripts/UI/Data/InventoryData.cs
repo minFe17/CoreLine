@@ -6,5 +6,4 @@ public struct InventoryData
 {
     public string UnitType;
     public int UnlockPrice;
-    public bool IsUnlocked;
 }

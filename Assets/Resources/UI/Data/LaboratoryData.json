@@ -1,6 +1,4 @@
-{
-    "LaboratoryList":
-    [
+[
     {
         "Id" : "Attack_Num1",
         "Name" : "공격 속도 증가 Lv.1",
@@ -31,4 +29,3 @@
         "Prerequisite": null
     }
     ]
-}
