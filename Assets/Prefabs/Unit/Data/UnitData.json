@@ -144,6 +144,105 @@
           "_cost": 55
         }
       ]
+    },
+    {
+      "_unitType": "ShieldSoldier",
+      "_levelData": 
+      [
+        {
+          "_hp": 110,
+          "_cost": 100
+        },
+        {
+          "_hp": 120,
+          "_cost": 50
+        },
+        {
+          "_hp": 135,
+          "_cost": 50
+        }
+      ]
+    },
+    {
+      "_unitType": "Assassin",
+      "_levelData": 
+      [
+        {
+          "_hp": 60,
+          "_attackDamage": 30,
+          "_attackSpeed": 1.5,
+          "_attackRange": 2.0,
+          "_cost": 110
+        },
+        {
+          "_hp": 75,
+          "_attackDamage": 30,
+          "_attackSpeed": 1.3,
+          "_attackRange": 2.0,
+          "_cost": 55
+        },
+        {
+          "_hp": 85,
+          "_attackDamage": 40,
+          "_attackSpeed": 1.0,
+          "_attackRange": 2.0,
+          "_cost": 55
+        }
+      ]
+    },
+    {
+      "_unitType": "Dwarf",
+      "_levelData": 
+      [
+        {
+          "_hp": 100,
+          "_attackDamage": 25,
+          "_attackSpeed": 2.0,
+          "_attackRange": 2.0,
+          "_cost": 110
+        },
+        {
+          "_hp": 110,
+          "_attackDamage": 30,
+          "_attackSpeed": 1.7,
+          "_attackRange": 2.3,
+          "_cost": 55
+        },
+        {
+          "_hp": 120,
+          "_attackDamage": 40,
+          "_attackSpeed": 1.7,
+          "_attackRange": 2.3,
+          "_cost": 55
+        }
+      ]
+    },
+    {
+      "_unitType": "Hammer",
+      "_levelData": 
+      [
+        {
+          "_hp": 80,
+          "_attackDamage": 20,
+          "_attackSpeed": 3.0,
+          "_attackRange": 2.3,
+          "_cost": 115
+        },
+        {
+          "_hp": 95,
+          "_attackDamage": 25,
+          "_attackSpeed": 2.7,
+          "_attackRange": 2.3,
+          "_cost": 60
+        },
+        {
+          "_hp": 110,
+          "_attackDamage": 35,
+          "_attackSpeed": 2.5,
+          "_attackRange": 2.5,
+          "_cost": 60
+        }
+      ]
     }
   ]
 }

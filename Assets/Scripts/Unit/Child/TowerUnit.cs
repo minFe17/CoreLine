@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
-public class TowerUnit : Unit, ILevelUp, IFusion
+public class TowerUnit : Unit
 {
+    [SerializeField] protected EUnitType _unitType;
     [SerializeField] List<GameObject> _levelUnit;
 
     public event Action OnUpgrade;
@@ -20,13 +21,11 @@ public class TowerUnit : Unit, ILevelUp, IFusion
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (_level == _levelUnit.Count - 1)
+                Fusion();
             Upgrade();
-    }
-
-    void OnMouseDown()
-    {
-        // UI 소환
-        SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
+        }
     }
 
     void SetLevel()
@@ -51,18 +50,19 @@ public class TowerUnit : Unit, ILevelUp, IFusion
         return _levelUnit[_level];
     }
 
-    #region Interface
     public void Upgrade()
     {
+        if (_level >= _levelUnit.Count - 1)
+            return;
         _level++;
         UpgradeCharacter();
         SetLevel();
         OnUpgrade?.Invoke();
     }
 
-    void IFusion.Fusion()
+    public void Fusion()
     {
-
+        // 퓨전 가능한 유닛이 있는 타일만 밝게?
+        // 그 유닛 누르면 지금 유닛이랑 그 유닛 없애고 이 위치에 퓨전 유닛 소환
     }
-    #endregion
 }

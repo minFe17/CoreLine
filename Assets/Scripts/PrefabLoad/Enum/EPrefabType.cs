@@ -1,7 +1,6 @@
-using UnityEngine;
-
 public enum EPrefabType
 {
     AttackRange,
+    Unit,
     Max,
 }

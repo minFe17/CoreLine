@@ -3,6 +3,8 @@ using Utils;
 
 public class KingUnit : Unit
 {
+    EUnitType _unitType = EUnitType.King;
+
     void Start()
     {
         _animator = GetComponent<Animator>();

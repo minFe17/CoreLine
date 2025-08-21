@@ -11,15 +11,6 @@ public class AttackRangeManager
 
     bool IsSameUnit(Unit unit) => _targetUnit == unit;
 
-    void HideAttackRange()
-    {
-        if (_attackRange != null)
-            MonoSingleton<ObjectPoolManager>.Instance.Push(EPrefabType.AttackRange, _attackRange);
-
-        _attackRange = null;
-        _targetUnit = null;
-    }
-
     void ShowAttackRange(Unit unit)
     {
         if (_attackRange == null)
@@ -40,5 +31,14 @@ public class AttackRangeManager
             return;
         }
         ShowAttackRange(unit);
+    }
+
+    public void HideAttackRange()
+    {
+        if (_attackRange != null)
+            MonoSingleton<ObjectPoolManager>.Instance.Push(EPrefabType.AttackRange, _attackRange);
+
+        _attackRange = null;
+        _targetUnit = null;
     }
 }

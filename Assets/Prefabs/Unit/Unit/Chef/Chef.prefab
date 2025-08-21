@@ -5041,9 +5041,10 @@ GameObject:
   - component: {fileID: 3322664402881673002}
   - component: {fileID: 7312866562977192501}
   - component: {fileID: 2128708103103653249}
+  - component: {fileID: -389376002029666334}
   m_Layer: 0
   m_Name: Chef
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5132,6 +5133,18 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 1}
   m_Size: {x: 1.45, y: 2.1}
   m_Direction: 0
+--- !u!210 &-389376002029666334
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2087524457113989218}
+  m_Enabled: 1
+  m_SortingLayerID: 1016584573
+  m_SortingLayer: 1
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
 --- !u!1 &2392229200453263930
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,7 +9,9 @@ public class PrefabManager : MonoBehaviour
     void SetDictionary()
     {
         _prefabDict = new Dictionary<EPrefabType, PrefabLoadBase>
-        { {EPrefabType.AttackRange, new AttackRangePrefabLoad() }
+        {
+            {EPrefabType.AttackRange, new AttackRangePrefabLoad() },
+            {EPrefabType.Unit, new UnitPrefabLoad() }
         };
     }
 

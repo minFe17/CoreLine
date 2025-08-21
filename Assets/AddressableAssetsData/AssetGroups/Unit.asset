@@ -15,8 +15,58 @@ MonoBehaviour:
   m_GroupName: Unit
   m_GUID: 1e77385c0ca88dc4c9838b431a496490
   m_SerializeEntries:
+  - m_GUID: 2013673a214a51c47b668f881f445331
+    m_Address: Hammer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 64507206b2622cf48859499c5d10e95f
+    m_Address: Assassin
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 652faf1f2d24d4048bf718fcc49f81c1
+    m_Address: Wizard
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ac9c950328f31fe47a8902375bdcb497
     m_Address: AttackRange
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bda46ebafdfa69f4183f8763f7890de6
+    m_Address: King
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c71d657d9655f89478f967fd68bc0d35
+    m_Address: Pirate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c971ba3489289fb41aefd67a35a2c428
+    m_Address: Warrior
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d69d26b7755144746870212a12badd4a
+    m_Address: ShieldSoldier
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e517e4243bcca9b4fa65f2a7585f10e5
+    m_Address: Archer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e62c6ca994bbede459f419cecadad625
+    m_Address: Dwarf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7d5a1a82f203b646aaa550a111f1133
+    m_Address: Chef
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

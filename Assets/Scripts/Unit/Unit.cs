@@ -1,11 +1,9 @@
 using NaughtyAttributes;
 using UnityEngine;
+using Utils;
 
 public class Unit : MonoBehaviour
 {
-    [SerializeField] protected EUnitType _unitType;
-    [ShowIf("IsNotKing")]
-
     protected const int MaxLevel = 3;
 
     protected UnitLevelData _data;
@@ -19,9 +17,15 @@ public class Unit : MonoBehaviour
     public Animator Animator { get => _animator; }
     public bool IsDie { get => _isDie; }
 
-    #region NaughtyAttributes
-    bool IsNotKing() => _unitType != EUnitType.King;
-    #endregion
+    void OnMouseDown()
+    {
+        // UI º“»Ø 
+
+        if (_data.AttackRange != 0)
+            SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
+        else
+            SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+    }
 
     public void TakeDamage(int damage)
     {

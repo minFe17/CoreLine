@@ -10540,9 +10540,10 @@ GameObject:
   - component: {fileID: 8259253217523941155}
   - component: {fileID: 1129611662372026554}
   - component: {fileID: 7624770750078052263}
+  - component: {fileID: -2873749973276147320}
   m_Layer: 0
   m_Name: Pirate
-  m_TagString: Untagged
+  m_TagString: Unit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10631,6 +10632,18 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 1}
   m_Size: {x: 1.45, y: 2.1}
   m_Direction: 0
+--- !u!210 &-2873749973276147320
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5781825840646375004}
+  m_Enabled: 1
+  m_SortingLayerID: 1016584573
+  m_SortingLayer: 1
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
 --- !u!1 &5823400916097275913
 GameObject:
   m_ObjectHideFlags: 0

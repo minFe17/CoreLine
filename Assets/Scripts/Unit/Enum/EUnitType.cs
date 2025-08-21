@@ -6,5 +6,9 @@ public enum EUnitType
     Wizard,
     Chef,
     Pirate,
+    ShieldSoldier,
+    Assassin,
+    Dwarf,
+    Hammer,
     Max,
 }

@@ -10,7 +10,7 @@ public class AttackRangeFactory : IFactory
     {
         if(_attackRangePrefab == null)
             _attackRangePrefab = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.AttackRange).GetPrefab();
-        return UnityEngine.Object.Instantiate(_attackRangePrefab);
+        return Object.Instantiate(_attackRangePrefab);
     }
 
     void IFactory.Register()

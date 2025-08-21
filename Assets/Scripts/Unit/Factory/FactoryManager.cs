@@ -5,7 +5,6 @@ using Utils;
 public class FactoryManager : MonoBehaviour
 {
     // ╫л╠шео
-
     List<IFactory> _factories = new List<IFactory>();
 
     public void Init()
@@ -19,5 +18,8 @@ public class FactoryManager : MonoBehaviour
     void SetFactories()
     {
         _factories.Add(new AttackRangeFactory());
+        // юс╫ц
+        for (int i = 0; i < (int)EUnitType.Max; i++)
+            _factories.Add(new UnitFactory((EUnitType)i));
     }
 }
