@@ -4,9 +4,9 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class PathRenderer : MonoBehaviour
 {
-    LineRenderer _line;
+    private LineRenderer _line;
 
-    void Awake()
+    private void Awake()
     {
         _line = GetComponent<LineRenderer>();
         _line.useWorldSpace = true;
@@ -29,8 +29,8 @@ public class PathRenderer : MonoBehaviour
         _line.positionCount = path.Count;
         for (int i = 0; i < path.Count; i++)
         {
-            var rc = path[i]; // (r,c)
-            Vector3 p = map.CellToWorld(rc.x, rc.y); // Ç×»ó ¼¿ Áß¾Ó
+            Vector2Int rc = path[i]; 
+            Vector3 p = map.CellToWorld(rc.x, rc.y);
             _line.SetPosition(i, p);
         }
     }

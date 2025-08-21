@@ -3,57 +3,62 @@ using UnityEngine;
 
 public class RouteManager : MonoBehaviour
 {
-    public TestMap map;
-    public PathRenderer renderer;
+    [SerializeField] private TestMap _map;
+    [SerializeField] private PathRenderer _renderer;
 
-    [Header("Endpoints (행,열)")]
-    public Vector2Int SpawnCell = new Vector2Int(0, 0);
-    public Vector2Int GoalCell = new Vector2Int(5, 5);
+    [Header("Spawn Position")]
+    [SerializeField] private int _spawnX = 0;
+    [SerializeField] private int _spawnY = 0;
+    [Header("Goal Position")]
+    [SerializeField] private int _goalX = 0;
+    [SerializeField] private int _goalY = 0;
+
+    public Vector2Int SpawnCell => new Vector2Int(_spawnY, _spawnX);
+    public Vector2Int GoalCell => new Vector2Int(_goalY, _goalX);
 
     private List<Vector2Int> _lastPath;
 
-    void Awake()
+    private void Awake()
     {
-        if (!map) map = FindAnyObjectByType<TestMap>();
+        if (!_map) _map = FindAnyObjectByType<TestMap>();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
-        if (map != null) map.OnCellChanged += HandleCellChanged;
+        if (_map != null) _map.OnCellChanged += HandleCellChanged;
         RebuildAndApply(force: true);
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        if (map != null) map.OnCellChanged -= HandleCellChanged;
+        if (_map != null) _map.OnCellChanged -= HandleCellChanged;
     }
 
-    void HandleCellChanged(int r, int c)
+    private void HandleCellChanged(int r, int c)
     {
-        // 셀 하나 바뀔 때마다 경로 재평가, "실제로 달라졌을 때만" 라인 업데이트
         RebuildAndApply(force: false);
     }
 
     public void RebuildAndApply(bool force)
     {
-        if (map == null) { renderer?.Clear(); _lastPath = null; return; }
+        if (_map == null) { _renderer?.Clear(); _lastPath = null; return; }
 
-        var path = AStarPathfinder.FindPath(
-            map.Height, map.Width,
-            (r, c) => map.IsWalkable(r, c),
+        List<Vector2Int> path = AStarPathfinder.FindPath(
+            _map.Height, _map.Width,
+            (r, c) => _map.IsWalkable(r, c),
             SpawnCell, GoalCell
         );
 
         if (path == null || path.Count == 0)
         {
-            renderer?.Clear();
+            _renderer?.Clear();
             _lastPath = null;
             return;
         }
 
         if (force || IsDifferent(_lastPath, path))
         {
-            renderer?.SetPath(map, path);
+            _renderer?.SetPath(_map, path);
             _lastPath = path;
 
             MonsterManager.Instance?.OnRouteChanged();
@@ -63,12 +68,14 @@ public class RouteManager : MonoBehaviour
 
     public void SetEndpoints(Vector2Int spawn, Vector2Int goal, bool rebuildNow = true)
     {
-        SpawnCell = spawn;
-        GoalCell = goal;
+        _spawnX = spawn.x;
+        _spawnY = spawn.y;
+        _goalX = goal.x;
+        _goalY = goal.y;
         if (rebuildNow) RebuildAndApply(force: true);
     }
 
-    static bool IsDifferent(List<Vector2Int> a, List<Vector2Int> b)
+    static private bool IsDifferent(List<Vector2Int> a, List<Vector2Int> b)
     {
         if (a == null || b == null) return true;
         if (a.Count != b.Count) return true;

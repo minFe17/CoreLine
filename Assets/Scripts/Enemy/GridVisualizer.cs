@@ -1,61 +1,61 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static TestMap;
 
 public class GridVisualizer : MonoBehaviour
 {
-    [Header("Refs")]
-    public TestMap map;
+    [SerializeField] private TestMap _map;
 
     [Header("Overlay (optional)")]
-    public bool useOverlay = false;                   // 인게임 표시
-    public GameObject cellOverlayPrefab;              // 반투명 Quad/Sprite 프리팹(선택)
+    [SerializeField] private bool _useOverlay = false;
+    [SerializeField] private GameObject _cellOverlayPrefab;        
 
     [Header("Colors")]
-    public Color walkableColor = new Color(0.2f, 1f, 0.6f, 0.12f);
-    public Color wallColor = new Color(1f, 0.2f, 0.2f, 0.45f);
-    public Color destructibleColor = new Color(0.9f, 0.2f, 0.9f, 0.45f);
-    public Color towerColor = new Color(1f, 0.6f, 0.2f, 0.5f);
+    [SerializeField] private Color _walkableColor = new Color(0.2f, 1f, 0.6f, 0.12f);
+    [SerializeField] private Color _wallColor = new Color(1f, 0.2f, 0.2f, 0.45f);
+    [SerializeField] private Color _destructibleColor = new Color(0.9f, 0.2f, 0.9f, 0.45f);
+    [SerializeField] private Color _towerColor = new Color(1f, 0.6f, 0.2f, 0.5f);
 
     private GameObject[,] _overlays;
 
-    void Awake()
+    private void Awake()
     {
-        if (!map) map = FindAnyObjectByType<TestMap>();
+        if (!_map) _map = FindAnyObjectByType<TestMap>();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
-        if (map != null) map.OnCellChanged += HandleCellChanged;
+        if (_map != null) _map.OnCellChanged += HandleCellChanged;
         RebuildAll();
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        if (map != null) map.OnCellChanged -= HandleCellChanged;
+        if (_map != null) _map.OnCellChanged -= HandleCellChanged;
         ClearAll();
     }
 
-    void HandleCellChanged(int r, int c)
+    private void HandleCellChanged(int r, int c)
     {
-        if (!useOverlay || _overlays == null) return;
+        if (!_useOverlay || _overlays == null) return;
         UpdateCell(r, c);
     }
 
     public void RebuildAll()
     {
-        if (!map) return;
+        if (!_map) return;
 
-        if (useOverlay && cellOverlayPrefab != null)
+        if (_useOverlay && _cellOverlayPrefab != null)
         {
             ClearAll();
-            _overlays = new GameObject[map.Height, map.Width];
+            _overlays = new GameObject[_map.Height, _map.Width];
 
-            for (int r = 0; r < map.Height; r++)
+            for (int r = 0; r < _map.Height; r++)
             {
-                for (int c = 0; c < map.Width; c++)
+                for (int c = 0; c < _map.Width; c++)
                 {
-                    var go = Instantiate(cellOverlayPrefab, map.CellToWorld(r, c), Quaternion.identity, transform);
-                    go.transform.localScale = new Vector3(map.CellSize, map.CellSize, 1f);
+                    GameObject go = Instantiate(_cellOverlayPrefab, _map.CellToWorld(r, c), Quaternion.identity, transform);
+                    go.transform.localScale = new Vector3(_map.CellSize, _map.CellSize, 1f);
                     _overlays[r, c] = go;
                     ApplyColor(r, c);
                 }
@@ -72,43 +72,41 @@ public class GridVisualizer : MonoBehaviour
         _overlays = null;
     }
 
-    void UpdateCell(int r, int c)
+    private void UpdateCell(int r, int c)
     {
         if (_overlays[r, c] == null) return;
         ApplyColor(r, c);
     }
 
-    void ApplyColor(int r, int c)
+    private void ApplyColor(int r, int c)
     {
-        var f = map.cells[r, c];
-        var sr = _overlays[r, c].GetComponent<SpriteRenderer>();
+        CellFlags f = _map.cells[r, c];
+        SpriteRenderer sr = _overlays[r, c].GetComponent<SpriteRenderer>();
         if (!sr) return;
 
-        // 우선순위: Wall > Tower > Destructible > Walkable
-        if ((f & TestMap.CellFlags.Wall) != 0) sr.color = wallColor;
-        else if ((f & TestMap.CellFlags.Tower) != 0) sr.color = towerColor;
-        else if ((f & TestMap.CellFlags.Destructible) != 0) sr.color = destructibleColor;
-        else sr.color = walkableColor;
+        if ((f & TestMap.CellFlags.Wall) != 0) sr.color = _wallColor;
+        else if ((f & TestMap.CellFlags.Tower) != 0) sr.color = _towerColor;
+        else if ((f & TestMap.CellFlags.Destructible) != 0) sr.color = _destructibleColor;
+        else sr.color = _walkableColor;
     }
 
-    // 에디터 뷰에서만 기즈모로도 보여주기(인게임 off일 때)
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
-        if (!map || useOverlay) return;
+        if (!_map || _useOverlay) return;
 
-        for (int r = 0; r < map.Height; r++)
+        for (int r = 0; r < _map.Height; r++)
         {
-            for (int c = 0; c < map.Width; c++)
+            for (int c = 0; c < _map.Width; c++)
             {
-                var f = map.cells != null ? map.cells[r, c] : TestMap.CellFlags.None;
-                Color col = walkableColor;
-                if ((f & TestMap.CellFlags.Wall) != 0) col = wallColor;
-                else if ((f & TestMap.CellFlags.Tower) != 0) col = towerColor;
-                else if ((f & TestMap.CellFlags.Destructible) != 0) col = destructibleColor;
+                CellFlags f = _map.cells != null ? _map.cells[r, c] : TestMap.CellFlags.None;
+                Color col = _walkableColor;
+                if ((f & TestMap.CellFlags.Wall) != 0) col = _wallColor;
+                else if ((f & TestMap.CellFlags.Tower) != 0) col = _towerColor;
+                else if ((f & TestMap.CellFlags.Destructible) != 0) col = _destructibleColor;
 
                 Gizmos.color = col;
-                var p = map.CellToWorld(r, c);
-                Gizmos.DrawCube(p, new Vector3(map.CellSize * 0.98f, map.CellSize * 0.98f, 0.1f));
+                Vector3 p = _map.CellToWorld(r, c);
+                Gizmos.DrawCube(p, new Vector3(_map.CellSize * 0.98f, _map.CellSize * 0.98f, 0.1f));
             }
         }
     }
