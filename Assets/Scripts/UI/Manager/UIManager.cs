@@ -4,7 +4,11 @@ using System.Collections.Generic;
 
 public enum PanelStatus
 {
-    LobyPanel,InventoryPanel, UpgradePanel, LaboratoryPanel, PlayPanel, SettingPanel, NoMoneyAlert
+    LobyPanel,InventoryPanel, UpgradePanel, LaboratoryPanel, PlayPanel, SettingPanel
+}
+public enum PopupStatus
+{
+    NoMoneyAlret
 }
 public class UIManager : SimpleSingleton<UIManager>
 {
@@ -21,12 +25,17 @@ public class UIManager : SimpleSingleton<UIManager>
     }
     public void AddPanelStack(PanelStatus status)
     {
+        if(_panelStack.Count!=0)
+        {
+            _panelStack.Peek().SwitchOffPanel();
+        }
         _panelStack.Push(_panelDictionary[status]);
         _panelDictionary[status].SwitchOnPanel();
     }
     public void CloseFrontPanel()
     {
-        Panel panel = _panelStack.Pop();
-        panel.SwitchOffPanel();
+        _panelStack.Pop().SwitchOffPanel();
+        if (_panelStack.Count == 0) return;
+        _panelStack.Peek().SwitchOnPanel();
     }
 }

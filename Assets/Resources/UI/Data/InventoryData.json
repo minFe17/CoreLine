@@ -1,14 +1,32 @@
 [
     {
         "UnitType" : "King",
-        "UnlockPrice":100   
+        "UnlockPrice":100,
+        "Information":"왕입니다요"
     },
     {
         "UnitType" : "Archer",
-        "UnlockPrice":500
+        "UnlockPrice":500,
+        "Information":"궁수입니다요"
     },
     {
         "UnitType" : "Warrior",
-        "UnlockPrice":1000
+        "UnlockPrice":1000,
+        "Information":"전사입니다요"
+    },
+    {
+        "UnitType" : "Wizard",
+        "UnlockPrice":1500,
+        "Information":"마술사입니다요"
+    },
+    {
+        "UnitType" : "Chef",
+        "UnlockPrice":2000,
+        "Information":"요리사입니다요"
+    },
+    {
+        "UnitType" : "Pirate",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
     }
 ]

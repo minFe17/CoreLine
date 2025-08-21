@@ -1,5 +1,7 @@
+using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -12,10 +14,12 @@ public class InventoryManager : MonoBehaviour
     }
     private void CreateButtons()
     {
-        _unitButtons = new PoolingManager("UI/Prefabs/Button/Inventory/InventoryUnitButton", _content, 20);
-        for(int i=0;i<20;i++)
+        List<InventoryData> data = DataManager.Instance.InventoryDatas;
+        _unitButtons = new PoolingManager("UI/Prefabs/Button/Inventory/InventoryUnitButton", _content, data.Count);
+        for(int i=0;i<data.Count;i++)
         {
             InventoryUnitButton btn = _unitButtons.Pop().GetComponent<InventoryUnitButton>();
+            btn.Data = data[i];
         }
     }
 }

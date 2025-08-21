@@ -2,11 +2,17 @@
     "UnlockedUnit" : 
     [
         {
-            "Type":"test",
+            "Type":"King",
             "AttackDamageLevel" :0,
             "HealthPointLevel":0,
             "AttackRangeLevel":0 
-        }    
+        },
+        {
+            "Type":"Warrior",
+            "AttackDamageLevel" :0,
+            "HealthPointLevel":0,
+            "AttackRangeLevel":0 
+        }
     ],
     "UnlockedLaboratoryId" : [],
     "PlayerMoney":0

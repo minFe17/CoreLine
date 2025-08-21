@@ -29,7 +29,7 @@ public abstract class Panel : MonoBehaviour
     protected virtual void ChangeImage()
     {
         _backGroundImage = GetComponent<Image>();
-        _backGroundImage.sprite = Resources.Load<Sprite>(_backGroundImagePath); //이미지 리소스 변경
+        //_backGroundImage.sprite = Resources.Load<Sprite>(_backGroundImagePath); //이미지 리소스 변경
     }
     protected void FindAllButtons()
     {
