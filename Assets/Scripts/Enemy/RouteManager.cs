@@ -3,30 +3,30 @@ using UnityEngine;
 
 public class RouteManager : MonoBehaviour
 {
-    public TestMap map;
-    public Vector2Int spawnCell;
-    public Vector2Int goalCell;
+    public TestMap Map;
+    public Vector2Int SpawnCell;
+    public Vector2Int GoalCell;
 
-    public PathRenderer renderer;
+    public PathRenderer Renderer;
 
-    public bool autoDetectMapChange = true;
+    public bool AutoDetectMapChange = true;
 
     private List<Vector2Int> _lastPath;
     private int _lastWalkableHash;
 
     void Start()
     {
-        if (renderer) renderer.SetMap(map);
+        if (Renderer) Renderer.SetMap(Map);
         RebuildAndApply(force: true);
-        if (autoDetectMapChange)
-            _lastWalkableHash = HashWalkable(map);
+        if (AutoDetectMapChange)
+            _lastWalkableHash = HashWalkable(Map);
     }
 
     void Update()
     {
-        if (!autoDetectMapChange) return;
+        if (!AutoDetectMapChange) return;
 
-        int h = HashWalkable(map);
+        int h = HashWalkable(Map);
         if (h != _lastWalkableHash)
         {
             _lastWalkableHash = h;
@@ -36,18 +36,18 @@ public class RouteManager : MonoBehaviour
 
     public void RebuildAndApply(bool force)
     {
-        var newPath = AStarPathfinder.FindPath(map.walkable, spawnCell, goalCell);
+        var newPath = AStarPathfinder.FindPath(Map.Walkable, SpawnCell, GoalCell);
        
         if (newPath == null || newPath.Count == 0)
         {
-            renderer?.Clear();
+            Renderer?.Clear();
             _lastPath = null;
             return;
         }
 
         if (force || IsDifferent(_lastPath, newPath))
         {
-            renderer?.SetPath(newPath);
+            Renderer?.SetPath(newPath);
             _lastPath = newPath;
 
             if (!force) MonsterManager.Instance?.OnRouteChanged();
@@ -57,8 +57,8 @@ public class RouteManager : MonoBehaviour
 
     public void SetEndpoints(Vector2Int spawn, Vector2Int goal, bool rebuildNow = true)
     {
-        spawnCell = spawn;
-        goalCell = goal;
+        SpawnCell = spawn;
+        GoalCell = goal;
         if (rebuildNow) RebuildAndApply(force: true);
     }
 
@@ -73,15 +73,15 @@ public class RouteManager : MonoBehaviour
 
     private static int HashWalkable(TestMap map)
     {
-        if (map == null || map.walkable == null) return 0;
-        int H = map.walkable.GetLength(0);
-        int W = map.walkable.GetLength(1);
+        if (map == null || map.Walkable == null) return 0;
+        int H = map.Walkable.GetLength(0);
+        int W = map.Walkable.GetLength(1);
         unchecked
         {
             int h = 17;
             for (int r = 0; r < H; r++)
                 for (int c = 0; c < W; c++)
-                    h = h * 31 + (map.walkable[r, c] ? 1 : 0);
+                    h = h * 31 + (map.Walkable[r, c] ? 1 : 0);
             return h;
         }
     }

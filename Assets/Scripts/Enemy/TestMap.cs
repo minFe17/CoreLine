@@ -9,25 +9,25 @@ public class TestMap : MonoBehaviour
     public Vector3 Origin { get => origin; set => origin = value; }
 
     [SerializeField] private bool generateRandomObstacles = true;
-    [Range(0f, 1f)] public float obstacleRate = 0.18f;
+    [Range(0f, 1f)] public float ObstacleRate = 0.18f;
 
     public float CellSize => cellSize;
-    public bool[,] walkable;
+    public bool[,] Walkable;
 
     void Awake()
     {
-        walkable = new bool[height, width];
+        Walkable = new bool[height, width];
         for (int r = 0; r < height; r++)
             for (int c = 0; c < width; c++)
-                walkable[r, c] = true;
+                Walkable[r, c] = true;
 
         if (generateRandomObstacles)
         {
             var rand = new System.Random();
             for (int r = 0; r < height; r++)
                 for (int c = 0; c < width; c++)
-                    if (rand.NextDouble() < obstacleRate)
-                        walkable[r, c] = false;
+                    if (rand.NextDouble() < ObstacleRate)
+                        Walkable[r, c] = false;
         }
     }
 
@@ -39,12 +39,12 @@ public class TestMap : MonoBehaviour
             wp.z = 0f;
             Vector2Int point = WorldToCell(wp);
             
-            walkable[point.x, point.y] = (walkable[point.x, point.y]) ? false : true;
+            Walkable[point.x, point.y] = (Walkable[point.x, point.y]) ? false : true;
         }
     }
 
     public bool InBounds(int r, int c) => r >= 0 && c >= 0 && r < height && c < width;
-    public bool IsWalkable(int r, int c) => InBounds(r, c) && walkable[r, c];
+    public bool IsWalkable(int r, int c) => InBounds(r, c) && Walkable[r, c];
 
     public Vector3 CellToWorld(int r, int c)
         => origin + new Vector3((c + 0.5f) * cellSize, (r + 0.5f) * cellSize, 0f);

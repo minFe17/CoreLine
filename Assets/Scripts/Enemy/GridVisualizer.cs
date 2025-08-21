@@ -37,15 +37,15 @@ public class GridVisualizer : MonoBehaviour
             }
         }
 
-        if (fillCells && map.walkable != null &&
-            map.walkable.GetLength(0) == height && map.walkable.GetLength(1) == width)
+        if (fillCells && map.Walkable != null &&
+            map.Walkable.GetLength(0) == height && map.Walkable.GetLength(1) == width)
         {
             for (int r = 0; r < height; r++)
             {
                 for (int c = 0; c < width; c++)
                 {
                     Vector3 center = origin + new Vector3((c + 0.5f) * cell, (r + 0.5f) * cell, 0f);
-                    Gizmos.color = map.walkable[r, c] ? walkableColor : obstacleColor;
+                    Gizmos.color = map.Walkable[r, c] ? walkableColor : obstacleColor;
                     Gizmos.DrawCube(center, new Vector3(cell * 0.98f, cell * 0.98f, 0.01f));
                 }
             }

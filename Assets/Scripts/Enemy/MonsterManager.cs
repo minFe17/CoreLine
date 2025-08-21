@@ -7,12 +7,12 @@ public class MonsterManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private TestMap map;
-    [SerializeField] private RouteManager route;        // RouteManager를 인스펙터에 연결
+    [SerializeField] private RouteManager route;       
     [SerializeField] private MonsterMover monsterPrefab;
 
     [Header("Spawn Settings")]
-    [SerializeField] private int initialSpawnCount = 5; // 시작 시 한 번에 몇 마리 소환할지
-    [SerializeField] private bool snapToCellCenter = true; // 셀 중앙으로 스폰할지
+    [SerializeField] private int initialSpawnCount = 5; 
+    [SerializeField] private bool snapToCellCenter = true; 
     [SerializeField] private bool spawnOnStart = true;
 
     private readonly List<MonsterMover> _monsters = new List<MonsterMover>();
@@ -45,11 +45,11 @@ public class MonsterManager : MonoBehaviour
     {
         if (!monsterPrefab || !map || !route) return null;
 
-        var spawnRC = route.spawnCell; 
+        var spawnRC = route.SpawnCell; 
         var pos = CellToSpawnWorld(spawnRC.x, spawnRC.y);
 
         var m = Instantiate(monsterPrefab, pos, Quaternion.identity);
-        m.map = map;                     
+        m.Map = map;                     
         _monsters.Add(m);
         return m;
     }
@@ -61,17 +61,15 @@ public class MonsterManager : MonoBehaviour
         foreach (var m in _monsters)
         {
             if (!m) continue;
-            m.MoveToCell(route.goalCell); // 현재 Cell → goal 로 길찾기
+            m.MoveToCell(route.GoalCell); 
         }
     }
 
     
     public void OnRouteChanged()
     {
-        SendAllToGoal(); // 라인이 바뀐 경우에만 다시 길찾기
+        SendAllToGoal(); 
     }
-
-    // ========== Helpers ==========
 
     private Vector3 CellToSpawnWorld(int row, int col)
     {

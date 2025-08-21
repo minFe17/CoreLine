@@ -5,12 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class MonsterMover : MonoBehaviour
 {
-    public TestMap map;
-    public float moveSpeed = 4f;
-    public float arriveEps = 0.02f;
-
-
-
+    public TestMap Map;
+    public float MoveSpeed = 4f;
+    public float ArriveEps = 0.02f;
     public Vector2Int Cell { get; private set; }
 
     private Vector2Int _dstCell;
@@ -22,16 +19,16 @@ public class MonsterMover : MonoBehaviour
 
     void Start()
     {
-        if (!map) map = FindAnyObjectByType<TestMap>();
+        if (!Map) Map = FindAnyObjectByType<TestMap>();
         _monster = GetComponent<Monster>();
 
-        Cell = map.WorldToCell(transform.position);
-        transform.position = map.CellToWorld(Cell.x, Cell.y);
+        Cell = Map.WorldToCell(transform.position);
+        transform.position = Map.CellToWorld(Cell.x, Cell.y);
     }
 
     public void MoveToWorld(Vector3 world)
     {
-        var dst = map.WorldToCell(world);
+        var dst = Map.WorldToCell(world);
         MoveToCell(dst);
     }
 
@@ -40,7 +37,7 @@ public class MonsterMover : MonoBehaviour
         _dstCell = dst;
         _hasDestination = true;
 
-        var path = AStarPathfinder.FindPath(map.walkable, Cell, dst);
+        var path = AStarPathfinder.FindPath(Map.Walkable, Cell, dst);
         if (path == null || path.Count <= 1)
         {
             IsFollowingPath = false;
@@ -60,9 +57,9 @@ public class MonsterMover : MonoBehaviour
         for (; i < path.Count; i++)
         {
             Vector2Int step = path[i];
-            if (_hasDestination && !map.IsWalkable(step.x, step.y))
+            if (_hasDestination && !Map.IsWalkable(step.x, step.y))
             {
-                var newPath = AStarPathfinder.FindPath(map.walkable, Cell, _dstCell);
+                var newPath = AStarPathfinder.FindPath(Map.Walkable, Cell, _dstCell);
                 if (newPath != null && newPath.Count > 1)
                 {
                     path = newPath;
@@ -78,15 +75,15 @@ public class MonsterMover : MonoBehaviour
                 }
             }
 
-            Vector3 target = map.CellToWorld(step.x, step.y);
+            Vector3 target = Map.CellToWorld(step.x, step.y);
 
             // 목표 셀로 이동
-            while ((transform.position - target).sqrMagnitude > arriveEps * arriveEps)
+            while ((transform.position - target).sqrMagnitude > ArriveEps * ArriveEps)
             {
-                if (_hasDestination && !map.IsWalkable(step.x, step.y))
+                if (_hasDestination && !Map.IsWalkable(step.x, step.y))
                     break;
                 Vector3 prev = transform.position;
-                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, target, MoveSpeed * Time.deltaTime);
 
                 // 진행 방향으로 스프라이트 좌우 반전
                 if (_monster != null)
@@ -98,7 +95,7 @@ public class MonsterMover : MonoBehaviour
                 yield return null;
             }
 
-            if ((transform.position - target).sqrMagnitude > arriveEps * arriveEps)
+            if ((transform.position - target).sqrMagnitude > ArriveEps * ArriveEps)
             {
                 i--;   
                 continue;
