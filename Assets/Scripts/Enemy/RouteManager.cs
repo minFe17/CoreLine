@@ -55,8 +55,11 @@ public class RouteManager : MonoBehaviour
         {
             renderer?.SetPath(map, path);
             _lastPath = path;
+
+            MonsterManager.Instance?.OnRouteChanged();
         }
     }
+
 
     public void SetEndpoints(Vector2Int spawn, Vector2Int goal, bool rebuildNow = true)
     {
@@ -72,4 +75,6 @@ public class RouteManager : MonoBehaviour
         for (int i = 0; i < a.Count; i++) if (a[i] != b[i]) return true;
         return false;
     }
+
+
 }
