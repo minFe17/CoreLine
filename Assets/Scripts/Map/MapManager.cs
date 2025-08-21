@@ -94,6 +94,17 @@ public class MapManager : MonoBehaviour
         public PlaceInfo(Vector3Int cell, bool placeable, bool occupied)
         { this.cell = cell; this.placeable = placeable; this.occupied = occupied; }
     }
+    public PlaceInfo GetPlaceInfo(Vector3Int cell)
+    {
+        bool occupied = _towers.ContainsKey(cell) || _occupied.Contains(cell);
+        bool placeable =
+            (_tmBuildable && _tmBuildable.HasTile(cell)) &&
+            !occupied &&
+            !((_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell)));
+
+        return new PlaceInfo(cell, placeable, occupied);
+    }
+    public PlaceInfo GetPlaceInfoWorld(Vector3 worldPos) => GetPlaceInfo(WorldToCell(worldPos));
 
     public readonly struct NavInfo
     {
@@ -105,20 +116,6 @@ public class MapManager : MonoBehaviour
         public NavInfo(Vector3Int cell, bool blocked, bool blockedByTower, bool blockedByWall)
         { this.cell = cell; this.blocked = blocked; this.blockedByTower = blockedByTower; this.blockedByWall = blockedByWall; }
     }
-
-    public PlaceInfo GetPlaceInfo(Vector3Int cell)
-    {
-        bool occupied = _towers.ContainsKey(cell) || _occupied.Contains(cell);
-        bool placeable =
-            (_tmBuildable && _tmBuildable.HasTile(cell)) &&
-            !occupied &&
-            !((_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell)));
-
-        return new PlaceInfo(cell, placeable, occupied);
-    }
-
-    public PlaceInfo GetPlaceInfoWorld(Vector3 worldPos) => GetPlaceInfo(WorldToCell(worldPos));
-
     public NavInfo GetNavInfo(Vector3Int cell)
     {
         bool byWall = (_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell));
@@ -126,7 +123,6 @@ public class MapManager : MonoBehaviour
         bool blocked = byWall || byTower;
         return new NavInfo(cell, blocked, byTower, byWall);
     }
-
     public NavInfo GetNavInfoWorld(Vector3 worldPos) => GetNavInfo(WorldToCell(worldPos));
 
     //
@@ -137,7 +133,9 @@ public class MapManager : MonoBehaviour
     //public bool IsBlockedWorld(Vector3 worldPos) => GetNavInfoWorld(worldPos).blocked;
     //
     //public bool IsBlockedByTower(Vector3Int cell) => GetNavInfo(cell).blockedByTower;
-    //public bool TryGetTowerAt(Vector3Int cell, out GameObject tower) => _towers.TryGetValue(cell, out tower);
+
+    //몬스터가 타워 공격 하는 용
+    public bool TryGetTowerAt(Vector3Int cell, out GameObject tower) => _towers.TryGetValue(cell, out tower);
     //
     //public bool HasTower(Vector3Int cell) => _towers.ContainsKey(cell);
     //public bool IsWall(Vector3Int cell) => _tmWall && _tmWall.HasTile(cell);
@@ -300,16 +298,15 @@ public class MapManager : MonoBehaviour
 
         return mapbounds;
     }
-
+    // 맵 전체 셀 범위/크기/셀 월드 크기
     public void GetNavFrame(out Vector3Int originCell, out Vector3Int sizeCells, out Vector3 cellSize)
     {
         BoundsInt b = GetNavBounds();
-        originCell = b.min;
-        sizeCells = b.size;
+        originCell = b.min;      
+        sizeCells = b.size;      
         cellSize = _grid != null ? _grid.cellSize : Vector3.one;
     }
 
-    public int NavWidth => MapManager.Instance.GetNavBounds().size.x;
 
     // 실험/디버그용
     public void GetCellFlags(Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied)
