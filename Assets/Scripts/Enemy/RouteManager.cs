@@ -3,56 +3,59 @@ using UnityEngine;
 
 public class RouteManager : MonoBehaviour
 {
-    public TestMap Map;
-    public Vector2Int SpawnCell;
-    public Vector2Int GoalCell;
+    public TestMap map;
+    public PathRenderer renderer;
 
-    public PathRenderer Renderer;
-
-    public bool AutoDetectMapChange = true;
+    [Header("Endpoints (행,열)")]
+    public Vector2Int SpawnCell = new Vector2Int(0, 0);
+    public Vector2Int GoalCell = new Vector2Int(5, 5);
 
     private List<Vector2Int> _lastPath;
-    private int _lastWalkableHash;
 
-    void Start()
+    void Awake()
     {
-        if (Renderer) Renderer.SetMap(Map);
-        RebuildAndApply(force: true);
-        if (AutoDetectMapChange)
-            _lastWalkableHash = HashWalkable(Map);
+        if (!map) map = FindAnyObjectByType<TestMap>();
     }
 
-    void Update()
+    void OnEnable()
     {
-        if (!AutoDetectMapChange) return;
+        if (map != null) map.OnCellChanged += HandleCellChanged;
+        RebuildAndApply(force: true);
+    }
 
-        int h = HashWalkable(Map);
-        if (h != _lastWalkableHash)
-        {
-            _lastWalkableHash = h;
-            RebuildAndApply(force: false);
-        }
+    void OnDisable()
+    {
+        if (map != null) map.OnCellChanged -= HandleCellChanged;
+    }
+
+    void HandleCellChanged(int r, int c)
+    {
+        // 셀 하나 바뀔 때마다 경로 재평가, "실제로 달라졌을 때만" 라인 업데이트
+        RebuildAndApply(force: false);
     }
 
     public void RebuildAndApply(bool force)
     {
-        var newPath = AStarPathfinder.FindPath(Map.Walkable, SpawnCell, GoalCell);
-       
-        if (newPath == null || newPath.Count == 0)
+        if (map == null) { renderer?.Clear(); _lastPath = null; return; }
+
+        var path = AStarPathfinder.FindPath(
+            map.Height, map.Width,
+            (r, c) => map.IsWalkable(r, c),
+            SpawnCell, GoalCell
+        );
+
+        if (path == null || path.Count == 0)
         {
-            Renderer?.Clear();
+            renderer?.Clear();
             _lastPath = null;
             return;
         }
 
-        if (force || IsDifferent(_lastPath, newPath))
+        if (force || IsDifferent(_lastPath, path))
         {
-            Renderer?.SetPath(newPath);
-            _lastPath = newPath;
-
-            if (!force) MonsterManager.Instance?.OnRouteChanged();
+            renderer?.SetPath(map, path);
+            _lastPath = path;
         }
-        
     }
 
     public void SetEndpoints(Vector2Int spawn, Vector2Int goal, bool rebuildNow = true)
@@ -62,27 +65,11 @@ public class RouteManager : MonoBehaviour
         if (rebuildNow) RebuildAndApply(force: true);
     }
 
-    private static bool IsDifferent(List<Vector2Int> a, List<Vector2Int> b)
+    static bool IsDifferent(List<Vector2Int> a, List<Vector2Int> b)
     {
         if (a == null || b == null) return true;
         if (a.Count != b.Count) return true;
-        for (int i = 0; i < a.Count; i++)
-            if (a[i] != b[i]) return true;
+        for (int i = 0; i < a.Count; i++) if (a[i] != b[i]) return true;
         return false;
-    }
-
-    private static int HashWalkable(TestMap map)
-    {
-        if (map == null || map.Walkable == null) return 0;
-        int H = map.Walkable.GetLength(0);
-        int W = map.Walkable.GetLength(1);
-        unchecked
-        {
-            int h = 17;
-            for (int r = 0; r < H; r++)
-                for (int c = 0; c < W; c++)
-                    h = h * 31 + (map.Walkable[r, c] ? 1 : 0);
-            return h;
-        }
     }
 }

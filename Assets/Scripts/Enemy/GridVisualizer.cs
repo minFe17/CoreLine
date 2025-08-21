@@ -1,60 +1,115 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridVisualizer : MonoBehaviour
 {
-    [SerializeField] private TestMap map;             
-    
-    [SerializeField] private bool drawGridLines = true;
-    [SerializeField] private bool fillCells = true;
+    [Header("Refs")]
+    public TestMap map;
 
-    [SerializeField] private Color gridColor = new Color(1f, 1f, 1f, 0.25f);
-    [SerializeField] private Color walkableColor = new Color(0f, 0.7f, 1f, 0.15f);
-    [SerializeField] private Color obstacleColor = new Color(1f, 0.15f, 0.15f, 0.35f);
+    [Header("Overlay (optional)")]
+    public bool useOverlay = false;                   // 인게임 표시
+    public GameObject cellOverlayPrefab;              // 반투명 Quad/Sprite 프리팹(선택)
 
-    void OnDrawGizmos()
+    [Header("Colors")]
+    public Color walkableColor = new Color(0.2f, 1f, 0.6f, 0.12f);
+    public Color wallColor = new Color(1f, 0.2f, 0.2f, 0.45f);
+    public Color destructibleColor = new Color(0.9f, 0.2f, 0.9f, 0.45f);
+    public Color towerColor = new Color(1f, 0.6f, 0.2f, 0.5f);
+
+    private GameObject[,] _overlays;
+
+    void Awake()
+    {
+        if (!map) map = FindAnyObjectByType<TestMap>();
+    }
+
+    void OnEnable()
+    {
+        if (map != null) map.OnCellChanged += HandleCellChanged;
+        RebuildAll();
+    }
+
+    void OnDisable()
+    {
+        if (map != null) map.OnCellChanged -= HandleCellChanged;
+        ClearAll();
+    }
+
+    void HandleCellChanged(int r, int c)
+    {
+        if (!useOverlay || _overlays == null) return;
+        UpdateCell(r, c);
+    }
+
+    public void RebuildAll()
     {
         if (!map) return;
 
-        int width = GetPrivate(map, "width", 20);
-        int height = GetPrivate(map, "height", 12);
-        float cell = GetPrivate(map, "cellSize", 1f);
-        Vector3 origin = GetPrivate(map, "origin", Vector3.zero);
-
-        if (drawGridLines)
+        if (useOverlay && cellOverlayPrefab != null)
         {
-            Gizmos.color = gridColor;
-            for (int r = 0; r <= height; r++)
-            {
-                Vector3 a = origin + new Vector3(0, r * cell, 0);
-                Vector3 b = origin + new Vector3(width * cell, r * cell, 0);
-                Gizmos.DrawLine(a, b);
-            }
-            for (int c = 0; c <= width; c++)
-            {
-                Vector3 a = origin + new Vector3(c * cell, 0, 0);
-                Vector3 b = origin + new Vector3(c * cell, height * cell, 0);
-                Gizmos.DrawLine(a, b);
-            }
-        }
+            ClearAll();
+            _overlays = new GameObject[map.Height, map.Width];
 
-        if (fillCells && map.Walkable != null &&
-            map.Walkable.GetLength(0) == height && map.Walkable.GetLength(1) == width)
-        {
-            for (int r = 0; r < height; r++)
+            for (int r = 0; r < map.Height; r++)
             {
-                for (int c = 0; c < width; c++)
+                for (int c = 0; c < map.Width; c++)
                 {
-                    Vector3 center = origin + new Vector3((c + 0.5f) * cell, (r + 0.5f) * cell, 0f);
-                    Gizmos.color = map.Walkable[r, c] ? walkableColor : obstacleColor;
-                    Gizmos.DrawCube(center, new Vector3(cell * 0.98f, cell * 0.98f, 0.01f));
+                    var go = Instantiate(cellOverlayPrefab, map.CellToWorld(r, c), Quaternion.identity, transform);
+                    go.transform.localScale = new Vector3(map.CellSize, map.CellSize, 1f);
+                    _overlays[r, c] = go;
+                    ApplyColor(r, c);
                 }
             }
         }
     }
 
-    T GetPrivate<T>(object obj, string field, T fallback)
+    public void ClearAll()
     {
-        var f = obj.GetType().GetField(field, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        return f != null ? (T)f.GetValue(obj) : fallback;
+        if (_overlays == null) return;
+        for (int r = 0; r < _overlays.GetLength(0); r++)
+            for (int c = 0; c < _overlays.GetLength(1); c++)
+                if (_overlays[r, c]) Destroy(_overlays[r, c]);
+        _overlays = null;
+    }
+
+    void UpdateCell(int r, int c)
+    {
+        if (_overlays[r, c] == null) return;
+        ApplyColor(r, c);
+    }
+
+    void ApplyColor(int r, int c)
+    {
+        var f = map.cells[r, c];
+        var sr = _overlays[r, c].GetComponent<SpriteRenderer>();
+        if (!sr) return;
+
+        // 우선순위: Wall > Tower > Destructible > Walkable
+        if ((f & TestMap.CellFlags.Wall) != 0) sr.color = wallColor;
+        else if ((f & TestMap.CellFlags.Tower) != 0) sr.color = towerColor;
+        else if ((f & TestMap.CellFlags.Destructible) != 0) sr.color = destructibleColor;
+        else sr.color = walkableColor;
+    }
+
+    // 에디터 뷰에서만 기즈모로도 보여주기(인게임 off일 때)
+    void OnDrawGizmos()
+    {
+        if (!map || useOverlay) return;
+
+        for (int r = 0; r < map.Height; r++)
+        {
+            for (int c = 0; c < map.Width; c++)
+            {
+                var f = map.cells != null ? map.cells[r, c] : TestMap.CellFlags.None;
+                Color col = walkableColor;
+                if ((f & TestMap.CellFlags.Wall) != 0) col = wallColor;
+                else if ((f & TestMap.CellFlags.Tower) != 0) col = towerColor;
+                else if ((f & TestMap.CellFlags.Destructible) != 0) col = destructibleColor;
+
+                Gizmos.color = col;
+                var p = map.CellToWorld(r, c);
+                Gizmos.DrawCube(p, new Vector3(map.CellSize * 0.98f, map.CellSize * 0.98f, 0.1f));
+            }
+        }
     }
 }

@@ -301,6 +301,16 @@ public class MapManager : MonoBehaviour
         return mapbounds;
     }
 
+    public void GetNavFrame(out Vector3Int originCell, out Vector3Int sizeCells, out Vector3 cellSize)
+    {
+        BoundsInt b = GetNavBounds();
+        originCell = b.min;
+        sizeCells = b.size;
+        cellSize = _grid != null ? _grid.cellSize : Vector3.one;
+    }
+
+    public int NavWidth => MapManager.Instance.GetNavBounds().size.x;
+
     // 실험/디버그용
     public void GetCellFlags(Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied)
     {
