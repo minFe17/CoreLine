@@ -369,15 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706cfd64218a738449283534c48db7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< Updated upstream
   stagePrefab: {fileID: 1387169178987589946, guid: 98d2610135586a441afd0d4986a9849d, type: 3}
-=======
-<<<<<<< HEAD
-  stagePrefab: {fileID: 4589844151109710589, guid: 04bbc7e7627562d4e862ed7946bb2d14, type: 3}
-=======
-  stagePrefab: {fileID: 1387169178987589946, guid: 98d2610135586a441afd0d4986a9849d, type: 3}
->>>>>>> 607b064404a3258db25b68f2e14c3c228621c0c0
->>>>>>> Stashed changes
 --- !u!4 &738786009
 Transform:
   m_ObjectHideFlags: 0
