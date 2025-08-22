@@ -9,7 +9,7 @@ public class MapManager : MonoBehaviour
 
     private GameObject _stageRoot;
     private Grid _grid;
-    private Tilemap _tmBuildable, _tmUnbuildable, _tmWall, _tmDestructible, _tmDeco;
+    private Tilemap _tmBuildable, _tmUnbuildable, _tmWall, _tmDestructible, _tmDeco, _tmKing, _tmObjects, _tmMonsterSpawn;
 
     private readonly HashSet<Vector3Int> _occupied = new();
     private readonly Dictionary<Vector3Int, GameObject> _towers = new(); // 셀 → 타워 오브젝트
@@ -87,12 +87,12 @@ public class MapManager : MonoBehaviour
 
     public readonly struct PlaceInfo
     {
-        public readonly Vector3Int cell;
-        public readonly bool placeable; // 지금 즉시 설치 가능한가?
-        public readonly bool occupied;  // 점유돼 있는가?
+        public readonly Vector3Int Cell;
+        public readonly bool Placeable; // 지금 즉시 설치 가능한가?
+        public readonly bool Occupied;  // 점유돼 있는가?
 
         public PlaceInfo(Vector3Int cell, bool placeable, bool occupied)
-        { this.cell = cell; this.placeable = placeable; this.occupied = occupied; }
+        { this.Cell = cell; this.Placeable = placeable; this.Occupied = occupied; }
     }
     public PlaceInfo GetPlaceInfo(Vector3Int cell)
     {
@@ -105,16 +105,67 @@ public class MapManager : MonoBehaviour
         return new PlaceInfo(cell, placeable, occupied);
     }
     public PlaceInfo GetPlaceInfoWorld(Vector3 worldPos) => GetPlaceInfo(WorldToCell(worldPos));
+    // 스테이지 진입 시 플레이어 베이스 배치 가능 타일 Get용
+    // 현재 맵의 모든 KingTile 셀 나열
+    public List<Vector3Int> GetAllKingCells()
+    {
+        var list = new List<Vector3Int>();
+        if (_tmKing == null) return list;
+        foreach (var c in _tmKing.cellBounds.allPositionsWithin)
+            if (_tmKing.HasTile(c)) list.Add(c);
+        return list;
+    }
+
+    // 선택된 KingTile을 Buildable로 전환
+    public bool ConvertKingToBuildable(Vector3Int cell)
+    {
+        if (_tmKing == null || !_tmKing.HasTile(cell)) return false;
+        _tmKing.SetTile(cell, null);
+        OnCellChanged?.Invoke(cell);  // 길찾기/배치 갱신 알림
+        return true;
+    }
+    public bool SelectPlayerBase(Vector3Int selectedCell, GameObject basePrefab = null, bool occupyBaseCell = true)
+    {
+        if (_tmKing == null) return false;
+        if (!_tmKing.HasTile(selectedCell)) return false; // King 후보가 아닌 칸이면 실패
+
+        // 1) King 후보들 수집
+        var kings = GetAllKingCells();
+        if (kings.Count == 0) return false;
+
+        // 2) 모두 처리
+        foreach (var c in kings)
+        {
+            // King 타일 제거
+            _tmKing.SetTile(c, null);
+
+            if (c == selectedCell)
+            {
+                // 선택 칸: 베이스 확정
+                if (basePrefab != null)
+                {
+                    var pos = CellCenterWorld(c);
+                    var go = Instantiate(basePrefab, pos, Quaternion.identity, _stageRoot?.transform);
+                    go.name = basePrefab.name;
+                }
+
+                if (occupyBaseCell)
+                    MarkOccupied(c); // 베이스 셀은 타워 설치 불가로 막음
+            }
+            OnCellChanged?.Invoke(c);
+        }
+        return true;
+    }
 
     public readonly struct NavInfo
     {
-        public readonly Vector3Int cell;
-        public readonly bool blocked;        // 이동 불가 전체 판단
-        public readonly bool blockedByTower; // 타워/점유로 인해 막힘
-        public readonly bool blockedByWall;  // 벽/파괴벽으로 막힘
+        public readonly Vector3Int Cell;
+        public readonly bool Blocked;        // 이동 불가 전체 판단
+        public readonly bool BlockedByTower; // 타워/점유로 인해 막힘
+        public readonly bool BlockedByWall;  // 벽/파괴벽으로 막힘
 
         public NavInfo(Vector3Int cell, bool blocked, bool blockedByTower, bool blockedByWall)
-        { this.cell = cell; this.blocked = blocked; this.blockedByTower = blockedByTower; this.blockedByWall = blockedByWall; }
+        { this.Cell = cell; this.Blocked = blocked; this.BlockedByTower = blockedByTower; this.BlockedByWall = blockedByWall; }
     }
     public NavInfo GetNavInfo(Vector3Int cell)
     {
@@ -124,6 +175,15 @@ public class MapManager : MonoBehaviour
         return new NavInfo(cell, blocked, byTower, byWall);
     }
     public NavInfo GetNavInfoWorld(Vector3 worldPos) => GetNavInfo(WorldToCell(worldPos));
+    //몬스터 스폰 타일 Get용
+    public List<Vector3Int> GetSpawnCells()
+    {
+        var list = new List<Vector3Int>();
+        if (_tmMonsterSpawn == null) return list;
+        foreach (var c in _tmMonsterSpawn.cellBounds.allPositionsWithin)
+            if (_tmMonsterSpawn.HasTile(c)) list.Add(c);
+        return list;
+    }
 
     //
     //public bool IsTowerPlaceableCell(Vector3Int cell) => GetPlaceInfo(cell).placeable;
@@ -204,6 +264,9 @@ public class MapManager : MonoBehaviour
         _tmWall = FindByName(stageRoot, "UnDeWall")?.GetComponent<Tilemap>();
         _tmDestructible = FindByName(stageRoot, "DeWall")?.GetComponent<Tilemap>();
         _tmDeco = FindByName(stageRoot, "Decotile")?.GetComponent<Tilemap>();
+        _tmKing = FindByName(stageRoot, "KingTile")?.GetComponent<Tilemap>();
+        _tmObjects = FindByName(stageRoot, "ObjectsTile")?.GetComponent<Tilemap>();
+        _tmMonsterSpawn = FindByName(stageRoot, "MonsterSpawnTile")?.GetComponent<Tilemap>();
     }
 
     private Transform FindByName(Transform root, string name)
@@ -268,6 +331,29 @@ public class MapManager : MonoBehaviour
     }
 
     // ───────────────────────────────────────────────────────────────────────
+    // 오브젝트 타일 상호작용 관련
+    // ───────────────────────────────────────────────────────────────────────
+    // 해당 셀이 ObjectsTile인가?
+    //public bool IsObjectTile(Vector3Int cell) => _tmObjects && _tmObjects.HasTile(cell);
+
+    // 효과 트리거 이벤트(타일 이름을 함께 넘김)
+    //public event Action<Vector3Int, string> OnObjectTileTriggered;
+
+    // 효과 사용: 타일 제거 + 이벤트 발행
+    //public bool UseObjectTile(Vector3Int cell)
+    //{
+    //    if (_tmObjects == null || !_tmObjects.HasTile(cell)) return false;
+    //
+    //    // 어떤 오브젝트였는지 식별(타일 이름 활용)
+    //    string tileName = _tmObjects.GetTile(cell)?.name ?? "Object";
+    //    _tmObjects.SetTile(cell, null);
+    //
+    //    OnObjectTileTriggered?.Invoke(cell, tileName);
+    //    OnCellChanged?.Invoke(cell); // 필요 시 네비 갱신(비차단이라 영향은 없음)
+    //    return true;
+    //}
+
+    // ───────────────────────────────────────────────────────────────────────
     // 맵 바운드/디버그
     // ───────────────────────────────────────────────────────────────────────
     public BoundsInt GetNavBounds()
@@ -295,6 +381,10 @@ public class MapManager : MonoBehaviour
         Accumulate(_tmWall);
         Accumulate(_tmDestructible);
         Accumulate(_tmDeco);
+        Accumulate(_tmKing);
+        Accumulate(_tmObjects);
+        Accumulate(_tmMonsterSpawn);
+
 
         return mapbounds;
     }
@@ -323,6 +413,6 @@ public class MapManager : MonoBehaviour
     {
         if (!IsReady) return;
         var info = GetPlaceInfoWorld(worldPos);
-        Debug.Log($"셀 {WorldToCell(worldPos)} : {(info.placeable ? "타워 설치 가능" : "설치 불가")} / 점유={info.occupied}");
+        Debug.Log($"셀 {WorldToCell(worldPos)} : {(info.Placeable ? "타워 설치 가능" : "설치 불가")} / 점유={info.Occupied}");
     }
 }
