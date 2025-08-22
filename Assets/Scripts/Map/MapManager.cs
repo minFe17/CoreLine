@@ -6,7 +6,8 @@ using UnityEngine.Tilemaps;
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance => Utils.MonoSingleton<MapManager>.Instance;
-
+    private bool _hasSpawn;
+    private Vector3Int _spawnCell;
     private GameObject _stageRoot;
     private Grid _grid;
     private Tilemap _tmBuildable, _tmUnbuildable, _tmWall, _tmDestructible, _tmDeco, _tmKing, _tmObjects, _tmMonsterSpawn;
@@ -40,6 +41,7 @@ public class MapManager : MonoBehaviour
         CacheMapsFrom(_stageRoot.transform);
         //SetupCollisionLayers();
         WireDestructibleController();
+        InitSpawnCell();
     }
 
     public void BindStageRoot(Transform stageRoot)
@@ -50,6 +52,7 @@ public class MapManager : MonoBehaviour
         CacheMapsFrom(stageRoot);
         //SetupCollisionLayers();
         WireDestructibleController();
+        InitSpawnCell();
     }
 
     public void UnloadStage()
@@ -63,6 +66,25 @@ public class MapManager : MonoBehaviour
         {
             Destroy(_stageRoot);
             _stageRoot = null;
+        }
+    }
+    private void InitSpawnCell()
+    {
+        _hasSpawn = false;
+        if (_tmMonsterSpawn == null) return;
+
+        foreach (Vector3Int cell in _tmMonsterSpawn.cellBounds.allPositionsWithin)
+        {
+            if (_tmMonsterSpawn.HasTile(cell))
+            {
+                if (_hasSpawn)
+                {
+                    Debug.LogWarning($"[MapManager] Spawn 타일이 여러 개입니다. 첫 번째({_spawnCell})만 사용, 나머지 {cell} 무시.");
+                    continue;
+                }
+                _spawnCell = cell;
+                _hasSpawn = true;
+            }
         }
     }
 
@@ -176,15 +198,25 @@ public class MapManager : MonoBehaviour
     }
     public NavInfo GetNavInfoWorld(Vector3 worldPos) => GetNavInfo(WorldToCell(worldPos));
     //몬스터 스폰 타일 Get용
-    public List<Vector3Int> GetSpawnCells()
+    //public List<Vector3Int> GetSpawnCells()
+    //{
+    //    var list = new List<Vector3Int>();
+    //    if (_tmMonsterSpawn == null) return list;
+    //    foreach (var c in _tmMonsterSpawn.cellBounds.allPositionsWithin)
+    //        if (_tmMonsterSpawn.HasTile(c)) list.Add(c);
+    //    return list;
+    //}
+    //실수 방지
+    public bool TryGetSpawnCell(out Vector3Int cell)
     {
-        var list = new List<Vector3Int>();
-        if (_tmMonsterSpawn == null) return list;
-        foreach (var c in _tmMonsterSpawn.cellBounds.allPositionsWithin)
-            if (_tmMonsterSpawn.HasTile(c)) list.Add(c);
-        return list;
+        cell = _spawnCell;
+        return _hasSpawn;
     }
-
+    //몬스터 스폰 타일 Get용
+    public Vector3 GetSpawnWorld()
+    {
+        return _hasSpawn ? CellCenterWorld(_spawnCell) : Vector3.zero;
+    }
     //
     //public bool IsTowerPlaceableCell(Vector3Int cell) => GetPlaceInfo(cell).placeable;
     //public bool IsTowerPlaceableWorld(Vector3 worldPos) => GetPlaceInfoWorld(worldPos).placeable;
