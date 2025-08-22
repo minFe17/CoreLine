@@ -1,11 +1,8 @@
-using NaughtyAttributes;
 using UnityEngine;
 using Utils;
 
 public class Unit : MonoBehaviour
 {
-    protected const int MaxLevel = 3;
-
     protected UnitLevelData _data;
     protected Animator _animator;
     protected int _level;
@@ -21,7 +18,7 @@ public class Unit : MonoBehaviour
     {
         // UI º“»Ø 
 
-        if (_data.AttackRange != 0)
+        if (_data.UnitState.AttackRange != 0)
             SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
         else
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();

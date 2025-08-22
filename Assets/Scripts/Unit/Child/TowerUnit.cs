@@ -8,7 +8,12 @@ public class TowerUnit : Unit
     [SerializeField] protected EUnitType _unitType;
     [SerializeField] List<GameObject> _levelUnit;
 
+    int _originalLayer;
+
     public event Action OnUpgrade;
+    public EUnitType UnitType { get => _unitType; }
+
+    bool IsMaxLevel() => _level >= _levelUnit.Count - 1;
 
     void OnEnable()
     {
@@ -23,9 +28,16 @@ public class TowerUnit : Unit
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             if (_level == _levelUnit.Count - 1)
-                Fusion();
+                return;
             Upgrade();
         }
+    }
+
+    private void OnMouseUp()
+    {
+        if (_level != _levelUnit.Count - 1)
+            return;
+        Fusion();
     }
 
     void SetLevel()
@@ -45,24 +57,50 @@ public class TowerUnit : Unit
         _animator = _levelUnit[_level].GetComponent<Animator>();
     }
 
+    void SetLayerRecursively(GameObject targetObject, int layer)
+    {
+        targetObject.layer = layer;
+        foreach (Transform child in targetObject.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
     public GameObject GetCurrentUnit()
     {
         return _levelUnit[_level];
     }
 
+    public void SetFusionLayer()
+    {
+        _originalLayer = gameObject.layer;
+
+        int fusionLayer = LayerMask.NameToLayer("FusionUnit");
+        SetLayerRecursively(_levelUnit[_level], fusionLayer);
+    }
+
+    public void RestoreOriginalLayer()
+    {
+        SetLayerRecursively(_levelUnit[_level], _originalLayer);
+    }
+
     public void Upgrade()
     {
-        if (_level >= _levelUnit.Count - 1)
+        if (IsMaxLevel())
             return;
+
         _level++;
         UpgradeCharacter();
         SetLevel();
         OnUpgrade?.Invoke();
+
+        if (IsMaxLevel())
+            SimpleSingleton<FusionManager>.Instance.AddFusionableUnit(_unitType, this);
     }
 
     public void Fusion()
     {
-        // 퓨전 가능한 유닛이 있는 타일만 밝게?
-        // 그 유닛 누르면 지금 유닛이랑 그 유닛 없애고 이 위치에 퓨전 유닛 소환
+        // 퓨전 가능한 유닛 누르면 지금 유닛이랑 그 유닛 없애고 이 위치에 퓨전 유닛 소환
+        SimpleSingleton<FusionManager>.Instance.FindFusionUnits(this);
     }
 }

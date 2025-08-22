@@ -24,7 +24,7 @@ public abstract class AttackBase : MonoBehaviour
         if(_unit.IsDie)
             return;
         _attackTimer += Time.deltaTime;
-        if(_unit.Data.AttackSpeed <= _attackTimer)
+        if(_unit.Data.UnitState.AttackSpeed <= _attackTimer)
         {
             _attackTimer = 0;
             _unit.Animator.SetTrigger("doAttack");
