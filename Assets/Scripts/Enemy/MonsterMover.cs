@@ -9,6 +9,12 @@ public class MonsterMover : MonoBehaviour
     [SerializeField] private float _moveSpeed = 4f;
     [SerializeField] private float _arriveEps = 0.02f;
 
+    [SerializeField] private int _attackRangeCell = 1;
+    [SerializeField] private bool _useDiag = false;
+    [SerializeField] private float _attackCooldown = 1.0f;
+    private float _attackTimer = 0f;
+    private RouteManager _route;
+
     public TestMap Map {
         get { return _map; }
         set { _map = value; }
@@ -25,6 +31,7 @@ public class MonsterMover : MonoBehaviour
     private void Start()
     {
         if (!_map) _map = FindAnyObjectByType<TestMap>();
+        if (!_route) _route = FindAnyObjectByType<RouteManager>();
         _monster = GetComponent<Monster>();
 
         Vector2Int rc = _map.WorldToCell(transform.position);
@@ -40,6 +47,25 @@ public class MonsterMover : MonoBehaviour
             wp.z = 0f;
             MoveToWorld(wp);
         }
+
+        if (CheckGoalRange())
+        {
+            if (IsFollowingPath)
+            {
+                IsFollowingPath = false;
+                _hasDestination = false;
+                if (_moveCo != null) { StopCoroutine(_moveCo); _moveCo = null; }
+            }
+
+            _attackTimer -= Time.deltaTime;
+            if (_attackTimer <= 0f && _monster.IsAttackReady())
+            {
+                _monster?.FireAttackTrigger();
+                _attackTimer = _attackCooldown;
+            }
+        }
+        else
+            _attackTimer = 0f;
     }
 
     public void MoveToWorld(Vector3 world)
@@ -50,6 +76,8 @@ public class MonsterMover : MonoBehaviour
 
     public void MoveToCell(Vector2Int dst)
     {
+        _attackTimer = 0;
+
         _dstCell = dst;
         _hasDestination = true;
 
@@ -78,6 +106,15 @@ public class MonsterMover : MonoBehaviour
 
         for (; i < path.Count; i++)
         {
+
+            if (CheckGoalRange())
+            {
+                IsFollowingPath = false;
+                _hasDestination = false;
+                _moveCo = null;
+                yield break;
+            }
+
             Vector2Int step = path[i];
             if (_hasDestination && !_map.IsWalkable(step.x, step.y))
             {
@@ -114,8 +151,25 @@ public class MonsterMover : MonoBehaviour
                 if (_monster != null)
                 {
                     Vector3 delta = transform.position - prev;
-                    _monster.SetFlip(delta);
+
+                    if (Mathf.Abs(delta.y) > Mathf.Abs(delta.x))
+                    {
+                        Vector3 goalWorld = _map.CellToWorld(_dstCell.x, _dstCell.y);
+                        float xdir = goalWorld.x - transform.position.x;
+                        _monster.SetFlip(new Vector3(xdir, 0f, 0f));
+                    }
+                    else
+                        _monster.SetFlip(delta);
                 }
+
+                if (CheckGoalRange())
+                {
+                    IsFollowingPath = false;
+                    _hasDestination = false;
+                    _moveCo = null;
+                    yield break;
+                }
+
                 yield return null;
             }
 
@@ -131,5 +185,14 @@ public class MonsterMover : MonoBehaviour
 
         IsFollowingPath = false;
         _moveCo = null;
+    }
+
+    private bool CheckGoalRange()
+    {
+        if (_route == null) return false;
+        Vector2Int goal = _route.GoalCell;
+        int dr = Mathf.Abs(Cell.x - goal.x);
+        int dc = Mathf.Abs(Cell.y - goal.y);
+        return _useDiag ? (Mathf.Max(dr, dc) <= _attackRangeCell): ((dr + dc) <= _attackRangeCell);
     }
 }

@@ -19,27 +19,27 @@ public class TestMap : MonoBehaviour
     private string _undeWallName = "UnDeWall";
     private string _deWallName = "DeWall";
     private string _decoName = "Decotile";
+    private string _spawnName = "MonsterSpawnTile";
 
    
     private Grid _grid;
-    private Tilemap _tmBuild, _tmUnbuild, _tmUnDeWall, _tmDeWall, _tmDeco;
+    private Tilemap _tmBuild, _tmUnbuild, _tmUnDeWall, _tmDeWall, _tmDeco, _tmSpawn;
 
     private BoundsInt _bounds;
 
-    
     public int Width { get; private set; }
     public int Height { get; private set; }
     public float CellSize => _grid ? _grid.cellSize.x : 1f;
     public CellFlags[,] cells;
     public event Action<int, int> OnCellChanged;
 
+    public Vector2Int SpawnCellRC { get; private set; } = new Vector2Int(-1, -1); // (r,c) 저장
+    public bool HasSpawnCell => SpawnCellRC.x >= 0;
+
     private void Awake()
     {
-        if (!StageRoot)
-        {
-            Debug.LogError("[TestMap] stageRoot(Realmap) 가 비어있습니다.");
-            return;
-        }
+        if (!StageRoot) return;
+
         CacheMapsFrom(StageRoot);
         RebuildFromTilemaps();
     }
@@ -68,6 +68,7 @@ public class TestMap : MonoBehaviour
         _tmUnDeWall = FindByName(root, _undeWallName)?.GetComponent<Tilemap>();
         _tmDeWall = FindByName(root, _deWallName)?.GetComponent<Tilemap>();
         _tmDeco = FindByName(root, _decoName)?.GetComponent<Tilemap>();
+        _tmSpawn = FindByName(root, _spawnName)?.GetComponent<Tilemap>();
     }
 
     public void RebuildFromTilemaps()
@@ -75,11 +76,12 @@ public class TestMap : MonoBehaviour
         if (!_grid)
             return;
 
-        _bounds = CalcUnionBounds(_tmBuild, _tmUnbuild, _tmUnDeWall, _tmDeWall);
+        _bounds = CalcUnionBounds(_tmBuild, _tmUnbuild, _tmUnDeWall, _tmDeWall, _tmSpawn);
         if (_bounds.size.x <= 0 || _bounds.size.y <= 0)
         {
             Width = Height = 0;
             cells = null;
+            SpawnCellRC = new Vector2Int(-1, -1);
             return;
         }
 
@@ -102,9 +104,29 @@ public class TestMap : MonoBehaviour
             }
         }
 
-       
-    }
+        SpawnCellRC = new Vector2Int(-1, -1);
+        if (_tmSpawn)
+        {
+            BoundsInt sb = _tmSpawn.cellBounds;
+            foreach (var pos in sb.allPositionsWithin)
+            {
+                if (!_tmSpawn.HasTile(pos)) continue;
+                int c = pos.x - _bounds.xMin;
+                int r = pos.y - _bounds.yMin;
+                if (InBounds(r, c))
+                {
+                    SpawnCellRC = new Vector2Int(r, c);
+                    break;
+                }
+            }
+        }
 
+    }
+    public bool TryGetSpawnCell(out Vector2Int rc)
+    {
+        rc = SpawnCellRC;
+        return HasSpawnCell;
+    }
 
     public Vector3 CellToWorld(int r, int c)
     {

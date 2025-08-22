@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2312470746457635389}
   - component: {fileID: 2002774819831669507}
   - component: {fileID: 8754167448134604521}
+  - component: {fileID: 5925282587562097821}
   m_Layer: 3
   m_Name: Dragon
   m_TagString: Untagged
@@ -90,7 +91,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_Sprite: {fileID: 4371639795956164320, guid: 872decd1bd3746e4e85c0697a45f63b3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -161,3 +162,21 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 2.67, y: 2.58}
   m_Direction: 0
+--- !u!114 &5925282587562097821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5481892056894795420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58ca3fa36cfb97446a28001baa9b4357, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _map: {fileID: 0}
+  _moveSpeed: 3
+  _arriveEps: 0.02
+  _attackRangeCell: 2
+  _useDiag: 1
+  _attackCooldown: 1

@@ -26,6 +26,12 @@ public class RouteManager : MonoBehaviour
     private void OnEnable()
     {
         if (_map != null) _map.OnCellChanged += HandleCellChanged;
+
+        if (_map && _map.TryGetSpawnCell(out var spawnRC))
+        {
+            _spawnX = spawnRC.y;
+            _spawnY = spawnRC.x;
+        }
         RebuildAndApply(force: true);
     }
 
@@ -68,10 +74,10 @@ public class RouteManager : MonoBehaviour
 
     public void SetEndpoints(Vector2Int spawn, Vector2Int goal, bool rebuildNow = true)
     {
-        _spawnX = spawn.x;
-        _spawnY = spawn.y;
-        _goalX = goal.x;
-        _goalY = goal.y;
+        _spawnX = spawn.y;
+        _spawnY = spawn.x;
+        _goalX = goal.y;
+        _goalY = goal.x;
         if (rebuildNow) RebuildAndApply(force: true);
     }
 
