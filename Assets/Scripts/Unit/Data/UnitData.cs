@@ -9,5 +9,5 @@ public class UnitData
     [SerializeField] List<UnitLevelData> _levelData;
 
     public EUnitType UnitType { get => (EUnitType)Enum.Parse(typeof(EUnitType), _unitType); }
-    public List<UnitLevelData> LevelData { get => _levelData; }
+    public IReadOnlyList<UnitLevelData> LevelData { get => _levelData; }
 }

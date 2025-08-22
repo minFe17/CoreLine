@@ -1,0 +1,14 @@
+{
+  "_fusionDataList": [
+    {
+      "_fusionUnitType": "Outlaw",
+      "_materialUnit": ["Warrior", "Pirate"],
+      "_fusionUnitState": {
+        "_hp": 120,
+        "_attackDamage": 35,
+        "_attackSpeed": 1.5,
+        "_attackRange": 3.5
+      }
+    }
+  ]
+}

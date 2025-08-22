@@ -14,7 +14,7 @@ public class KingUnit : Unit
     {
         if (_data == null)
             _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
-        _currentHp = _data.HP;
+        _currentHp = _data.UnitState.HP;
         _isDie = false;
     }
 

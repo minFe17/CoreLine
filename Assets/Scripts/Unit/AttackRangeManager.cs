@@ -17,7 +17,7 @@ public class AttackRangeManager
             _attackRange = MonoSingleton<ObjectPoolManager>.Instance.Pull(EPrefabType.AttackRange);
 
         _attackRange.transform.position = unit.transform.position;
-        float size = unit.Data.AttackRange * _attctRangeDiameter;
+        float size = unit.Data.UnitState.AttackRange * _attctRangeDiameter;
         _attackRange.transform.localScale = new Vector2(size, size);
 
         _targetUnit = unit;
