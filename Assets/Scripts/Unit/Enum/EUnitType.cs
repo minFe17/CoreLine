@@ -10,5 +10,10 @@ public enum EUnitType
     Assassin,
     Dwarf,
     Hammer,
+    Gunner,
+    Hunter,
+    FireWizard,
+    ThunderWizard,
+    Priest,
     Max,
 }

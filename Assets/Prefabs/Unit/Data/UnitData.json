@@ -288,6 +288,166 @@
           }
         }
       ]
+    },
+    {
+      "_unitType": "Gunner",
+      "_levelData": [
+        {
+          "_cost": 120,
+          "_unitState": {
+            "_hp": 70,
+            "_attackDamage": 15,
+            "_attackSpeed": 2.0,
+            "_attackRange": 3.0
+          }
+        },
+        {
+          "_cost": 60,
+          "_unitState": {
+            "_hp": 80,
+            "_attackDamage": 15,
+            "_attackSpeed": 1.7,
+            "_attackRange": 3.3
+          }
+        },
+        {
+          "_cost": 60,
+          "_unitState": {
+            "_hp": 95,
+            "_attackDamage": 20,
+            "_attackSpeed": 1.5,
+            "_attackRange": 3.5
+          }
+        }
+      ]
+    },
+    {
+      "_unitType": "Hunter",
+      "_levelData": [
+        {
+          "_cost": 120,
+          "_unitState": {
+            "_hp": 75,
+            "_attackDamage": 25,
+            "_attackSpeed": 2.5,
+            "_attackRange": 3.3
+          }
+        },
+        {
+          "_cost": 60,
+          "_unitState": {
+            "_hp": 80,
+            "_attackDamage": 30,
+            "_attackSpeed": 2.5,
+            "_attackRange": 3.5
+          }
+        },
+        {
+          "_cost": 60,
+          "_unitState": {
+            "_hp": 90,
+            "_attackDamage": 40,
+            "_attackSpeed": 2.3,
+            "_attackRange": 4.0
+          }
+        }
+      ]
+    },
+    {
+      "_unitType": "FireWizard",
+      "_levelData": [
+        {
+          "_cost": 130,
+          "_unitState": {
+            "_hp": 70,
+            "_attackDamage": 25,
+            "_attackSpeed": 3.5,
+            "_attackRange": 3.3
+          }
+        },
+        {
+          "_cost": 70,
+          "_unitState": {
+            "_hp": 80,
+            "_attackDamage": 35,
+            "_attackSpeed": 3.5,
+            "_attackRange": 3.5
+          }
+        },
+        {
+          "_cost": 70,
+          "_unitState": {
+            "_hp": 95,
+            "_attackDamage": 50,
+            "_attackSpeed": 3.2,
+            "_attackRange": 4.0
+          }
+        }
+      ]
+    },
+    {
+      "_unitType": "ThunderWizard",
+      "_levelData": [
+        {
+          "_cost": 140,
+          "_unitState": {
+            "_hp": 70,
+            "_attackDamage": 15,
+            "_attackSpeed": 3.0,
+            "_attackRange": 2.7
+          }
+        },
+        {
+          "_cost": 75,
+          "_unitState": {
+            "_hp": 80,
+            "_attackDamage": 20,
+            "_attackSpeed": 2.7,
+            "_attackRange": 3.0
+          }
+        },
+        {
+          "_cost": 75,
+          "_unitState": {
+            "_hp": 95,
+            "_attackDamage": 30,
+            "_attackSpeed": 2.5,
+            "_attackRange": 3.5
+          }
+        }
+      ]
+    },
+    {
+      "_unitType": "Priest",
+      "_levelData": [
+        {
+          "_cost": 140,
+          "_unitState": {
+            "_hp": 50,
+            "_attackDamage": 20,
+            "_attackSpeed": 3.3,
+            "_attackRange": 2.5
+          }
+        },
+        {
+          "_cost": 75,
+          "_unitState": {
+            "_hp": 60,
+            "_attackDamage": 30,
+            "_attackSpeed": 3.0,
+            "_attackRange": 2.7
+          }
+        },
+        {
+          "_cost": 75,
+          "_unitState": {
+            "_hp": 70,
+            "_attackDamage": 45,
+            "_attackSpeed": 2.7,
+            "_attackRange": 3.0
+          }
+        }
+      ]
     }
   ]
 }
