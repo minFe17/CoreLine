@@ -2,12 +2,72 @@
   "_fusionDataList": [
     {
       "_fusionUnitType": "Outlaw",
-      "_materialUnit": ["Warrior", "Pirate"],
+      "_materialUnit": [ "Warrior", "Pirate" ],
       "_fusionUnitState": {
         "_hp": 120,
         "_attackDamage": 35,
+        "_attackSpeed": 2.0,
+        "_attackRange": 3.5
+      }
+    },
+    {
+      "_fusionUnitType": "Thor",
+      "_materialUnit": [ "Hammer", "ThunderWizard" ],
+      "_fusionUnitState": {
+        "_hp": 140,
+        "_attackDamage": 20,
+        "_attackSpeed": 2.5,
+        "_attackRange": 3.0
+      }
+    },
+    {
+      "_fusionUnitType": "ShieldLauncher",
+      "_materialUnit": [ "ShieldSoldier", "Dwarf" ],
+      "_fusionUnitState": {
+        "_hp": 150,
+        "_attackDamage": 25,
+        "_attackSpeed": 2.3,
+        "_attackRange": 3.0
+      }
+    },
+    {
+      "_fusionUnitType": "Ninja",
+      "_materialUnit": [ "Assassin", "Hunter" ],
+      "_fusionUnitState": {
+        "_hp": 110,
+        "_attackDamage": 20,
+        "_attackSpeed": 2.0,
+        "_attackRange": 3.3
+      }
+    },
+    {
+      "_fusionUnitType": "BulletStriker",
+      "_materialUnit": [ "Wizard", "Gunner" ],
+      "_fusionUnitState": {
+        "_hp": 100,
+        "_attackDamage": 10,
         "_attackSpeed": 1.5,
         "_attackRange": 3.5
+      }
+    },
+    {
+      "_fusionUnitType": "Cleric",
+      "_materialUnit": [ "Chef", "Priest" ],
+      "_fusionUnitState": {
+        "_hp": 110,
+        "_attackDamage": 20,
+        "_attackSpeed": 3.0,
+        "_attackRange": 3.5
+      }
+    },
+    {
+      "_fusionUnitType": "Flamecaster",
+      "_materialUnit": [ "Archer", "FireWizard" ],
+      "_fusionUnitState": {
+        "_hp": 120,
+        "_attackDamage": 20,
+        "_attackSpeed": 2.5,
+        "_attackRange": 3.0
       }
     }
   ]
