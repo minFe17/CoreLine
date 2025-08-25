@@ -70,7 +70,7 @@ public class UnitManager : SimpleSingleton<UnitManager>
             Debug.Log("유닛못찾음 오류");
             return;
         }
-        
+        Debug.Log(findUnit.UnitType);
         switch (type)
         {
             case UpgradeType.AttackDamage:

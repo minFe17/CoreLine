@@ -1165,7 +1165,6 @@ SpriteAtlas:
     - 53baa4dfc10c6084ba66891331f8e8d4: 21300000
     - cbffc9dfbf2cb244a9e04fed9accc7dd: 21300000
     - 5bde9edf5305a944a94229d28882338c: 21300000
-    - 09c4d1ef60bc3f64eb8a6fe0d5b8cc98: 21300000
     - 3467d2ef92b2b6246a26b193b0d0eb5d: 21300000
     - 441ae2ef606a55b49aa7a4a077641341: 21300000
     - 951903ef9bdbd5043b6ed51d60321ee9: 21300000
@@ -2296,7 +2295,6 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 53baa4dfc10c6084ba66891331f8e8d4, type: 3}
   - {fileID: 21300000, guid: cbffc9dfbf2cb244a9e04fed9accc7dd, type: 3}
   - {fileID: 21300000, guid: 5bde9edf5305a944a94229d28882338c, type: 3}
-  - {fileID: 21300000, guid: 09c4d1ef60bc3f64eb8a6fe0d5b8cc98, type: 3}
   - {fileID: 21300000, guid: 3467d2ef92b2b6246a26b193b0d0eb5d, type: 3}
   - {fileID: 21300000, guid: 441ae2ef606a55b49aa7a4a077641341, type: 3}
   - {fileID: 21300000, guid: 951903ef9bdbd5043b6ed51d60321ee9, type: 3}
@@ -3426,7 +3424,6 @@ SpriteAtlas:
   - Type11
   - Skull
   - ThiefClothes
-  - MoneyPouchD
   - PeacekeeperDagger
   - Raspberry
   - ChampionArmor
