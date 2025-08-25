@@ -175,5 +175,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 0}
-  _moveSpeed: 3
+  _moveSpeed: 2
   _arriveEps: 0.02
+  _attackRangeCell: 1
+  _useDiag: 0
+  _attackCooldown: 1

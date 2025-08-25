@@ -486,6 +486,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81ea1304c01e76b4a82524b21bf5362e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _arrowSprite: {fileID: -765150924802650856, guid: a91e52f03bb45a342a35e980890a8856, type: 3}
+  _arrowSize: {x: 1, y: 0.5}
+  _runnerCount: 29
+  _runnerSpeed: 2
+  _runnerSpacing: 1.96
+  _runnerSortingOrder: 4
+  _minScale: 2
+  _margin: 1
 --- !u!120 &447625286
 LineRenderer:
   serializedVersion: 2
@@ -785,6 +793,22 @@ PrefabInstance:
       propertyPath: m_Tiles.Array.data[0].second.m_TileSpriteIndex
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 3179137305241539538, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4996430421985213543, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5010957903686770150, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6200733362662555204, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6839693625336603306, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.06
@@ -832,6 +856,14 @@ PrefabInstance:
     - target: {fileID: 6839693625336603306, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7392881734071944182, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7682042502598484081, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8145642074313702623, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
       propertyPath: m_Name
@@ -1238,8 +1270,8 @@ MonoBehaviour:
   _renderer: {fileID: 447625285}
   _spawnX: 0
   _spawnY: 0
-  _goalX: 14
-  _goalY: 4
+  _goalX: 20
+  _goalY: 9
 --- !u!4 &2125745507
 Transform:
   m_ObjectHideFlags: 0
