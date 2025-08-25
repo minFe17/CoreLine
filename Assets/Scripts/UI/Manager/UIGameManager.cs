@@ -3,18 +3,19 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 
-public class UIGameManager : MonoSingleton<GameManager>
+public class UIGameManager : MonoSingleton<UIGameManager>
 {
 
     private void Awake()
     {
         DataManager.Instance.LoadData();
-        UnitManager.Instance.SettingData();
     }
     private void Start()
     {
         //UIManager.Instance.AddPanelStack(PanelStatus.SettingPanel);
-        UIManager.Instance.AddPanelStack(PanelStatus.LobyPanel);
+        //UIManager.Instance.AddPanelStack(PanelStatus.LobyPanel);
+        //UIManager.Instance.AddPanelStack(PanelStatus.InventoryPanel);
+        UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
     }
 
 }

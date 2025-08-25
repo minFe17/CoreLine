@@ -1,8 +1,14 @@
 using UnityEngine;
 using Utils;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
+[JsonConverter(typeof(StringEnumConverter))]
+public enum UpgradeType
+{
+    AttackDamage, AttackRange, HealthPoint
+}
 public class DataManager : SimpleSingleton<DataManager>
 {
     private List<InventoryData> _inventoryDatas;
@@ -12,19 +18,19 @@ public class DataManager : SimpleSingleton<DataManager>
 
     public List<InventoryData> InventoryDatas
     {
-        get {return _inventoryDatas;}
+        get { return _inventoryDatas; }
     }
-    public List<LaboratoryData > LaboratoryDatas
+    public List<LaboratoryData> LaboratoryDatas
     {
-        get {return _laboratoryDatas;}
+        get { return _laboratoryDatas; }
     }
     public List<UpgradeData> UpgradeDatas
     {
-        get {return _upgradeDatas;}
+        get { return _upgradeDatas; }
     }
     public GameData GameData
     {
-        get {return _gameData;}
+        get { return _gameData; }
     }
 
     public void LoadData()
@@ -33,6 +39,7 @@ public class DataManager : SimpleSingleton<DataManager>
         LoadLaboratoryDatas();
         LoadUpgradeDatas();
         LoadUpgradeData();
+
     }
 
     public void SaveData()
@@ -42,24 +49,21 @@ public class DataManager : SimpleSingleton<DataManager>
     private void LoadInventoryDatas()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/InventoryData");
-        InventoryData[] array = JsonHelper.FromJson<InventoryData>(jsonFile.text);
-        _inventoryDatas = new List<InventoryData>(array);
+        _inventoryDatas = JsonConvert.DeserializeObject<List<InventoryData>>(jsonFile.text);
     }
     private void LoadLaboratoryDatas()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/LaboratoryData");
-        LaboratoryData[] array = JsonHelper.FromJson<LaboratoryData>(jsonFile.text);
-        _laboratoryDatas = new List<LaboratoryData>(array);
+        _laboratoryDatas = JsonConvert.DeserializeObject<List<LaboratoryData>>(jsonFile.text);
     }
     private void LoadUpgradeDatas()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/UpgradeData");
-        UpgradeData[] array = JsonHelper.FromJson<UpgradeData>(jsonFile.text);
-        _upgradeDatas = new List<UpgradeData>(array);
+        _upgradeDatas = JsonConvert.DeserializeObject<List<UpgradeData>>(jsonFile.text);
     }
     private void LoadUpgradeData()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/GameData");
-        _gameData = JsonUtility.FromJson<GameData>(jsonFile.text);
+        _gameData = JsonConvert.DeserializeObject<GameData>(jsonFile.text);
     }
 }

@@ -4,20 +4,18 @@ using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InventoryUnitButton : BaseButton
+public class InventoryUnitButton : UnitButton
 {
-    private Image _unitImage;
     private Image _buyImage;
-    private InventoryData _data;
-    
-    public InventoryData Data
+
+
+    public override InventoryData Data
     {
         get { return _data; }
-        set 
-        { 
-            _data = value;
+        set
+        {
+            base.Data = value;
             SettingBuyImage();
-            SettingUnitImage();
         }
     }
 
@@ -26,15 +24,16 @@ public class InventoryUnitButton : BaseButton
         base.Awake();
         Transform trans = transform.Find("BuyImage");
         _buyImage = trans.GetComponent<Image>();
-        trans = transform.Find("UnitImage");
-        _unitImage = trans.GetComponent<Image>();
+    }
+    private void Start()
+    {
+        EventManager.Instance.Subscribe("SettingBuyUnit", SettingBuyImage); 
+        //이거 좀 비효율적인것같은데 고민한번 해보자
+        
     }
     protected override void OnClick()
     {
-        print(_data.UnitType);
-        UnitManager.Instance.ChoiceUnit = _data;
-        print(UnitManager.Instance.ChoiceUnit.UnitType);
-        EventManager.Instance.Invoke<string>("ChangeUnit", _data.UnitType);
+        EventManager.Instance.Invoke<EUnitType>("ChangeUnit", _data.UnitType);
     }
     private void SettingBuyImage()
     {
@@ -42,24 +41,11 @@ public class InventoryUnitButton : BaseButton
 
         foreach (UnlockedUnit unit in data.UnlockedUnit)
         {
-            if (unit.Type == _data.UnitType)
+            if (unit.UnitType == _data.UnitType)
             {
                 _buyImage.gameObject.SetActive(false);
+                return;
             }
-        }
-    }
-    private void SettingUnitImage()
-    {
-        string path = "UI/Image/Unit/" + _data.UnitType + "/Level1Front";
-        string spriteName = "Level1Front_0";
-
-        // 모든 잘린 Sprite들을 배열로 불러온다
-        Sprite[] sprites = Resources.LoadAll<Sprite>(path);
-        Sprite targetSprite = sprites.FirstOrDefault(s => s.name == spriteName);
-        print(path);
-        if (targetSprite != null)
-        {
-            _unitImage.sprite = targetSprite;
         }
     }
 }

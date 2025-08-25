@@ -25,7 +25,7 @@ public class SettingUnitButton : BaseButton //UnitButton으로 빼서 상속해서 쓰기
     }
     protected override void OnClick()
     {
-        EventManager.Instance.Invoke<string>("ChangeUnit", _data.UnitType);
+        EventManager.Instance.Invoke<EUnitType>("ChangeUnit", _data.UnitType);
     }
     private void SettingImage()
     {

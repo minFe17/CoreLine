@@ -4,7 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public struct UpgradeData
 {
-    public string UpgradeType;
+    public UpgradeType UpgradeType;
     public float BaseMultiplier;
     public float MaxMultiplier;
     public int BaseLevel;

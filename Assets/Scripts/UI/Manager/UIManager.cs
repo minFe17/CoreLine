@@ -34,6 +34,7 @@ public class UIManager : SimpleSingleton<UIManager>
     }
     public void CloseFrontPanel()
     {
+        EventManager.Instance.Invoke("Reset");
         _panelStack.Pop().SwitchOffPanel();
         if (_panelStack.Count == 0) return;
         _panelStack.Peek().SwitchOnPanel();

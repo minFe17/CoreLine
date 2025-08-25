@@ -8,8 +8,8 @@ public class ShowUnitController: MonoBehaviour
     private void Awake()
     {
         FindAndGetComponent();
-        EventManager.Instance.Subscribe<string>("ChangeUnit", ChangeAnimation);
-        EventManager.Instance.Subscribe<string>("ChangeUnit", ChangeText);
+        EventManager.Instance.Subscribe<EUnitType>("ChangeUnit", ChangeAnimation);
+        EventManager.Instance.Subscribe<EUnitType>("ChangeUnit", ChangeText);
     }
 
     private void FindAndGetComponent()
@@ -22,31 +22,32 @@ public class ShowUnitController: MonoBehaviour
             _text = trans.GetComponent<TextMeshProUGUI>();
         }
     }
-    private void ChangeText(string param)
+    private void ChangeText(EUnitType param)
     {
         if (_text == null) return;
         InventoryData data = UnitManager.Instance.GetInventoryData(param);
         _text.text = data.Information;
     }
-    private void ChangeAnimation(string param)
+    private void ChangeAnimation(EUnitType param)
     {
+        EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", param);
         _animator.SetInteger("Unit", MatchingUnit(param));
     }
-    private int MatchingUnit (string param)
+    private int MatchingUnit (EUnitType param)
     {
         switch (param)
         {
-            case "King":
+            case EUnitType.King:
                 return 0;
-            case "Wizard":
+            case EUnitType.Wizard:
                 return 1;
-            case "Pirate":
+            case EUnitType.Pirate:
                 return 2;
-            case "Warrior":
+            case EUnitType.Warrior:
                 return 3;
-            case "Chef":
+            case EUnitType.Chef:
                 return 4;
-            case "Archer":
+            case EUnitType.Archer:
                 return 5;
 
         }

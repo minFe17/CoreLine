@@ -67,6 +67,10 @@ public class EventManager : SimpleSingleton<EventManager>
                 callBack.Invoke();
             }
         }
+        else
+        {
+            Debug.Log(key + "오류발생");
+        }
     }
     public void Invoke<T>(string key, T param)
     {
@@ -77,6 +81,10 @@ public class EventManager : SimpleSingleton<EventManager>
                 callBack.Invoke(param);
             }
         }
+        else
+        {
+            Debug.Log(key + "오류발생");
+        }
     }
     public void Invoke<T1,T2>(string key, T1 param1, T2 param2)
     {
@@ -86,6 +94,10 @@ public class EventManager : SimpleSingleton<EventManager>
             {
                 callBack.Invoke(param1, param2);
             }
+        }
+        else
+        {
+            Debug.Log(key + "오류발생");
         }
     }
 

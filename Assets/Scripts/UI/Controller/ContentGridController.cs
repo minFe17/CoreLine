@@ -1,26 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ContentGridController : MonoBehaviour
+public class ContentGridController : GridController
 {
-    private GridLayoutGroup _layoutGroup;
     private RectTransform _content;
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _layoutGroup = GetComponent<GridLayoutGroup>();
     }
-    private void Start()
+    protected override void Start()
     {
         _content = GameObject.Find("Scroll View").GetComponent<RectTransform>();
         SetRectSize();
     }
-    private void SetRectSize()
+    protected override void SetRectSize()
     {
         float width = _content.rect.width;
-        int columns = 4;
         int spacing = 15;
 
-        float cellSize = (width - (spacing * columns)) / columns;
+        float cellSize = (width - (spacing * _columns)) / _columns;
 
         _layoutGroup.cellSize = new Vector2(cellSize, cellSize);
     }

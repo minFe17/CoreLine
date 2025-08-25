@@ -11,7 +11,7 @@ public class GameData
 [System.Serializable]
 public class UnlockedUnit
 {
-    public string Type; //이거 enum으로 매칭해줘야됨
+    public EUnitType UnitType; //이거 enum으로 매칭해줘야됨
     public int AttackDatamageLevel;
     public int HealthPointLevel;
     public int AttackRangeLevel;

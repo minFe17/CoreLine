@@ -4,7 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public struct InventoryData
 {
-    public string UnitType;
+    public EUnitType UnitType;
     public int UnlockPrice;
     public string Information;
 }
