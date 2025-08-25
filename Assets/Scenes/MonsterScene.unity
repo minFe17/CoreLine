@@ -1239,7 +1239,7 @@ MonoBehaviour:
   _spawnX: 0
   _spawnY: 0
   _goalX: 14
-  _goalY: 6
+  _goalY: 4
 --- !u!4 &2125745507
 Transform:
   m_ObjectHideFlags: 0

@@ -27,6 +27,7 @@ public class MonsterMover : MonoBehaviour
     private bool _hasDestination;
     private Coroutine _moveCo;
     private Monster _monster;
+    private bool _allowDestructible = false;
 
     private void Start()
     {
@@ -74,18 +75,27 @@ public class MonsterMover : MonoBehaviour
         MoveToCell(dst);
     }
 
-    public void MoveToCell(Vector2Int dst)
+    public void MoveToCell(Vector2Int dst, bool allowDestructible = false)
     {
         _attackTimer = 0;
 
         _dstCell = dst;
+        _allowDestructible = allowDestructible;
         _hasDestination = true;
 
+        //List<Vector2Int> path = AStarPathfinder.FindPath(
+        //    _map.Height, _map.Width,
+        //    (r, c) => _map.IsWalkable(r, c),
+        //    Cell, _dstCell
+        //);
+
         List<Vector2Int> path = AStarPathfinder.FindPath(
-            _map.Height, _map.Width,
-            (r, c) => _map.IsWalkable(r, c),
-            Cell, _dstCell
-        );
+        _map.Height, _map.Width,
+        (r, c) => _allowDestructible
+                  ? (_map.IsWalkable(r, c) || _map.IsDestructible(r, c))
+                  : _map.IsWalkable(r, c),
+        Cell, _dstCell
+    );
 
         if (path == null || path.Count <= 1)
         {
@@ -116,13 +126,26 @@ public class MonsterMover : MonoBehaviour
             }
 
             Vector2Int step = path[i];
-            if (_hasDestination && !_map.IsWalkable(step.x, step.y))
+
+            if (_allowDestructible && _map.IsDestructible(step.x, step.y))
+            {
+                if (_monster != null && _monster.IsAttackReady()) 
+                    _monster.FireAttackTrigger();
+
+                yield return new WaitUntil(() => _monster != null && _monster.IsAttackReady());
+                _map.SetDestructible(step.x, step.y, false);
+                i--;
+                continue;
+            }
+
+            if (_hasDestination && !IsPassable(step.x, step.y))
             {
                 List<Vector2Int> newPath = AStarPathfinder.FindPath(
                     _map.Height, _map.Width,
-                    (r, c) => _map.IsWalkable(r, c),
+                    (r, c) => IsPassable(r, c), 
                     Cell, _dstCell
                 );
+
 
                 if (newPath != null && newPath.Count > 1)
                 {
@@ -142,7 +165,7 @@ public class MonsterMover : MonoBehaviour
             Vector3 target = _map.CellToWorld(step.x, step.y);
             while ((transform.position - target).sqrMagnitude > _arriveEps * _arriveEps)
             {
-                if (_hasDestination && !_map.IsWalkable(step.x, step.y))
+                if (_hasDestination && !IsPassable(step.x, step.y))
                     break;
 
                 Vector3 prev = transform.position;
@@ -194,5 +217,12 @@ public class MonsterMover : MonoBehaviour
         int dr = Mathf.Abs(Cell.x - goal.x);
         int dc = Mathf.Abs(Cell.y - goal.y);
         return _useDiag ? (Mathf.Max(dr, dc) <= _attackRangeCell): ((dr + dc) <= _attackRangeCell);
+    }
+
+    private bool IsPassable(int r, int c)
+    {
+        return _allowDestructible
+            ? (_map.IsWalkable(r, c) || _map.IsDestructible(r, c))
+            : _map.IsWalkable(r, c);
     }
 }

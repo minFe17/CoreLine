@@ -18,6 +18,9 @@ public class RouteManager : MonoBehaviour
 
     private List<Vector2Int> _lastPath;
 
+    private bool _allowDestructibleForRoute = false;
+    public bool AllowDestructibleForRoute => _allowDestructibleForRoute;
+
     private void Awake()
     {
         if (!_map) _map = FindAnyObjectByType<TestMap>();
@@ -54,6 +57,19 @@ public class RouteManager : MonoBehaviour
             (r, c) => _map.IsWalkable(r, c),
             SpawnCell, GoalCell
         );
+
+        //----------------------------test----------------------------------
+        _allowDestructibleForRoute = false;
+        if (path == null || path.Count == 0)
+        {
+            path = AStarPathfinder.FindPath(
+                _map.Height, _map.Width,
+                (r, c) => _map.IsWalkable(r, c) || _map.IsDestructible(r, c),
+                SpawnCell, GoalCell
+            );
+            _allowDestructibleForRoute = (path != null && path.Count > 0);
+        }
+        //-------------------------------------------------------------------
 
         if (path == null || path.Count == 0)
         {

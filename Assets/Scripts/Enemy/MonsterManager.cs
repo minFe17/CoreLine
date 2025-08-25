@@ -63,10 +63,12 @@ public class MonsterManager : MonoBehaviour
     public void SendAllToGoal()
     {
         if (!_route) return;
+        bool allowDestructible = _route.AllowDestructibleForRoute;
+
         foreach (MonsterMover m in _monsters)
         {
             if (!m) continue;
-            m.MoveToCell(_route.GoalCell); 
+            m.MoveToCell(_route.GoalCell, allowDestructible); 
         }
     }
 
