@@ -40,9 +40,45 @@ public class FusionManager : MonoBehaviour
                 continue;
 
             foreach (TowerUnit unit in units)
-                unit.SetFusionLayer("FusionUnit");
+                unit.SetFusionLayer(layerName);
         }
-        _baseUnit.SetFusionLayer("FusionUnit");
+        _baseUnit.SetFusionLayer(layerName);
+    }
+
+    FusionData GetFusionData(TowerUnit unitA, TowerUnit unitB)
+    {
+        IReadOnlyList<FusionData> dataList = SimpleSingleton<FusionDataList>.Instance.DataList;
+
+        return dataList.FirstOrDefault(fusion =>
+            fusion.MaterialUnit.Contains(unitA.UnitType) &&
+            fusion.MaterialUnit.Contains(unitB.UnitType) &&
+            unitA.UnitType != unitB.UnitType);
+    }
+
+    void HandleFailedFusion(TowerUnit unit)
+    {
+        ApplyFusionLayer("Default");
+        FindFusionUnits(unit);
+    }
+
+    void CreateFusedUnit(FusionData fusionData, Vector3 position)
+    {
+        GameObject fusedObj = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType);
+        fusedObj.transform.position = position;
+    }
+
+    void ReturnUnitsToPool(TowerUnit unitA, TowerUnit unitB)
+    {
+        _fusionableUnit[unitA.UnitType].Remove(unitA);
+        _fusionableUnit[unitB.UnitType].Remove(unitB);
+
+        MonoSingleton<ObjectPoolManager>.Instance.Push(unitA.UnitType, unitA.gameObject);
+        MonoSingleton<ObjectPoolManager>.Instance.Push(unitB.UnitType, unitB.gameObject);
+    }
+
+    void NotifyFusion(bool value)
+    {
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.Fusion, value);
     }
 
     public void AddFusionableUnit(EUnitType key, TowerUnit value)
@@ -68,7 +104,7 @@ public class FusionManager : MonoBehaviour
 
         _baseUnit = unit;
         ApplyFusionLayer("FusionUnit");
-        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.Fusion, true);
+        NotifyFusion(true);
     }
 
     public void Fusion(TowerUnit unit)
@@ -78,30 +114,24 @@ public class FusionManager : MonoBehaviour
             FindFusionUnits(unit);
             return;
         }
+
         if (_baseUnit == unit)
             return;
 
-        FusionDataList data = SimpleSingleton<FusionDataList>.Instance;
-
-        FusionData fusionData = data.DataList.FirstOrDefault(fusion => fusion.MaterialUnit.Contains(unit.UnitType) && fusion.MaterialUnit.Contains(_baseUnit.UnitType) 
-                                              && unit.UnitType != _baseUnit.UnitType);
-
+        FusionData fusionData = GetFusionData(_baseUnit, unit);
 
         if (fusionData == null)
         {
-            ApplyFusionLayer("Default");
-            FindFusionUnits(unit);
+            HandleFailedFusion(unit);
             return;
         }
 
-        GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType);
-        temp.transform.position = _baseUnit.transform.position;
+        CreateFusedUnit(fusionData, _baseUnit.transform.position);
+        ReturnUnitsToPool(_baseUnit, unit);
 
-        Debug.Log(1);
-        MonoSingleton<ObjectPoolManager>.Instance.Push(_baseUnit.UnitType, _baseUnit.gameObject);
-        MonoSingleton<ObjectPoolManager>.Instance.Push(unit.UnitType, unit.gameObject);
+        ApplyFusionLayer("Default");
         _baseUnit = null;
 
-        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.Fusion, false);
+        NotifyFusion(false);
     }
 }
