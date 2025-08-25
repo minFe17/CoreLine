@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3fa8f05120a72dd428763126a8fbb9aa
+    m_Address: Thor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 42b49fec36f3fcc4f9523b6641a230b2
     m_Address: Gunner
     m_ReadOnly: 0
@@ -45,6 +50,26 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92c46c4e3549f174f9a9e1d47592581f
+    m_Address: Ninja
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a293db954ebd768498b70a9cc989af04
+    m_Address: Cleric
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a2d115028044c2b4998dbb3229150674
+    m_Address: Flamecaster
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a94516b7c4054c14594f080e1a6500cc
+    m_Address: Outlaw
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ac9c950328f31fe47a8902375bdcb497
     m_Address: AttackRange
     m_ReadOnly: 0
@@ -52,6 +77,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b6efaa0d00c0ea04b814186e430f12f4
     m_Address: Hunter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd2525f4dd71b9d449e1df894370205f
+    m_Address: ShieldLauncher
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -67,6 +97,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c971ba3489289fb41aefd67a35a2c428
     m_Address: Warrior
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d34ceb5d29c7f4c4f9fa381c75ec21c1
+    m_Address: BulletStriker
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

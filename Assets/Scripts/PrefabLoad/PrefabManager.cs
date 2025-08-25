@@ -11,7 +11,8 @@ public class PrefabManager : MonoBehaviour
         _prefabDict = new Dictionary<EPrefabType, PrefabLoadBase>
         {
             {EPrefabType.AttackRange, new AttackRangePrefabLoad() },
-            {EPrefabType.Unit, new UnitPrefabLoad() }
+            {EPrefabType.Unit, new UnitPrefabLoad() },
+            {EPrefabType.FusionUnit, new FusionUnitPrefabLoad() },
         };
     }
 

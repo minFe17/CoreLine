@@ -5,6 +5,7 @@ using Utils;
 
 public class TowerUnit : Unit
 {
+
     [SerializeField] protected EUnitType _unitType;
     [SerializeField] List<GameObject> _levelUnit;
 
@@ -71,11 +72,11 @@ public class TowerUnit : Unit
         return _levelUnit[_level];
     }
 
-    public void SetFusionLayer()
+    public void SetFusionLayer(string layerName)
     {
         _originalLayer = gameObject.layer;
 
-        int fusionLayer = LayerMask.NameToLayer("FusionUnit");
+        int fusionLayer = LayerMask.NameToLayer(layerName);
         SetLayerRecursively(_levelUnit[_level], fusionLayer);
     }
 
@@ -101,6 +102,6 @@ public class TowerUnit : Unit
     public void Fusion()
     {
         // 퓨전 가능한 유닛 누르면 지금 유닛이랑 그 유닛 없애고 이 위치에 퓨전 유닛 소환
-        SimpleSingleton<FusionManager>.Instance.FindFusionUnits(this);
+        SimpleSingleton<FusionManager>.Instance.Fusion(this);
     }
 }

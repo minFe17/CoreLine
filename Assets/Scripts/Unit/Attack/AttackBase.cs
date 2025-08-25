@@ -27,7 +27,7 @@ public abstract class AttackBase : MonoBehaviour
         if(_unit.Data.UnitState.AttackSpeed <= _attackTimer)
         {
             _attackTimer = 0;
-            _unit.Animator.SetTrigger("doAttack");
+            PlayAttackAnimation();
         }
     }
 
@@ -35,5 +35,10 @@ public abstract class AttackBase : MonoBehaviour
     {
         AttackEvent temp = _unit.GetCurrentUnit().AddComponent<AttackEvent>();
         temp.Init(this);
+    }
+
+    protected virtual void PlayAttackAnimation()
+    {
+        _unit.Animator.SetTrigger("doAttack");
     }
 }
