@@ -18,7 +18,7 @@
     RGBA = float4(Color.rgb, Color.a * outlineFactor);
 
     //[branch]
-    //if(count > 0.0f && count < 9)
+    //if (count > 0.0f && count < 9)
     //{
     //    RGBA = Color;
     //}
