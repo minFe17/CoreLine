@@ -197,7 +197,7 @@ public class MapManager : MonoBehaviour
         return new NavInfo(cell, blocked, byTower, byWall);
     }
     public NavInfo GetNavInfoWorld(Vector3 worldPos) => GetNavInfo(WorldToCell(worldPos));
-    //몬스터 스폰 타일 Get용
+
     //public List<Vector3Int> GetSpawnCells()
     //{
     //    var list = new List<Vector3Int>();
@@ -313,47 +313,6 @@ public class MapManager : MonoBehaviour
         return null;
     }
 
-    //private void SetupCollisionLayers()
-    //{
-    //    // Buildable: 충돌 X
-    //    DisableCollider(_tmBuildable);
-    //
-    //    // Wall/Destructible: 충돌 O
-    //    SetupCollider(_tmWall, CompositeCollider2D.GeometryType.Outlines);
-    //    SetupCollider(_tmDestructible, CompositeCollider2D.GeometryType.Outlines);
-    //
-    //    // Deco, UnBuildable: 충돌 X (필요 시 UnBuildable에 충돌 켜도 됨)
-    //    DisableCollider(_tmDeco);
-    //    DisableCollider(_tmUnbuildable);
-    //}
-    //
-    //private void DisableCollider(Tilemap tilemap)
-    //{
-    //    if (!tilemap) return;
-    //    TilemapCollider2D collider = tilemap.GetComponent<TilemapCollider2D>();
-    //    if (collider) collider.enabled = false;
-    //    Rigidbody2D rigid = tilemap.GetComponent<Rigidbody2D>();
-    //    if (rigid) rigid.simulated = false;
-    //    CompositeCollider2D composite = tilemap.GetComponent<CompositeCollider2D>();
-    //    if (composite) composite.enabled = false;
-    //}
-    //
-    //private void SetupCollider(Tilemap tilemap, CompositeCollider2D.GeometryType geoType)
-    //{
-    //    if (!tilemap) return;
-    //
-    //    TilemapCollider2D tileCol = tilemap.GetComponent<TilemapCollider2D>() ?? tilemap.gameObject.AddComponent<TilemapCollider2D>();
-    //    tileCol.isTrigger = false;
-    //    tileCol.usedByComposite = true;
-    //
-    //    CompositeCollider2D composite = tilemap.GetComponent<CompositeCollider2D>() ?? tilemap.gameObject.AddComponent<CompositeCollider2D>();
-    //    composite.geometryType = geoType;
-    //    composite.generationType = CompositeCollider2D.GenerationType.Synchronous;
-    //
-    //    Rigidbody2D rigid = tilemap.GetComponent<Rigidbody2D>() ?? tilemap.gameObject.AddComponent<Rigidbody2D>();
-    //    rigid.bodyType = RigidbodyType2D.Static;
-    //}
-    //
     private void WireDestructibleController()
     {
         if (_tmDestructible == null) return;
