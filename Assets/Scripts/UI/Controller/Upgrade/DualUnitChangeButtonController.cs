@@ -16,4 +16,10 @@ public class DualUnitChangeButtonController : DualButtonController<UnlockedUnit>
     {
         _list = UnitManager.Instance.UnlockedUnits;
     }
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        
+
+    }
 }

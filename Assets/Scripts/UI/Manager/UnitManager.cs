@@ -55,12 +55,11 @@ public class UnitManager : SimpleSingleton<UnitManager>
 
     public bool IsGetUnit(EUnitType type)
     {
-        foreach (UnlockedUnit unit in _unlockedUnits)
-        {
-            if (unit.UnitType == type)
-                return true;
-        }
-        return false;
+        return _unlockedUnits.FindIndex(unit => unit.UnitType == type) >=0;
+    }
+    public int GetChoiceUnitIndex()
+    {
+        return _unlockedUnits.FindIndex(unit => unit.UnitType == ChoiceUnit.UnitType);
     }
     private void UpgradeUnit(UpgradeType type)
     {

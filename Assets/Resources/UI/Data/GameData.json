@@ -2,12 +2,6 @@
     "UnlockedUnit" : 
     [
         {
-            "UnitType":"King",
-            "AttackDamageLevel" :0,
-            "HealthPointLevel":0,
-            "AttackRangeLevel":0 
-        },
-        {
             "UnitType":"Warrior",
             "AttackDamageLevel" :0,
             "HealthPointLevel":0,

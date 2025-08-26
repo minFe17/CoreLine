@@ -31,7 +31,7 @@ public abstract class DualButtonController<T> : MonoBehaviour
     {
         SettingList();
     }
-    protected void OnEnable()
+    protected virtual void OnEnable()
     {
         _index = 0;
         ChangeButtonStatus();

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class InventoryUnitButton : UnitButton
 {
     private Image _buyImage;
+    private TextMeshProUGUI _buyText;
 
 
     public override InventoryData Data
@@ -24,11 +25,10 @@ public class InventoryUnitButton : UnitButton
         base.Awake();
         Transform trans = transform.Find("BuyImage");
         _buyImage = trans.GetComponent<Image>();
+        _buyText = trans.GetComponentInChildren<TextMeshProUGUI>();
     }
     private void Start()
     {
-        EventManager.Instance.Subscribe("SettingBuyUnit", SettingBuyImage); 
-        //이거 좀 비효율적인것같은데 고민한번 해보자
         
     }
     protected override void OnClick()
@@ -43,7 +43,9 @@ public class InventoryUnitButton : UnitButton
         {
             if (unit.UnitType == _data.UnitType)
             {
-                _buyImage.gameObject.SetActive(false);
+                _buyImage.color = Color.green;
+                _buyText.text = Data.UnitType.ToString();
+                
                 return;
             }
         }
