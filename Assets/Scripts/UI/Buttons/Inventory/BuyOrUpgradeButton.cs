@@ -27,6 +27,7 @@ public class BuyOrUpgradeButton : BaseButton
     private void UpgradeUnit()
     {
         //강화 패널로 넘어가기
+        UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
         print("강화");
     }
 

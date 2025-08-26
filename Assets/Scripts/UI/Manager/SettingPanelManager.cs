@@ -10,6 +10,12 @@ public class SettingPanelManager : MonoBehaviour
 
     private GameObject _content;
     private GameObject _seleced;
+    
+    public void OnClickUpgradeButton()
+    {
+        UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
+    }
+
     private void Start()
     {
         _content = GameObject.Find("Content");
