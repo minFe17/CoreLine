@@ -103,6 +103,12 @@ public class MapManager : MonoBehaviour
         return _grid.GetCellCenterWorld(cell);
     }
 
+    public Vector3 GetCellCenterWorld(Vector3Int cell)
+    {
+        if (!IsReady) { Debug.LogError("[MapManager] Stage not ready."); return Vector3.zero; }
+        return _grid.GetCellCenterWorld(cell);
+    }
+
     // ───────────────────────────────────────────────────────────────────────
     // 경량 구조체 & 편의 API (배치/길찾기 전용)
     // ───────────────────────────────────────────────────────────────────────

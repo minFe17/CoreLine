@@ -2,9 +2,9 @@ using System;
 
 namespace Utils
 {
-    public interface IStateMachine<TEnum> where TEnum : Enum
+    public interface IStateMachine
     {
-        void ChangeState(TEnum key);
+        void ChangeState<TEnum>(TEnum key);
         void Loop();
     }
 }

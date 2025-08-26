@@ -24,6 +24,11 @@ public class Unit : MonoBehaviour
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
     }
 
+    protected virtual void CheckAttackRange()
+    {
+        SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+    }
+
     public void TakeDamage(int damage)
     {
         if (_isDie)
