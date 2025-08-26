@@ -48,6 +48,9 @@ public class BuildUI : MonoBehaviour
     private RectTransform _leftGrid;    // 좌측 2×2 그리드
     private RectTransform _rightGrid;   // 우측 2×2 그리드
 
+    private Vector3Int _currentCell;
+    private bool _hasCurrentCell;
+    private Action<TowerOption, Vector3Int> _onPickCell;
     // 버튼 프리팹 (TowerPlaceButton은 BaseButton 상속받은 전용 버튼 클래스)
     [Header("Prefabs")]
     [SerializeField] private TowerPlaceButton buttonPrefab; // 인스펙터에서 드래그해두면 바로 사용 가능
@@ -90,13 +93,20 @@ public class BuildUI : MonoBehaviour
     {
         _onPick = onPick;
 
+        _onPickCell = null;            // <- 셀 없는 콜백 모드
+        _hasCurrentCell = false;       // <- 셀 정보 초기화
         if (!_wired) { Wire(); LogWireState(); }
         if (!_wired || !_root || !_anchor || !_leftGrid || !_rightGrid) return;
 
         // 1) 타일 중앙으로 스냅
         var map = MapManager.Instance;
         if (map && map.IsReady)
-            worldPos = map.CellCenterWorld(map.WorldToCell(worldPos));
+        {
+            var cell = map.WorldToCell(worldPos);
+            worldPos = map.CellCenterWorld(cell);
+            _currentCell = cell;       // <- 현재 셀 저장
+            _hasCurrentCell = true;
+        }
 
         // 2) 월드→스크린→로컬 변환
         var uiCam = GetUiCamera();
@@ -122,11 +132,16 @@ public class BuildUI : MonoBehaviour
     /// <summary>
     /// 셀(그리드 좌표)을 바로 전달하고 싶은 경우의 헬퍼.
     /// </summary>
-    public void OpenAtCell(Vector3Int cell, List<TowerOption> options, Action<TowerOption> onPick)
+    public void OpenAtCell(Vector3Int cell, List<TowerOption> options, Action<TowerOption, Vector3Int> onPickCell)
     {
+        _onPick = null;
+        _onPickCell = onPickCell;      // <- 셀 포함 콜백 모드
+        _currentCell = cell;
+        _hasCurrentCell = true;
+
         var map = MapManager.Instance;
         Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
-        OpenAtWorld(world, options, onPick);
+        OpenAtWorld(world, options, (TowerOption _) => { /* dummy; 실제로는 _onPickCell 사용 */ });
     }
 
     /// <summary>
@@ -134,7 +149,9 @@ public class BuildUI : MonoBehaviour
     /// </summary>
     public void Close()
     {
-        _onPick = null; // 세션 종료
+        _onPick = null;
+        _onPickCell = null;
+        _hasCurrentCell = false;
         if (_root) _root.gameObject.SetActive(false);
     }
 
@@ -273,8 +290,13 @@ public class BuildUI : MonoBehaviour
                 var opt = options[i];
                 btn.Bind(opt, picked =>
                 {
-                    _onPick?.Invoke(picked); // 외부 콜백 실행
-                    Close();                 // UI 닫기
+                    // 우선순위: (1) 셀 포함 콜백  (2) 기존 콜백
+                    if (_onPickCell != null && _hasCurrentCell)
+                        _onPickCell.Invoke(picked, _currentCell);
+                    else
+                        _onPick?.Invoke(picked);
+
+                    Close();
                 });
             }
             else
@@ -333,8 +355,10 @@ public class BuildUI : MonoBehaviour
     }
 }
 //유닛에서 사용
-//buildUI.OpenAtWorld(map.CellCenterWorld(cell), options, picked =>
+//buildUI.OpenAtCell(cell, options, (picked, selectedCell) =>
 //{
-//    // 비용 체크
-//    // 실제 타워 배치
+//    MapManager map = MapManager.Instance;
+//    if (!map.GetPlaceInfo(selectedCell).Placeable) return;
+//
+//    Vector3 pos = map.CellCenterWorld(selectedCell); //정중앙
 //});
