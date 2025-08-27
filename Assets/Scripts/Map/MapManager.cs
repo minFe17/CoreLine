@@ -284,6 +284,28 @@ public class MapManager : MonoBehaviour
             OnCellChanged?.Invoke(cell);
         }
     }
+    public bool IsDestructible(Vector3Int cell)
+    {
+        return _tmDestructible && _tmDestructible.HasTile(cell);
+    }
+
+    // 월드 좌표로 판정
+    public bool IsDestructibleWorld(Vector3 worldPos)
+    {
+        return IsDestructible(WorldToCell(worldPos));
+    }
+
+    // 파괴(= DeWall → 제거, 아래 Buildable 드러남). 기존 Convert*를 래핑해 가독성만 높임
+    public void DestroyWallAt(Vector3Int cell)
+    {
+        ConvertDestructibleToBuildable(cell);
+    }
+
+    // 월드 좌표 버전
+    public void DestroyWallAtWorld(Vector3 worldPos)
+    {
+        DestroyWallAt(WorldToCell(worldPos));
+    }
 
     // ───────────────────────────────────────────────────────────────────────
     // 내부 구현

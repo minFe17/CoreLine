@@ -10,7 +10,8 @@ public class GameManager : MonoBehaviour
 
     [Header("BuildUI 프리팹 (없으면 Resources/UI/BuildUI 에서 시도)")]
     [SerializeField] private BuildUI buildUIPrefab;
-
+    [SerializeField] private Sprite _cancelIcon;
+    [SerializeField] private Sprite _destroyIcon;
     private Camera _cam;
     private BuildUI _buildUI; // 런타임 인스턴스(또는 씬 상주 인스턴스)
 
@@ -76,66 +77,87 @@ public class GameManager : MonoBehaviour
         // 좌클릭: 현재 위치에 빌드 UI 띄우기
         if (Input.GetMouseButtonDown(0))
         {
-            if (IsPointerOverUI()) return;  // ← 이 한 줄이 핵심!
-
+            if (IsPointerOverUI()) return;
             if (_buildUI == null) return;
 
-            Vector3 world = _cam ? _cam.ScreenToWorldPoint(Input.mousePosition) : (Vector3)Input.mousePosition;
+            var cam = Camera.main;
+            Vector3 world = cam.ScreenToWorldPoint(Input.mousePosition);
             world.z = 0f;
 
             var map = MapManager.Instance;
+            Vector3Int cell = default;
             if (map && map.IsReady)
-                world = map.CellCenterWorld(map.WorldToCell(world));
-
-            List<TowerOption> options = MakeOptionsForTest(8);
-
-            _buildUI.OpenAtWorld(world, options, picked =>
             {
-                Debug.Log($"[GameManager] Picked: {picked.Id}, Cost={picked.Cost}");
+                cell = map.WorldToCell(world);
+                world = map.CellCenterWorld(cell); // 스냅
+            }
 
-                if (map && map.IsReady && picked.Prefab)
+            // 1) 파괴 가능 벽 확인 모드
+            if (map && map.IsReady && map.IsDestructible(cell))
+            {
+                _buildUI.UseLayoutOnce(1, 1);
+
+                var options = new List<TowerOption>
+        {
+            new TowerOption("cancel",  _cancelIcon,  null, 0), // 왼쪽
+            new TowerOption("destroy", _destroyIcon, null, 0), // 오른쪽
+        };
+
+                _buildUI.OpenAtCell(cell, options, (picked, selectedCell) =>
                 {
-                    var cell = map.WorldToCell(world);
-                    if (map.GetPlaceInfo(cell).Placeable)
-                    {
-                        var pos = map.CellCenterWorld(cell);
-                        var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
-                        map.RegisterTower(cell, go);
-                    }
+                    if (picked.Id == "destroy")
+                        map.DestroyWallAt(selectedCell);
+                    // cancel은 아무 동작 X (Close는 BuildUI가 처리)
+                });
+                return;
+            }
+
+            // 2) 일반 배치 모드
+            var buildOptions = MakeOptionsForTest(8); // or 실제 옵션
+            _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
+            {
+                if (map && map.IsReady && picked.Prefab != null)
+                {
+                    var info = map.GetPlaceInfo(selectedCell);
+                    if (!info.Placeable) return;
+
+                    Vector3 pos = map.CellCenterWorld(selectedCell);   //셀 정중앙
+                    var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
+                    map.RegisterTower(selectedCell, go);
                 }
             });
         }
-    }
-    bool IsPointerOverUI()
-    {
-        if (EventSystem.current == null) return false;
+        bool IsPointerOverUI()
+        {
+            if (EventSystem.current == null) return false;
 
-        // 마우스
-        if (EventSystem.current.IsPointerOverGameObject())
-            return true;
-
-        // 터치(모바일 고려)
-        for (int i = 0; i < Input.touchCount; i++)
-            if (EventSystem.current.IsPointerOverGameObject(Input.touches[i].fingerId))
+            // 마우스
+            if (EventSystem.current.IsPointerOverGameObject())
                 return true;
 
-        return false;
-    }
-    // ─────────────────────────────────────────────────────────────
-    // 더미/테스트 옵션 생성: 아이콘/프리팹 없이도 UI가 뜨도록
-    // ─────────────────────────────────────────────────────────────
-    List<TowerOption> MakeOptionsForTest(int count)
-    {
-        var list = new List<TowerOption>(count);
-        for (int i = 0; i < count; i++)
-        {
-            list.Add(new TowerOption(
-                id: $"opt_{i + 1}",
-                icon: null,       // 필요하면 Sprite 연결
-                prefab: null,     // 필요하면 실제 타워 프리팹 연결
-                cost: (i + 1) * 10
-            ));
+            // 터치(모바일 고려)
+            for (int i = 0; i < Input.touchCount; i++)
+                if (EventSystem.current.IsPointerOverGameObject(Input.touches[i].fingerId))
+                    return true;
+
+            return false;
         }
-        return list;
+        // ─────────────────────────────────────────────────────────────
+        // 더미/테스트 옵션 생성: 아이콘/프리팹 없이도 UI가 뜨도록
+        // ─────────────────────────────────────────────────────────────
+        List<TowerOption> MakeOptionsForTest(int count)
+        {
+            var list = new List<TowerOption>(count);
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(new TowerOption(
+                    id: $"opt_{i + 1}",
+                    icon: null,       // 필요하면 Sprite 연결
+                    prefab: null,     // 필요하면 실제 타워 프리팹 연결
+                    cost: (i + 1) * 10
+                ));
+            }
+            return list;
+        }
     }
 }

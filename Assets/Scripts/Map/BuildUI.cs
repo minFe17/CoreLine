@@ -39,7 +39,8 @@ public class BuildUI : MonoBehaviour
     [SerializeField] float spacing = 8f;               // 버튼 간격(px)
     [SerializeField] float gapFromTile = 16f;          // 타일 중심과 그리드 사이 거리(px)
     [SerializeField] bool closeOnBackground = true;    // Dimmer 클릭 시 닫기
-
+    [SerializeField] float clusterGap = 12f; // 같은 편에 2x2 묶음 두 개를 나란히 둘 때 사이 간격
+    private Vector2 _lastGridSize;           // LayoutGrids 때 계산한 2x2 하나의 실제 픽셀 크기
     // 캔버스/필수 노드
     private Canvas _canvas;
     private RectTransform _root;        // BuildPanel(기준 사각형)
@@ -59,6 +60,7 @@ public class BuildUI : MonoBehaviour
     // 현재 세션의 선택 콜백
     private Action<TowerOption> _onPick;
 
+    private (int cols, int rows)? _layoutOnce;
     private bool _wired; // 배선 완료 여부
 
     // ─────────────────────────────────────────────────────────────────────
@@ -99,17 +101,17 @@ public class BuildUI : MonoBehaviour
         if (!_wired || !_root || !_anchor || !_leftGrid || !_rightGrid) return;
 
         // 1) 타일 중앙으로 스냅
-        var map = MapManager.Instance;
+        MapManager map = MapManager.Instance;
         if (map && map.IsReady)
         {
-            var cell = map.WorldToCell(worldPos);
+            Vector3Int cell = map.WorldToCell(worldPos);
             worldPos = map.CellCenterWorld(cell);
             _currentCell = cell;       // <- 현재 셀 저장
             _hasCurrentCell = true;
         }
 
         // 2) 월드→스크린→로컬 변환
-        var uiCam = GetUiCamera();
+        Camera uiCam = GetUiCamera();
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out var local);
         _anchor.anchoredPosition = local;
@@ -134,14 +136,19 @@ public class BuildUI : MonoBehaviour
     /// </summary>
     public void OpenAtCell(Vector3Int cell, List<TowerOption> options, Action<TowerOption, Vector3Int> onPickCell)
     {
-        _onPick = null;
-        _onPickCell = onPickCell;      // <- 셀 포함 콜백 모드
+        _onPick = null;          // 셀 없는 콜백은 안 씀
+        _onPickCell = null;      // ← 필드에 저장하지 않고
         _currentCell = cell;
         _hasCurrentCell = true;
 
-        var map = MapManager.Instance;
+        MapManager map = MapManager.Instance;
         Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
-        OpenAtWorld(world, options, (TowerOption _) => { /* dummy; 실제로는 _onPickCell 사용 */ });
+
+        // 셀(capture) 포함 onPick 람다로 위임
+        OpenAtWorld(world, options, picked =>
+        {
+            onPickCell?.Invoke(picked, cell);
+        });
     }
 
     /// <summary>
@@ -159,58 +166,104 @@ public class BuildUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     // 레이아웃 계산 (좌/우 2×2)
     // ─────────────────────────────────────────────────────────────────────
+    // 파괴 가능 벽 눌렀을때 레이아웃
+    private (int useCols, int useRows) GetEffectiveLayout()
+    {
+        return (_layoutOnce?.cols ?? cols, _layoutOnce?.rows ?? rows);
+    }
+
+    public void UseLayoutOnce(int cols, int rows)
+    {
+        _layoutOnce = (cols, rows);
+    }
     void LayoutGrids()
     {
-        // 그리드 공통 설정(2×2)
+        int useCols = _layoutOnce?.cols ?? cols;
+        int useRows = _layoutOnce?.rows ?? rows;
+
         void Apply(GridLayoutGroup gl)
         {
             gl.cellSize = new Vector2(cell, cell);
             gl.spacing = new Vector2(spacing, spacing);
             gl.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gl.constraintCount = cols; // 2열 고정
+            gl.constraintCount = useCols; //  일회성/기본 열 수 반영
             gl.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gl.startAxis = GridLayoutGroup.Axis.Horizontal;
             gl.childAlignment = TextAnchor.UpperLeft;
         }
+
         Apply(_leftGrid.GetComponent<GridLayoutGroup>());
         Apply(_rightGrid.GetComponent<GridLayoutGroup>());
 
-        // 한쪽 그리드의 실제 픽셀 크기
+        //  현재 레이아웃 기준으로 실제 그리드 박스 크기 계산
         Vector2 gridSize = new(
-            cols * cell + (cols - 1) * spacing,   // 2*cell + spacing
-            rows * cell + (rows - 1) * spacing    // 2*cell + spacing
+            useCols * cell + (useCols - 1) * spacing,
+            useRows * cell + (useRows - 1) * spacing
         );
+        _lastGridSize = gridSize;
 
-        // 왼쪽 그리드: pivot(1,0.5) → 오른쪽 모서리가 앵커(타일 중앙)에 닿음
+        // 좌측(타일 기준 왼쪽)
         _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
         _leftGrid.pivot = new Vector2(1f, 0.5f);
         _leftGrid.sizeDelta = gridSize;
         _leftGrid.anchoredPosition = new Vector2(-gapFromTile, 0f);
 
-        // 오른쪽 그리드: pivot(0,0.5) → 왼쪽 모서리가 앵커에 닿음
+        // 우측(타일 기준 오른쪽)
         _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
         _rightGrid.pivot = new Vector2(0f, 0.5f);
         _rightGrid.sizeDelta = gridSize;
         _rightGrid.anchoredPosition = new Vector2(+gapFromTile, 0f);
+
+        // 이번 Open에만 적용되는 일회성 레이아웃 초기화
+        _layoutOnce = null;
     }
+
 
     // ─────────────────────────────────────────────────────────────────────
     // 화면 가장자리 보정(좌/우 공간이 너무 없으면 한쪽만)
     // ─────────────────────────────────────────────────────────────────────
     void AutoKeepInside()
     {
-        var uiCam = GetUiCamera();
+        Camera uiCam = GetUiCamera();
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam, _anchor.position);
         float left = screen.x;
         float right = Screen.width - screen.x;
-        const float edge = 80f; // 기준 픽셀(원하면 인스펙터로 뺄 것)
+        const float edge = 80f; // 이 값보다 작으면 "그쪽은 비좁다"로 판단
 
+        // 기본은 양쪽 보이도록
         _leftGrid.gameObject.SetActive(true);
         _rightGrid.gameObject.SetActive(true);
 
-        if (left < edge && right >= edge) _leftGrid.gameObject.SetActive(false);
-        else if (right < edge && left >= edge) _rightGrid.gameObject.SetActive(false);
-        // 둘 다 좁으면 기본(양쪽) 유지 → 필요 시 더 공격적 보정 로직 추가
+        // 왼쪽이 좁고 오른쪽은 넉넉 → 오른쪽으로 8칸 몰아주기
+        if (left < edge && right >= edge)
+        {
+            // 둘 다 "오른쪽 모드" 피벗/앵커
+            _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
+            _rightGrid.pivot = new Vector2(0f, 0.5f);
+            _rightGrid.anchoredPosition = new Vector2(+gapFromTile, 0f); // 앵커에 더 가까운 묶음
+
+            _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
+            _leftGrid.pivot = new Vector2(0f, 0.5f);
+            _leftGrid.anchoredPosition = new Vector2(+gapFromTile + _lastGridSize.x + clusterGap, 0f); // 그 옆에 붙이기
+
+            return;
+        }
+        // 오른쪽이 좁고 왼쪽은 넉넉 → 왼쪽으로 8칸 몰아주기
+        else if (right < edge && left >= edge)
+        {
+            // 둘 다 "왼쪽 모드" 피벗/앵커
+            _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
+            _leftGrid.pivot = new Vector2(1f, 0.5f);
+            _leftGrid.anchoredPosition = new Vector2(-gapFromTile, 0f); // 앵커에 더 가까운 묶음
+
+            _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
+            _rightGrid.pivot = new Vector2(1f, 0.5f);
+            _rightGrid.anchoredPosition = new Vector2(-gapFromTile - _lastGridSize.x - clusterGap, 0f); // 그 옆에 붙이기
+
+            return;
+        }
+
+        // 둘 다 애매하면 원래 양쪽 배치 유지(이미 LayoutGrids에서 셋업됨)
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -222,7 +275,7 @@ public class BuildUI : MonoBehaviour
         _canvas = GetComponentInParent<Canvas>(true);
         if (!_canvas) _canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
-        var panelRoot = FindChildRT(transform, "BuildPanel");
+        RectTransform panelRoot = FindChildRT(transform, "BuildPanel");
         if (!panelRoot) panelRoot = (RectTransform)transform;
 
         _root = panelRoot;
@@ -235,7 +288,7 @@ public class BuildUI : MonoBehaviour
 
         if (_dimmer && closeOnBackground)
         {
-            var bgBtn = _dimmer.GetComponent<Button>();
+            Button bgBtn = _dimmer.GetComponent<Button>();
             if (bgBtn)
             {
                 bgBtn.onClick.RemoveAllListeners();
@@ -269,28 +322,28 @@ public class BuildUI : MonoBehaviour
 
         options ??= new List<TowerOption>();
 
-        int perSide = cols * rows;   // 4
-        int maxTotal = perSide * 2;  // 8
+        // 이번 Open에서 적용될 레이아웃 기준
+        var (useCols, useRows) = GetEffectiveLayout();
+        int perSide = useCols * useRows;   // 1x1이면 1, 2x2면 4
+        int maxTotal = perSide * 2;
+
         int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
 
         for (int i = 0; i < total; i++)
         {
-            var parent = (i < perSide) ? _leftGrid : _rightGrid;
-            var btn = Instantiate(_runtimeButtonPrefab, parent);
+            RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
+            TowerPlaceButton btn = Instantiate(_runtimeButtonPrefab, parent);
             btn.gameObject.SetActive(true);
 
-            // 사이즈 보정
-            var rt = (RectTransform)btn.transform;
+            RectTransform rt = (RectTransform)btn.transform;
             if (rt.sizeDelta == Vector2.zero) rt.sizeDelta = new Vector2(cell, cell);
 
-            // 실제 옵션이 있으면 Bind, 없으면 빈 슬롯 처리
-            var hasOpt = i < options.Count;
-            if (hasOpt)
+            if (i < options.Count)
             {
-                var opt = options[i];
+                TowerOption opt = options[i];
                 btn.Bind(opt, picked =>
                 {
-                    // 우선순위: (1) 셀 포함 콜백  (2) 기존 콜백
+                    // OpenAtCell은 이제 _onPick 경로로 들어온다(셀 캡처 람다)
                     if (_onPickCell != null && _hasCurrentCell)
                         _onPickCell.Invoke(picked, _currentCell);
                     else
@@ -301,7 +354,7 @@ public class BuildUI : MonoBehaviour
             }
             else
             {
-                btn.Bind(default, null);
+                btn.Bind(default, null); // 빈 슬롯(프리팹에서 아이콘/텍스트 비워두면 OK)
             }
         }
     }
@@ -330,7 +383,7 @@ public class BuildUI : MonoBehaviour
     static RectTransform FindChildRT(Transform root, string name)
     {
         if (!root) return null;
-        foreach (var rt in root.GetComponentsInChildren<RectTransform>(true))
+        foreach (RectTransform rt in root.GetComponentsInChildren<RectTransform>(true))
             if (rt.name == name) return rt;
         return null;
     }
