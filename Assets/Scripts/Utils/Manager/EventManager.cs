@@ -2,6 +2,7 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System;
+using Mono.Cecil;
 
 /*
  !매개변수 있는거랑 없는거랑, 혹은 1개인거랑 2개인거랑 섞으시면 안됩니다.
@@ -88,6 +89,9 @@ public class EventManager : SimpleSingleton<EventManager>
     }
     public void Invoke<T1,T2>(string key, T1 param1, T2 param2)
     {
+        Delegate[] invocationList = _eventBus[key].GetInvocationList();
+        int count = invocationList.Length;
+        Debug.Log(count.ToString());
         if (_eventBus.TryGetValue(key, out Delegate existing))
         {
             if (existing is Action<T1,T2> callBack)

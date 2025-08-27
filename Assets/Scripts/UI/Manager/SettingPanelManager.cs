@@ -53,6 +53,7 @@ public class SettingPanelManager : MonoBehaviour
     }
     private void UpdateSelectableButtons()
     {
+        if (_selectableUnitButtons == null) return;
         foreach (GameObject obj in _selectableUnitButtons.GetAllToActiveTrue())
         {
             SelectUnitButton btn = obj.GetComponent<SelectUnitButton>();

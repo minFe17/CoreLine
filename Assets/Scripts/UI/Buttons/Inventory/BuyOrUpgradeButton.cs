@@ -22,6 +22,7 @@ public class BuyOrUpgradeButton : BaseButton
         //구매하시겠습니까? 띄우고 구매하면 돈깎기. 돈없으면 잔액부족 띄우기 
         //이런건 프리팹으로빼도될것같은데
         EventManager.Instance.Invoke("BuyUnit");
+
         print("구매");
     }
     private void UpgradeUnit()

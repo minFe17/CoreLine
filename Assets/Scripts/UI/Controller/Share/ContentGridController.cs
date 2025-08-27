@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class ContentGridController : GridController
 {
+    [SerializeField]
+    private string _parentPath = "Scroll View";
     private RectTransform _content;
     protected override void Awake()
     {
@@ -11,7 +13,8 @@ public class ContentGridController : GridController
     }
     protected override void Start()
     {
-        _content = GameObject.Find("Scroll View").GetComponent<RectTransform>();
+        _content = GameObject.Find(_parentPath).GetComponent<RectTransform>();
+        
         SetRectSize();
     }
     protected override void SetRectSize()

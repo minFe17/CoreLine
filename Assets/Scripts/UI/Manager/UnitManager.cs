@@ -94,6 +94,7 @@ public class UnitManager : SimpleSingleton<UnitManager>
         _unlockedUnits.Add(unit);
 
         EventManager.Instance.Invoke("SettingBuyUnit");
+        EventManager.Instance.Invoke<bool,EUnitType>("IsBuyUnit", true,_choiceUnit.UnitType); //이거 되나 확인할 것.
     }
     private void SettingChoiceUnit(EUnitType param)
     {

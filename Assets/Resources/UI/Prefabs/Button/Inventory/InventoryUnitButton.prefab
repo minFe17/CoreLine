@@ -35,8 +35,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0}
-  m_SizeDelta: {x: 200, y: 80}
+  m_AnchoredPosition: {x: 0.573, y: 0}
+  m_SizeDelta: {x: 138.07, y: 56.5}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &798827547936823163
 CanvasRenderer:
@@ -141,7 +141,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4500518786308125813, guid: 93618f073f1100648a05264a5c1528e2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5a4b0fcc2c33546c7b1ac7dfb5d45861, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -243,8 +243,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50
-  m_fontSizeBase: 50
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -300,6 +300,7 @@ GameObject:
   - component: {fileID: 1093188297485412030}
   - component: {fileID: 6202702560393075359}
   - component: {fileID: 6205853520025488398}
+  - component: {fileID: 3915365236233679199}
   m_Layer: 5
   m_Name: InventoryUnitButton
   m_TagString: Untagged
@@ -356,7 +357,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 5953fb31da0024eabb12dd752dbb53ed, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -422,3 +423,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0edf85fd49553647a59bc9f7ca74a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3915365236233679199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6021789793955017731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 050c71cd99380eb49a5b6574f783d4fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorType: 1

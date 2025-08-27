@@ -6,12 +6,12 @@ public enum StageType
 {
     Stage1, Stage2
 }//이거 스테이지 나오는거 보고 맞춰야됨
+public enum ColorType
+{
+    Dark, Normal, Light
+}
 public class UIColorApplier : MonoBehaviour
 {
-    private enum ColorType
-    {
-        Dark, Normal,Light
-    }
 
     [SerializeField]
     private ColorType _colorType;
@@ -21,6 +21,16 @@ public class UIColorApplier : MonoBehaviour
     private Image _image;
 
 
+    public ColorType MyColorType
+    {
+        get { return _colorType; }
+        set 
+        {
+            if (_colorType == value) return;
+            _colorType = value;
+            SettingColor();
+        }
+    }
     private void Awake()
     {
         _image = GetComponent<Image>();
@@ -42,7 +52,7 @@ public class UIColorApplier : MonoBehaviour
                 _color = RGBToHSLUtils.Color;
                 break;
             case ColorType.Light:
-                _color = RGBToHSLUtils.Lighten(RGBToHSLUtils.Color, 0.3f);
+                _color = RGBToHSLUtils.Lighten(RGBToHSLUtils.Color, 0.2f);
                 break;
         }
         _image.color = _color;
@@ -52,10 +62,10 @@ public class UIColorApplier : MonoBehaviour
         switch (_stageType)
         {
             case StageType.Stage1:
-                RGBToHSLUtils.Color = new Color(1f, 0.95f, 0.4f, 1f);
+                RGBToHSLUtils.Color = new Color(1f, 0.95f, 0.4f);
                 break;
             case StageType.Stage2:
-                RGBToHSLUtils.Color = Color.red;
+                RGBToHSLUtils.Color = new Color(0.85f, 0.3f, 0.2f);
                 break;
         }
     }

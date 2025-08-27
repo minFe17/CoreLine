@@ -9,7 +9,7 @@ public class InventoryManager : MonoBehaviour
     private GameObject _content;
     private void Start()
     {
-        _content = GameObject.Find("Content");
+        _content = GameObject.Find("Content"); //이름 바꿔주기
         CreateButtons();
         EventManager.Instance.Subscribe("SettingBuyUnit", UpdateUnitButton);
     }

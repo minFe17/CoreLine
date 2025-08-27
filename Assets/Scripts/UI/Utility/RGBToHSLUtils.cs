@@ -74,7 +74,17 @@ public static class RGBToHSLUtils
     public static Color AdjustLightness(Color original, float percent)
     {
         RGBToHSL(original, out float h, out float s, out float l);
+
+        // 밝기 조정
         l = Mathf.Clamp01(l + percent);
+
+        // 채도 조정: 밝아지면 채도가 너무 낮아져서 탈색처럼 보임 → 보정
+        if (percent > 0f)
+        {
+            // 밝아질수록 채도 감소를 보정 (최대 +0.15 정도까지)
+            s = Mathf.Clamp01(s + Mathf.Lerp(0f, 0.15f, percent));
+        }
+
         return HSLToRGB(h, s, l, original.a);
     }
 
