@@ -15,7 +15,12 @@ public class MapManager : MonoBehaviour
     private readonly HashSet<Vector3Int> _occupied = new();
     private readonly Dictionary<Vector3Int, GameObject> _towers = new(); // 셀 → 타워 오브젝트
     public bool IsReady => _grid != null;
+    private bool _hasPlayerBase;
+    private Vector3Int _playerBaseCell;
 
+    public bool HasPlayerBase => _hasPlayerBase;
+    public Vector3Int PlayerBaseCell => _playerBaseCell;
+    public Vector3 PlayerBaseWorld => IsReady && _hasPlayerBase ? CellCenterWorld(_playerBaseCell) : Vector3.zero;
     // 네비/배치 변경 알림(타워 설치/제거, 파괴벽 변경 등)
     public Action<Vector3Int> OnCellChanged;
 
@@ -155,21 +160,17 @@ public class MapManager : MonoBehaviour
     public bool SelectPlayerBase(Vector3Int selectedCell, GameObject basePrefab = null, bool occupyBaseCell = true)
     {
         if (_tmKing == null) return false;
-        if (!_tmKing.HasTile(selectedCell)) return false; // King 후보가 아닌 칸이면 실패
+        if (!_tmKing.HasTile(selectedCell)) return false;
 
-        // 1) King 후보들 수집
         var kings = GetAllKingCells();
         if (kings.Count == 0) return false;
 
-        // 2) 모두 처리
         foreach (var c in kings)
         {
-            // King 타일 제거
             _tmKing.SetTile(c, null);
 
             if (c == selectedCell)
             {
-                // 선택 칸: 베이스 확정
                 if (basePrefab != null)
                 {
                     var pos = CellCenterWorld(c);
@@ -178,9 +179,13 @@ public class MapManager : MonoBehaviour
                 }
 
                 if (occupyBaseCell)
-                    MarkOccupied(c); // 베이스 셀은 타워 설치 불가로 막음
+                    MarkOccupied(c);        // 설치 제한은 유지하고
+
+                _playerBaseCell = c;       // ★ 목적지로 쓸 셀 저장
+                _hasPlayerBase = true;
             }
-            OnCellChanged?.Invoke(c);
+
+            OnCellChanged?.Invoke(c);      // (있던) 네비 갱신은 그대로
         }
         return true;
     }
