@@ -1,53 +1,3 @@
-//using UnityEngine;
-//using System.Collections; 
-
-//public class DamageFlash : MonoBehaviour
-//{
-//    public float flashDuration = 0.5f; 
-//    public float flashInterval = 0.1f; 
-//    private Renderer objectRenderer;
-//    private Color originalColor; 
-
-//    void Start()
-//    {
-//        objectRenderer = GetComponent<Renderer>();
-//        if (objectRenderer != null)
-//        {
-//            originalColor = objectRenderer.material.color; 
-//        }
-//    }
-
-//    private void Update()
-//    {
-//        if(Input.GetKeyDown(KeyCode.Alpha1))
-//        {
-//            StartFlashing();
-//        }
-//    }
-
-//    public void StartFlashing()
-//    {
-//        StartCoroutine(FlashEffect());
-//    }
-
-//    IEnumerator FlashEffect()
-//    {
-//        float timer = 0f;
-//        while (timer < flashDuration)
-//        {
-//            objectRenderer.enabled = false;
-//            yield return new WaitForSeconds(flashInterval);
-//            timer += flashInterval;
-
-//            objectRenderer.enabled = true;
-//            yield return new WaitForSeconds(flashInterval);
-//            timer += flashInterval;
-//        }
-
-//        objectRenderer.enabled = true;
-
-//    }
-//}
 
 using UnityEngine;
 
@@ -61,23 +11,51 @@ public class HitFlashTest : MonoBehaviour
     [SerializeField] private Color flashColor = Color.white; 
     [SerializeField] private float flashDuration = 0.1f;
 
+    [SerializeField] private float scaleUpAmount = 0.1f;   
+    [SerializeField] private float scaleReturnSpeed = 10f;
+
+    [SerializeField] private Camera clickCamera;    
+    [SerializeField] private LayerMask interactMask = ~0; 
+
+
     private SpriteRenderer sr;
     private MaterialPropertyBlock mpb;
     private float flashTimer;
 
-    void Awake()
+    private Vector3 originalScale;
+    private Vector3 targetScale;
+
+    private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
         mpb = new MaterialPropertyBlock();
         ApplyFlash(0f);
+
+        originalScale = transform.localScale;
+        targetScale = originalScale;
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            flashTimer = flashDuration;
-            ApplyFlash(1f);
+            TriggerHitEffect();
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            var cam = clickCamera != null ? clickCamera : Camera.main;
+            if (cam == null) return;
+
+            // 마우스 좌표에서 카메라 레이 생성
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+
+            // 2D Physics 레이캐스트
+            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity, interactMask);
+            if (hit.collider != null && hit.collider.gameObject == gameObject)
+            {
+                TriggerHitEffect(); // 자기 자신만 반응
+            }
         }
 
         if (flashTimer > 0f)
@@ -86,13 +64,33 @@ public class HitFlashTest : MonoBehaviour
             float amount = Mathf.Clamp01(flashTimer / flashDuration);
             ApplyFlash(amount);
         }
+
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * scaleReturnSpeed);
+    
     }
 
-    void ApplyFlash(float amount)
+
+    private void ApplyFlash(float amount)
     {
         sr.GetPropertyBlock(mpb);
         mpb.SetFloat(ID_FlashAmount, amount);
         mpb.SetColor(ID_FlashColor, flashColor);
         sr.SetPropertyBlock(mpb);
+    }
+
+    public void TriggerHitEffect()
+    {
+        flashTimer = flashDuration;
+        ApplyFlash(1f);
+
+        targetScale = originalScale * (1f + scaleUpAmount);
+
+        CancelInvoke(nameof(ResetScale));
+        Invoke(nameof(ResetScale), flashDuration * 0.5f); 
+    }
+
+    void ResetScale()
+    {
+        targetScale = originalScale;
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(-1000)]
 public class GameManager : MonoBehaviour
 {
     [Header("스테이지 프리팹 (중클릭으로 로드 테스트)")]
@@ -16,6 +17,8 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        MapManager.Instance.LoadStage(stagePrefab);
+
         // 1) 카메라 확보
         _cam = Camera.main;
         if (_cam == null) _cam = FindFirstObjectByType<Camera>();

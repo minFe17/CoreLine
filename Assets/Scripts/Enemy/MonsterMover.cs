@@ -6,6 +6,7 @@ using UnityEngine;
 public class MonsterMover : MonoBehaviour
 {
     [SerializeField] private TestMap _map;
+
     [SerializeField] private float _moveSpeed = 4f;
     [SerializeField] private float _arriveEps = 0.02f;
 
@@ -15,7 +16,8 @@ public class MonsterMover : MonoBehaviour
     private float _attackTimer = 0f;
     private RouteManager _route;
 
-    public TestMap Map {
+    public TestMap Map
+    {
         get { return _map; }
         set { _map = value; }
     }
@@ -38,35 +40,6 @@ public class MonsterMover : MonoBehaviour
         Vector2Int rc = _map.WorldToCell(transform.position);
         Cell = rc;
         transform.position = _map.CellToWorld(rc.x, rc.y);
-    }
-
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(1))
-        {
-            Vector3 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            wp.z = 0f;
-            MoveToWorld(wp);
-        }
-
-        if (CheckGoalRange())
-        {
-            if (IsFollowingPath)
-            {
-                IsFollowingPath = false;
-                _hasDestination = false;
-                if (_moveCo != null) { StopCoroutine(_moveCo); _moveCo = null; }
-            }
-
-            _attackTimer -= Time.deltaTime;
-            if (_attackTimer <= 0f && _monster.IsAttackReady())
-            {
-                _monster?.FireAttackTrigger();
-                _attackTimer = _attackCooldown;
-            }
-        }
-        else
-            _attackTimer = 0f;
     }
 
     public void MoveToWorld(Vector3 world)
@@ -129,7 +102,7 @@ public class MonsterMover : MonoBehaviour
 
             if (_allowDestructible && _map.IsDestructible(step.x, step.y))
             {
-                if (_monster != null && _monster.IsAttackReady()) 
+                if (_monster != null && _monster.IsAttackReady())
                     _monster.FireAttackTrigger();
 
                 yield return new WaitUntil(() => _monster != null && _monster.IsAttackReady());
@@ -142,7 +115,7 @@ public class MonsterMover : MonoBehaviour
             {
                 List<Vector2Int> newPath = AStarPathfinder.FindPath(
                     _map.Height, _map.Width,
-                    (r, c) => IsPassable(r, c), 
+                    (r, c) => IsPassable(r, c),
                     Cell, _dstCell
                 );
 
@@ -210,6 +183,16 @@ public class MonsterMover : MonoBehaviour
         _moveCo = null;
     }
 
+    private bool IsPassable(int r, int c)
+    {
+        return _allowDestructible
+            ? (_map.IsWalkable(r, c) || _map.IsDestructible(r, c))
+            : _map.IsWalkable(r, c);
+    }
+
+
+
+
     private bool CheckGoalRange()
     {
         if (_route == null) return false;
@@ -219,10 +202,32 @@ public class MonsterMover : MonoBehaviour
         return _useDiag ? (Mathf.Max(dr, dc) <= _attackRangeCell): ((dr + dc) <= _attackRangeCell);
     }
 
-    private bool IsPassable(int r, int c)
+    private void Update()
     {
-        return _allowDestructible
-            ? (_map.IsWalkable(r, c) || _map.IsDestructible(r, c))
-            : _map.IsWalkable(r, c);
+        if (Input.GetMouseButtonDown(1))
+        {
+            Vector3 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            wp.z = 0f;
+            MoveToWorld(wp);
+        }
+
+        if (CheckGoalRange())
+        {
+            if (IsFollowingPath)
+            {
+                IsFollowingPath = false;
+                _hasDestination = false;
+                if (_moveCo != null) { StopCoroutine(_moveCo); _moveCo = null; }
+            }
+
+            _attackTimer -= Time.deltaTime;
+            if (_attackTimer <= 0f && _monster != null && _monster.IsAttackReady())
+            {
+                _monster?.FireAttackTrigger();
+                _attackTimer = _attackCooldown;
+            }
+        }
+        else
+            _attackTimer = 0f;
     }
 }

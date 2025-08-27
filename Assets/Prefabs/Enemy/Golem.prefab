@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 2592622457519344146}
   - component: {fileID: 3748896504225090762}
   - component: {fileID: 5957591340127595148}
+  - component: {fileID: 8923165808409025291}
+  - component: {fileID: 971656304818782371}
   m_Layer: 3
   m_Name: Golem
   m_TagString: Untagged
@@ -96,7 +98,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: b804f677e94a4b846a411792eac12fcc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -180,3 +182,33 @@ MonoBehaviour:
   _attackRangeCell: 1
   _useDiag: 0
   _attackCooldown: 1
+--- !u!114 &8923165808409025291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8472593775564949861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5057c0e136fb11428525e6a61d90381, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.5
+  scaleUpAmount: 0.1
+  scaleReturnSpeed: 10
+--- !u!114 &971656304818782371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8472593775564949861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bd9a400824a5d545bda0ed5754d9187, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashDuration: 0.5
+  flashInterval: 0.1

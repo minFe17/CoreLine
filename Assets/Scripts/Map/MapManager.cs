@@ -412,4 +412,5 @@ public class MapManager : MonoBehaviour
         var info = GetPlaceInfoWorld(worldPos);
         Debug.Log($"셀 {WorldToCell(worldPos)} : {(info.Placeable ? "타워 설치 가능" : "설치 불가")} / 점유={info.Occupied}");
     }
+
 }

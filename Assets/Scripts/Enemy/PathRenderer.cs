@@ -41,6 +41,7 @@ public class PathRenderer : MonoBehaviour
         }
     }
 
+    
     public void SetPath(TestMap map, List<Vector2Int> path)
     {
         if (map == null || path == null || path.Count < 2)

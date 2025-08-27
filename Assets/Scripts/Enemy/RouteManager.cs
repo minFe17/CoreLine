@@ -17,7 +17,6 @@ public class RouteManager : MonoBehaviour
     public Vector2Int GoalCell => new Vector2Int(_goalY, _goalX);
 
     private List<Vector2Int> _lastPath;
-
     private bool _allowDestructibleForRoute = false;
     public bool AllowDestructibleForRoute => _allowDestructibleForRoute;
 
@@ -104,6 +103,5 @@ public class RouteManager : MonoBehaviour
         for (int i = 0; i < a.Count; i++) if (a[i] != b[i]) return true;
         return false;
     }
-
 
 }

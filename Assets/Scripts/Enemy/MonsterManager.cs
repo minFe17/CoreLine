@@ -8,15 +8,16 @@ public class MonsterManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private TestMap _map;
-    [SerializeField] private RouteManager _route;       
+    [SerializeField] private RouteManager _route;
     [SerializeField] private MonsterMover _monsterPrefab;
 
     [Header("Spawn Settings")]
-    [SerializeField] private int _initialSpawnCount = 5; 
-    [SerializeField] private bool _snapToCellCenter = true; 
+    [SerializeField] private int _initialSpawnCount = 5;
+    [SerializeField] private bool _snapToCellCenter = true;
     [SerializeField] private bool _spawnOnStart = true;
 
     private readonly List<MonsterMover> _monsters = new List<MonsterMover>();
+
 
     private void Awake()
     {
@@ -32,6 +33,23 @@ public class MonsterManager : MonoBehaviour
         if (_spawnOnStart)
             SpawnWave(_initialSpawnCount);
     }
+    public MonsterMover SpawnOne()
+    {
+        if (!_monsterPrefab || !_map || !_route) return null;
+
+        Vector2Int spawnRC = _route.SpawnCell;
+        Vector3 pos = CellToSpawnWorld(spawnRC.x, spawnRC.y);
+
+        MonsterMover m = Instantiate(_monsterPrefab, pos, Quaternion.identity);
+        m.Map = _map;
+        _monsters.Add(m);
+        return m;
+    }
+    private Vector3 CellToSpawnWorld(int row, int col)
+    {
+        return _map.CellToWorld(row, col);
+    }
+
 
     public void SpawnWave(int n)
     {
@@ -44,19 +62,6 @@ public class MonsterManager : MonoBehaviour
     {
         yield return null; 
         SendAllToGoal();
-    }
-
-    public MonsterMover SpawnOne()
-    {
-        if (!_monsterPrefab || !_map || !_route) return null;
-
-        Vector2Int spawnRC = _route.SpawnCell; 
-        Vector3 pos = CellToSpawnWorld(spawnRC.x, spawnRC.y);
-
-        MonsterMover m = Instantiate(_monsterPrefab, pos, Quaternion.identity);
-        m.Map = _map;                     
-        _monsters.Add(m);
-        return m;
     }
 
    
@@ -76,11 +81,6 @@ public class MonsterManager : MonoBehaviour
     public void OnRouteChanged()
     {
         SendAllToGoal(); 
-    }
-
-    private Vector3 CellToSpawnWorld(int row, int col)
-    {
-        return _map.CellToWorld(row, col);
     }
 
 }
