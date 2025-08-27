@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
             new TowerOption("destroy", _destroyIcon, null, 0), // ¿À¸¥ÂÊ
         };
 
-                _destructUI.OpenAtCell(cell, _cancelIcon, _destroyIcon, (picked, selectedCell) =>
+                _destructUI.OpenAtCell(cell,(picked, selectedCell) =>
                 {
                     if (picked.Id == "destroy")
                     {
