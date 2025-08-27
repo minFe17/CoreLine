@@ -1,53 +1,98 @@
+//using UnityEngine;
+//using System.Collections; 
+
+//public class DamageFlash : MonoBehaviour
+//{
+//    public float flashDuration = 0.5f; 
+//    public float flashInterval = 0.1f; 
+//    private Renderer objectRenderer;
+//    private Color originalColor; 
+
+//    void Start()
+//    {
+//        objectRenderer = GetComponent<Renderer>();
+//        if (objectRenderer != null)
+//        {
+//            originalColor = objectRenderer.material.color; 
+//        }
+//    }
+
+//    private void Update()
+//    {
+//        if(Input.GetKeyDown(KeyCode.Alpha1))
+//        {
+//            StartFlashing();
+//        }
+//    }
+
+//    public void StartFlashing()
+//    {
+//        StartCoroutine(FlashEffect());
+//    }
+
+//    IEnumerator FlashEffect()
+//    {
+//        float timer = 0f;
+//        while (timer < flashDuration)
+//        {
+//            objectRenderer.enabled = false;
+//            yield return new WaitForSeconds(flashInterval);
+//            timer += flashInterval;
+
+//            objectRenderer.enabled = true;
+//            yield return new WaitForSeconds(flashInterval);
+//            timer += flashInterval;
+//        }
+
+//        objectRenderer.enabled = true;
+
+//    }
+//}
+
 using UnityEngine;
-using System.Collections; // 코루틴 사용을 위해
 
-public class DamageFlash : MonoBehaviour
+[RequireComponent(typeof(SpriteRenderer))]
+public class HitFlashTest : MonoBehaviour
 {
-    public float flashDuration = 0.5f; // 깜빡임 지속 시간
-    public float flashInterval = 0.1f; // 깜빡이는 간격
-    private Renderer objectRenderer;
-    private Color originalColor; // 원래 색상 저장 (깜빡임 후 원래 색으로 되돌릴 경우)
+    static readonly int ID_FlashAmount = Shader.PropertyToID("_HitFlash"); 
+    static readonly int ID_FlashColor = Shader.PropertyToID("Tint");     
 
-    void Start()
+    [Header("Flash Settings")]
+    [SerializeField] private Color flashColor = Color.white; 
+    [SerializeField] private float flashDuration = 0.1f;
+
+    private SpriteRenderer sr;
+    private MaterialPropertyBlock mpb;
+    private float flashTimer;
+
+    void Awake()
     {
-        objectRenderer = GetComponent<Renderer>();
-        if (objectRenderer != null)
+        sr = GetComponent<SpriteRenderer>();
+        mpb = new MaterialPropertyBlock();
+        ApplyFlash(0f);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            originalColor = objectRenderer.material.color; 
+            flashTimer = flashDuration;
+            ApplyFlash(1f);
+        }
+
+        if (flashTimer > 0f)
+        {
+            flashTimer -= Time.deltaTime;
+            float amount = Mathf.Clamp01(flashTimer / flashDuration);
+            ApplyFlash(amount);
         }
     }
 
-    private void Update()
+    void ApplyFlash(float amount)
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            StartFlashing();
-        }
-    }
-
-    // 데미지를 받았을 때 호출하는 함수
-    public void StartFlashing()
-    {
-        StartCoroutine(FlashEffect());
-    }
-
-    IEnumerator FlashEffect()
-    {
-        float timer = 0f;
-        while (timer < flashDuration)
-        {
-            // 오브젝트를 끄고
-            objectRenderer.enabled = false;
-            yield return new WaitForSeconds(flashInterval);
-            timer += flashInterval;
-
-            // 오브젝트를 켜고
-            objectRenderer.enabled = true;
-            yield return new WaitForSeconds(flashInterval);
-            timer += flashInterval;
-        }
-        
-        objectRenderer.enabled = true;
-        
+        sr.GetPropertyBlock(mpb);
+        mpb.SetFloat(ID_FlashAmount, amount);
+        mpb.SetColor(ID_FlashColor, flashColor);
+        sr.SetPropertyBlock(mpb);
     }
 }

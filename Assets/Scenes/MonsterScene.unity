@@ -1130,6 +1130,10 @@ PrefabInstance:
       propertyPath: m_Color.a
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2266521662506007033, guid: bb74a1e0990e0c94582f8f4a93bfd331, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: b804f677e94a4b846a411792eac12fcc, type: 2}
     - target: {fileID: 4477903852095508678, guid: bb74a1e0990e0c94582f8f4a93bfd331, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4.37
@@ -1199,8 +1203,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5057c0e136fb11428525e6a61d90381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.5
-  flashInterval: 0.1
 --- !u!1 &1744987360
 GameObject:
   m_ObjectHideFlags: 0
