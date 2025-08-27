@@ -23,5 +23,6 @@ public class FactoryManager : MonoBehaviour
             _factories.Add(new UnitFactory((EUnitType)i));
         for (int i = 0; i < (int)EFusionUnitType.Max; i++)
             _factories.Add(new FusionUnitFactory((EFusionUnitType)i));
+        _factories.Add(new BuildUIFactory());
     }
 }

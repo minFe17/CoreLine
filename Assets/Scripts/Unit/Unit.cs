@@ -3,6 +3,7 @@ using Utils;
 
 public class Unit : MonoBehaviour
 {
+    Vector3Int _cell;
     protected UnitLevelData _data;
     protected Animator _animator;
     protected int _level;
@@ -13,6 +14,7 @@ public class Unit : MonoBehaviour
     public UnitLevelData Data { get => _data; }
     public Animator Animator { get => _animator; }
     public bool IsDie { get => _isDie; }
+    public Vector3Int Cell { get => _cell; set => _cell = value; }
 
     void OnMouseDown()
     {
@@ -39,6 +41,11 @@ public class Unit : MonoBehaviour
             _animator.SetTrigger("doDie");
         else
             _animator.SetTrigger("doHit");
+    }
+
+    public void UnregisterCell()
+    {
+        MapManager.Instance.UnregisterTower(_cell);
     }
 
     #region Animation Event

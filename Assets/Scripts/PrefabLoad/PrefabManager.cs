@@ -13,6 +13,8 @@ public class PrefabManager : MonoBehaviour
             {EPrefabType.AttackRange, new AttackRangePrefabLoad() },
             {EPrefabType.Unit, new UnitPrefabLoad() },
             {EPrefabType.FusionUnit, new FusionUnitPrefabLoad() },
+            {EPrefabType.UI, new UIPrefabLoad()},
+            { EPrefabType.SpriteAtlas, new SpriteAtlasPrefabLoad() }
         };
     }
 

@@ -63,12 +63,18 @@ public class FusionManager : MonoBehaviour
 
     void CreateFusedUnit(FusionData fusionData, Vector3 position)
     {
-        GameObject fusedObj = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType);
-        fusedObj.transform.position = position;
+        SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+        GameObject fusedObject = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType);
+        fusedObject.transform.position = position;
+        MapManager.Instance.RegisterTower(_baseUnit.Cell, fusedObject);
+        //fusedObject.GetComponent<FusionUnit>().Cell = _baseUnit.Cell;
     }
 
     void ReturnUnitsToPool(TowerUnit unitA, TowerUnit unitB)
     {
+        unitA.UnregisterCell();
+        unitB.UnregisterCell();
+
         _fusionableUnit[unitA.UnitType].Remove(unitA);
         _fusionableUnit[unitB.UnitType].Remove(unitB);
 
@@ -127,9 +133,9 @@ public class FusionManager : MonoBehaviour
         }
 
         CreateFusedUnit(fusionData, _baseUnit.transform.position);
+        ApplyFusionLayer("Default");
         ReturnUnitsToPool(_baseUnit, unit);
 
-        ApplyFusionLayer("Default");
         _baseUnit = null;
 
         NotifyFusion(false);

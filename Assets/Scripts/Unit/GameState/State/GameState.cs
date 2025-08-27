@@ -1,46 +1,72 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
-public class GameState : IState
+public class GameState : IState, IMediatorEvent
 {
+    BuildUI _buildUI;
+
+    bool _isSelectUnit;
+    Vector3Int _cell;
+    Vector3 _worldPosition;
+
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Archer, EUnitType.Warrior, EUnitType.Wizard, EUnitType.Assassin, EUnitType.Chef, EUnitType.Pirate };
+
+    public GameState()
+    {
+        SimpleSingleton<MediatorManager>.Instance.Register(EMediatorType.EndSelectUnit, this);
+    }
+
     void HandleMouseClick()
     {
         Vector3 mouseWorld = SimpleSingleton<UnitPlacementManager>.Instance.GetMouseWorldPosition();
         Vector3Int cell = SimpleSingleton<UnitPlacementManager>.Instance.GetCellFromWorld(mouseWorld);
         Vector3 cellCenter = MapManager.Instance.GetCellCenterWorld(cell);
 
-        CreateUI(cell, cellCenter);
-        CreateUnit(cell, cellCenter);
+        _cell = cell;
+        _worldPosition = cellCenter;
+        CreateUI();
+        //CheckDestory();
     }
 
-    // UI에서 호출?
-    void CreateUnit(Vector3Int cell, Vector3 worldPosition)
+    void CreateUI()
     {
-        // 임시
-        MapManager.PlaceInfo temp = MapManager.Instance.GetPlaceInfo(cell);
-        Debug.Log(temp.Occupied);
-        if (!temp.Placeable || temp.Occupied)
+        MapManager.PlaceInfo info = MapManager.Instance.GetPlaceInfo(_cell);
+        if (!info.Placeable || info.Occupied)
             return;
-        int randomIndex = Random.Range(1, (int)EUnitType.Max);
-
-
-        GameObject unit = MonoSingleton<ObjectPoolManager>.Instance.Pull((EUnitType)randomIndex);
-        unit.transform.position = worldPosition;
-
-        MapManager.Instance.RegisterTower(cell, unit);
+        _isSelectUnit = true;
+        if (_buildUI == null)
+            _buildUI = MonoSingleton<ObjectPoolManager>.Instance.Pull(EPrefabType.UI).GetComponent<BuildUI>();
+        _buildUI.OpenAtCell(_cell, _test);
     }
 
-    void CreateUI(Vector3Int cell, Vector3 worldPosition)
+    public void CreateUnit(EUnitType unitType)
     {
-        MapManager.PlaceInfo temp = MapManager.Instance.GetPlaceInfo(cell);
-        Debug.Log(temp.Occupied);
-        if (!temp.Placeable || temp.Occupied)
-            return;
+        GameObject unit = MonoSingleton<ObjectPoolManager>.Instance.Pull(unitType);
+        unit.transform.position = _worldPosition;
 
-        // UI 띄우기
+        MapManager.Instance.RegisterTower(_cell, unit);
+        unit.GetComponent<TowerUnit>().Cell = _cell;
+        _buildUI.Close();
     }
+
+    //public void CheckDestory()
+    //{
+    //    if(MapManager.Instance.IsDestructible(_cell))
+    //}
 
     #region Interface
+    void IState.Loop()
+    {
+        
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (_isSelectUnit)
+                return;
+            HandleMouseClick();
+        }
+    }
+
     void IState.Enter()
     {
 
@@ -51,12 +77,9 @@ public class GameState : IState
 
     }
 
-    void IState.Loop()
+    void IMediatorEvent.HandleEvent(object data)
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            HandleMouseClick();
-        }
+        _isSelectUnit = false;
     }
     #endregion
 }

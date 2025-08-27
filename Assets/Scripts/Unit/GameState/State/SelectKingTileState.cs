@@ -35,6 +35,14 @@ public class SelectKingTileState : IState
     }
 
     #region Interface
+    void IState.Loop()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            HandleMouseClick();
+        }
+    }
+
     void IState.Enter()
     {
 
@@ -43,14 +51,6 @@ public class SelectKingTileState : IState
     void IState.Exit()
     {
 
-    }
-
-    void IState.Loop()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            HandleMouseClick();
-        }
     }
     #endregion
 }

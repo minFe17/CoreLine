@@ -290,6 +290,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stagePrefab: {fileID: 8145642074313702623, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+  buildUIPrefab: {fileID: 2185940711290431863, guid: e66f2226204a8ea448b4b19b4fcbcf01, type: 3}
+  destructUIPrefab: {fileID: 0}
+  _cancelIcon: {fileID: 0}
+  _destroyIcon: {fileID: 0}
 --- !u!4 &618426915
 Transform:
   m_ObjectHideFlags: 0
@@ -454,7 +458,7 @@ GameObject:
   - component: {fileID: 1360015042}
   - component: {fileID: 1360015041}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: Temp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -681,7 +685,7 @@ SceneRoots:
   - {fileID: 1021953960}
   - {fileID: 1728354915}
   - {fileID: 4031332}
-  - {fileID: 390857696}
   - {fileID: 2137617701}
-  - {fileID: 618426915}
   - {fileID: 1360015042}
+  - {fileID: 618426915}
+  - {fileID: 390857696}

@@ -87,6 +87,9 @@ public class BuildUI : MonoBehaviour
     public void OpenAtCell(Vector3Int cell, List<TowerOption> options)
         => OpenAtCell(cell, options, null);
 
+    public void OpenAtCell(Vector3Int cell, List<EUnitType> options)
+        => OpenAtCell(cell, options, null);
+
     /// <summary>
     /// 월드 좌표 기준으로 열기 (선택 시 실행할 콜백 전달 가능)
     /// </summary>
@@ -129,11 +132,68 @@ public class BuildUI : MonoBehaviour
         // 6) 표시
         _root.gameObject.SetActive(true);
     }
+    public void OpenAtWorld(Vector3 worldPos, List<EUnitType> options, Action<TowerOption> onPick)
+    {
+        _onPick = onPick;
+
+        _onPickCell = null;            // <- 셀 없는 콜백 모드
+        _hasCurrentCell = false;       // <- 셀 정보 초기화
+        if (!_wired) { Wire(); LogWireState(); }
+        if (!_wired || !_root || !_anchor || !_leftGrid || !_rightGrid) return;
+
+        // 1) 타일 중앙으로 스냅
+        MapManager map = MapManager.Instance;
+        if (map && map.IsReady)
+        {
+            Vector3Int cell = map.WorldToCell(worldPos);
+            worldPos = map.CellCenterWorld(cell);
+            _currentCell = cell;       // <- 현재 셀 저장
+            _hasCurrentCell = true;
+        }
+
+        // 2) 월드→스크린→로컬 변환
+        Camera uiCam = GetUiCamera();
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out var local);
+        _anchor.anchoredPosition = local;
+
+        // 3) 기존 버튼들 정리
+        ClearChildrenExceptTemplate(_leftGrid, null);
+        ClearChildrenExceptTemplate(_rightGrid, null);
+
+        // 4) 버튼 생성
+        FillGrids(options);
+
+        // 5) 레이아웃/보정
+        LayoutGrids();
+        AutoKeepInside();
+
+        // 6) 표시
+        _root.gameObject.SetActive(true);
+    }
+
 
     /// <summary>
     /// 셀(그리드 좌표)을 바로 전달하고 싶은 경우의 헬퍼.
     /// </summary>
     public void OpenAtCell(Vector3Int cell, List<TowerOption> options, Action<TowerOption, Vector3Int> onPickCell)
+    {
+        _onPick = null;          // 셀 없는 콜백은 안 씀
+        _onPickCell = null;      // ← 필드에 저장하지 않고
+        _currentCell = cell;
+        _hasCurrentCell = true;
+
+        MapManager map = MapManager.Instance;
+        Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
+
+        // 셀(capture) 포함 onPick 람다로 위임
+        OpenAtWorld(world, options, picked =>
+        {
+            onPickCell?.Invoke(picked, cell);
+        });
+    }
+
+    public void OpenAtCell(Vector3Int cell, List<EUnitType> options, Action<TowerOption, Vector3Int> onPickCell)
     {
         _onPick = null;          // 셀 없는 콜백은 안 씀
         _onPickCell = null;      // ← 필드에 저장하지 않고
@@ -259,6 +319,9 @@ public class BuildUI : MonoBehaviour
         _canvas = GetComponentInParent<Canvas>(true);
         if (!_canvas) _canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
+        if(transform.parent != _canvas.transform)
+            transform.SetParent(_canvas.transform);
+
         // 이름에 의존하지 말고, 자기 자신을 루트로
         _root = (RectTransform)transform;
 
@@ -333,11 +396,50 @@ public class BuildUI : MonoBehaviour
             }
             else
             {
-                btn.Bind(default, null); // 빈 슬롯
+                btn.Bind((TowerOption)default, null); // 빈 슬롯
             }
         }
     }
 
+    void FillGrids(List<EUnitType> options)
+    {
+        if (_runtimeButtonPrefab == null)
+        { Debug.LogError("[BuildUI] No TowerPlaceButton prefab."); return; }
+
+        options ??= new List<EUnitType>();
+
+        int perSide = cols * rows;   // 2×2 → 4
+        int maxTotal = perSide * 2;  // 8
+        int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
+
+        for (int i = 0; i < total; i++)
+        {
+            RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
+            TowerPlaceButton btn = Instantiate(_runtimeButtonPrefab, parent);
+            btn.gameObject.SetActive(true);
+
+            RectTransform rt = (RectTransform)btn.transform;
+            if (rt.sizeDelta == Vector2.zero) rt.sizeDelta = new Vector2(cell, cell);
+
+            if (i < options.Count)
+            {
+                EUnitType opt = options[i];
+                btn.Bind(opt, picked =>
+                {
+                    if (_onPickCell != null && _hasCurrentCell)
+                        _onPickCell.Invoke(picked, _currentCell);
+                    else
+                        _onPick?.Invoke(picked);
+
+                    Close();
+                });
+            }
+            else
+            {
+                btn.Bind((TowerOption)default, null); // 빈 슬롯
+            }
+        }
+    }
 
     // ─────────────────────────────────────────────────────────────────────
     // 내부 유틸

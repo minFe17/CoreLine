@@ -14,7 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_GroupName: UI
   m_GUID: 175635f6a31f3b243a1bbbc4645de59f
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: c178e96cf1774234bbcca438717b7adb
+    m_Address: DestructUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4e25915e8524994cbfd2de590d6c024
+    m_Address: BuildUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec5faec685c0f6049bcab969cc78e47a
+    m_Address: UnitSpriteAtlas
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b4ea09713c0206c41bbd752ebba986c7, type: 2}
   m_SchemaSet:

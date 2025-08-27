@@ -100,6 +100,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf128a63e7975954bade907828750990
+    m_Address: Archer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d34ceb5d29c7f4c4f9fa381c75ec21c1
     m_Address: BulletStriker
     m_ReadOnly: 0
@@ -112,11 +117,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d976f10332c81c34caaabdd4eb4ecacd
     m_Address: ThunderWizard
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e517e4243bcca9b4fa65f2a7585f10e5
-    m_Address: Archer
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
