@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Utils;
 
 /// <summary>
 /// 빌드 옵션 1개에 대한 데이터(아이콘/프리팹/비용 등).
@@ -219,6 +220,7 @@ public class BuildUI : MonoBehaviour
         _onPickCell = null;
         _hasCurrentCell = false;
         if (_root) _root.gameObject.SetActive(false);
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.EndSelectUnit);
     }
 
 
@@ -319,6 +321,7 @@ public class BuildUI : MonoBehaviour
         _canvas = GetComponentInParent<Canvas>(true);
         if (!_canvas) _canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
+        Debug.Log(transform.parent);
         if(transform.parent != _canvas.transform)
             transform.SetParent(_canvas.transform);
 

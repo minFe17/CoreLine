@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Utils;
 
 public class GameState : IState, IMediatorEvent
 {
     BuildUI _buildUI;
+    Canvas _canvas;
 
     bool _isSelectUnit;
     Vector3Int _cell;
@@ -36,7 +38,15 @@ public class GameState : IState, IMediatorEvent
             return;
         _isSelectUnit = true;
         if (_buildUI == null)
-            _buildUI = MonoSingleton<ObjectPoolManager>.Instance.Pull(EPrefabType.UI).GetComponent<BuildUI>();
+        {
+            if(_canvas == null)
+            {
+                var temp = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                _canvas = temp.GetComponent<Canvas>();
+                _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            }
+            _buildUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
+        }
         _buildUI.OpenAtCell(_cell, _test);
     }
 
