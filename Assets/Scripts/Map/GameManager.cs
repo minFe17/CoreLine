@@ -10,10 +10,12 @@ public class GameManager : MonoBehaviour
 
     [Header("BuildUI 프리팹 (없으면 Resources/UI/BuildUI 에서 시도)")]
     [SerializeField] private BuildUI buildUIPrefab;
+    [SerializeField] private DestructUI destructUIPrefab;
     [SerializeField] private Sprite _cancelIcon;
     [SerializeField] private Sprite _destroyIcon;
     private Camera _cam;
     private BuildUI _buildUI; // 런타임 인스턴스(또는 씬 상주 인스턴스)
+    private DestructUI _destructUI;
 
     void Awake()
     {
@@ -27,7 +29,6 @@ public class GameManager : MonoBehaviour
         // 3) 없으면 프리팹/리소스에서 생성
         if (_buildUI == null)
         {
-            // 캔버스 확보(없으면 생성)
             var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
             if (canvas == null)
             {
@@ -35,25 +36,25 @@ public class GameManager : MonoBehaviour
                 canvas = go.GetComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             }
-            // EventSystem 확보(없으면 생성)
             if (FindFirstObjectByType<EventSystem>() == null)
                 new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
-            // 프리팹 원본 확보(SerializeField > Resources)
-            var prefab = buildUIPrefab;
-            if (prefab == null)
-                prefab = Resources.Load<BuildUI>("UI/BuildUI");
-
-            if (prefab != null)
+            // 1) BuildUI 찾기 or 생성
+            _buildUI = FindFirstObjectByType<BuildUI>(FindObjectsInactive.Include);
+            if (_buildUI == null && buildUIPrefab != null)
             {
-                _buildUI = Instantiate(prefab, canvas.transform);
+                _buildUI = Instantiate(buildUIPrefab, canvas.transform);
                 _buildUI.gameObject.name = "BuildUI(Runtime)";
-                _buildUI.Close(); // 시작 시 닫아두기
+                _buildUI.Close();
             }
-            else
+
+            // 2) DestructUI 찾기 or 생성  ← 여기 중요!
+            _destructUI = FindFirstObjectByType<DestructUI>(FindObjectsInactive.Include);
+            if (_destructUI == null && destructUIPrefab != null)
             {
-                Debug.LogWarning("[GameManager] BuildUI 프리팹이 없습니다. " +
-                                 "Inspector의 buildUIPrefab에 드래그하거나 Resources/UI/BuildUI 경로에 두세요.");
+                _destructUI = Instantiate(destructUIPrefab, canvas.transform);
+                _destructUI.gameObject.name = "DestructUI(Runtime)";
+                _destructUI.Close();
             }
         }
     }
@@ -95,19 +96,19 @@ public class GameManager : MonoBehaviour
             // 1) 파괴 가능 벽 확인 모드
             if (map && map.IsReady && map.IsDestructible(cell))
             {
-                _buildUI.UseLayoutOnce(1, 1);
-
                 var options = new List<TowerOption>
         {
             new TowerOption("cancel",  _cancelIcon,  null, 0), // 왼쪽
             new TowerOption("destroy", _destroyIcon, null, 0), // 오른쪽
         };
 
-                _buildUI.OpenAtCell(cell, options, (picked, selectedCell) =>
+                _destructUI.OpenAtCell(cell, _cancelIcon, _destroyIcon, (picked, selectedCell) =>
                 {
                     if (picked.Id == "destroy")
-                        map.DestroyWallAt(selectedCell);
-                    // cancel은 아무 동작 X (Close는 BuildUI가 처리)
+                    {
+                        MapManager.Instance.DestroyWallAt(selectedCell);
+                    }
+                    // cancel 은 아무것도 안함
                 });
                 return;
             }

@@ -60,7 +60,6 @@ public class BuildUI : MonoBehaviour
     // 현재 세션의 선택 콜백
     private Action<TowerOption> _onPick;
 
-    private (int cols, int rows)? _layoutOnce;
     private bool _wired; // 배선 완료 여부
 
     // ─────────────────────────────────────────────────────────────────────
@@ -167,55 +166,40 @@ public class BuildUI : MonoBehaviour
     // 레이아웃 계산 (좌/우 2×2)
     // ─────────────────────────────────────────────────────────────────────
     // 파괴 가능 벽 눌렀을때 레이아웃
-    private (int useCols, int useRows) GetEffectiveLayout()
-    {
-        return (_layoutOnce?.cols ?? cols, _layoutOnce?.rows ?? rows);
-    }
 
-    public void UseLayoutOnce(int cols, int rows)
-    {
-        _layoutOnce = (cols, rows);
-    }
     void LayoutGrids()
     {
-        int useCols = _layoutOnce?.cols ?? cols;
-        int useRows = _layoutOnce?.rows ?? rows;
-
+        // 2×2 고정
         void Apply(GridLayoutGroup gl)
         {
             gl.cellSize = new Vector2(cell, cell);
             gl.spacing = new Vector2(spacing, spacing);
             gl.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gl.constraintCount = useCols; //  일회성/기본 열 수 반영
+            gl.constraintCount = cols; // 고정: 2
             gl.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gl.startAxis = GridLayoutGroup.Axis.Horizontal;
             gl.childAlignment = TextAnchor.UpperLeft;
         }
-
         Apply(_leftGrid.GetComponent<GridLayoutGroup>());
         Apply(_rightGrid.GetComponent<GridLayoutGroup>());
 
-        //  현재 레이아웃 기준으로 실제 그리드 박스 크기 계산
+        // 그리드 박스 크기 캐싱(2×2 기준)
         Vector2 gridSize = new(
-            useCols * cell + (useCols - 1) * spacing,
-            useRows * cell + (useRows - 1) * spacing
+            cols * cell + (cols - 1) * spacing,
+            rows * cell + (rows - 1) * spacing
         );
         _lastGridSize = gridSize;
 
-        // 좌측(타일 기준 왼쪽)
+        // 기본 배치: 왼쪽/오른쪽
         _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
         _leftGrid.pivot = new Vector2(1f, 0.5f);
         _leftGrid.sizeDelta = gridSize;
         _leftGrid.anchoredPosition = new Vector2(-gapFromTile, 0f);
 
-        // 우측(타일 기준 오른쪽)
         _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
         _rightGrid.pivot = new Vector2(0f, 0.5f);
         _rightGrid.sizeDelta = gridSize;
         _rightGrid.anchoredPosition = new Vector2(+gapFromTile, 0f);
-
-        // 이번 Open에만 적용되는 일회성 레이아웃 초기화
-        _layoutOnce = null;
     }
 
 
@@ -275,14 +259,13 @@ public class BuildUI : MonoBehaviour
         _canvas = GetComponentInParent<Canvas>(true);
         if (!_canvas) _canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
-        RectTransform panelRoot = FindChildRT(transform, "BuildPanel");
-        if (!panelRoot) panelRoot = (RectTransform)transform;
+        // 이름에 의존하지 말고, 자기 자신을 루트로
+        _root = (RectTransform)transform;
 
-        _root = panelRoot;
-        _dimmer = FindChildRT(panelRoot, "Dimmer");
-        _anchor = FindChildRT(panelRoot, "Anchor");
-        _leftGrid = FindChildRT(panelRoot, "LeftGrid");
-        _rightGrid = FindChildRT(panelRoot, "RightGrid");
+        _dimmer = FindChildRT(_root, "Dimmer");
+        _anchor = FindChildRT(_root, "Anchor");
+        _leftGrid = FindChildRT(_root, "LeftGrid");
+        _rightGrid = FindChildRT(_root, "RightGrid");
 
         StretchToFullScreen(_root);
 
@@ -322,11 +305,8 @@ public class BuildUI : MonoBehaviour
 
         options ??= new List<TowerOption>();
 
-        // 이번 Open에서 적용될 레이아웃 기준
-        var (useCols, useRows) = GetEffectiveLayout();
-        int perSide = useCols * useRows;   // 1x1이면 1, 2x2면 4
-        int maxTotal = perSide * 2;
-
+        int perSide = cols * rows;   // 2×2 → 4
+        int maxTotal = perSide * 2;  // 8
         int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
 
         for (int i = 0; i < total; i++)
@@ -343,7 +323,6 @@ public class BuildUI : MonoBehaviour
                 TowerOption opt = options[i];
                 btn.Bind(opt, picked =>
                 {
-                    // OpenAtCell은 이제 _onPick 경로로 들어온다(셀 캡처 람다)
                     if (_onPickCell != null && _hasCurrentCell)
                         _onPickCell.Invoke(picked, _currentCell);
                     else
@@ -354,10 +333,11 @@ public class BuildUI : MonoBehaviour
             }
             else
             {
-                btn.Bind(default, null); // 빈 슬롯(프리팹에서 아이콘/텍스트 비워두면 OK)
+                btn.Bind(default, null); // 빈 슬롯
             }
         }
     }
+
 
     // ─────────────────────────────────────────────────────────────────────
     // 내부 유틸
