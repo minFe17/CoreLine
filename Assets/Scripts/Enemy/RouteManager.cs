@@ -20,6 +20,10 @@ public class RouteManager : MonoBehaviour
     private bool _allowDestructibleForRoute = false;
     public bool AllowDestructibleForRoute => _allowDestructibleForRoute;
 
+    public enum RouteAllowance { None, WallsOnly, WallsAndTowers }
+    private RouteAllowance _routeAllowance = RouteAllowance.None;
+    public RouteAllowance Allowance => _routeAllowance;
+
     private void Awake()
     {
         if (!_map) _map = FindAnyObjectByType<TestMap>();
@@ -83,28 +87,26 @@ public class RouteManager : MonoBehaviour
 
     public void RebuildAndApply(bool force)
     {
-        if (_map == null) { _renderer?.Clear(); _lastPath = null; return; }
-
-
-        // 기지 설치 전에는 경로 표시 비활성
+        if (_map == null) { _renderer?.Clear(); _lastPath = null; _routeAllowance = RouteAllowance.None; return; }
 
         MapManager mm = MapManager.Instance;
         if (mm == null || !mm.HasPlayerBase)
         {
             _renderer?.Clear();
             _lastPath = null;
+            _routeAllowance = RouteAllowance.None;
             return;
         }
 
-        // 기본 경로 탐색
+        // 1단계: Walkable만
         List<Vector2Int> path = AStarPathfinder.FindPath(
             _map.Height, _map.Width,
             (r, c) => _map.IsWalkable(r, c),
             SpawnCell, GoalCell
         );
+        _routeAllowance = RouteAllowance.None;
 
-        // 탐색 실패 시 파괴벽 허용해서 재시도
-        _allowDestructibleForRoute = false;
+        // 2단계: 실패 시 "벽만" 허용
         if (path == null || path.Count == 0)
         {
             path = AStarPathfinder.FindPath(
@@ -112,13 +114,27 @@ public class RouteManager : MonoBehaviour
                 (r, c) => _map.IsWalkable(r, c) || _map.IsDestructible(r, c),
                 SpawnCell, GoalCell
             );
-            _allowDestructibleForRoute = (path != null && path.Count > 0);
+            if (path != null && path.Count > 0)
+                _routeAllowance = RouteAllowance.WallsOnly;
         }
-        
+
+        // 3단계: 그래도 실패면 "벽 + 타워" 허용
+        if (path == null || path.Count == 0)
+        {
+            path = AStarPathfinder.FindPath(
+                _map.Height, _map.Width,
+                (r, c) => _map.IsWalkable(r, c) || _map.IsDestructible(r, c) || _map.HasTower(r, c),
+                SpawnCell, GoalCell
+            );
+            if (path != null && path.Count > 0)
+                _routeAllowance = RouteAllowance.WallsAndTowers;
+        }
+
         if (path == null || path.Count == 0)
         {
             _renderer?.Clear();
             _lastPath = null;
+            _routeAllowance = RouteAllowance.None;
             return;
         }
 
@@ -126,7 +142,6 @@ public class RouteManager : MonoBehaviour
         {
             _renderer?.SetPath(_map, path);
             _lastPath = path;
-
             MonsterManager.Instance?.OnRouteChanged();
         }
     }

@@ -90,13 +90,16 @@ public class MonsterManager : MonoBehaviour
     public void SendAllToGoal()
     {
         if (!_route) return;
-        
-        bool allowDestructible = _route.AllowDestructibleForRoute;
+
+        var allowance = _route.Allowance; // RouteAllowance
 
         foreach (MonsterMover m in _monsters)
         {
             if (!m) continue;
-            m.MoveToCell(_route.GoalCell, allowDestructible);
+            bool allowWalls = (allowance == RouteManager.RouteAllowance.WallsOnly || allowance == RouteManager.RouteAllowance.WallsAndTowers);
+            bool allowTowers = (allowance == RouteManager.RouteAllowance.WallsAndTowers);
+
+            m.MoveToCell(_route.GoalCell, allowWalls, allowTowers);
         }
     }
 

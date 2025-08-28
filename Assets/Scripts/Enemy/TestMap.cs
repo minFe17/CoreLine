@@ -109,7 +109,8 @@ public class TestMap : MonoBehaviour
         Vector3Int abs = RCToAbsCell(r, c);
         if (on) 
             _map.MarkOccupied(abs);
-        else 
+        else
+            _map.UnregisterTower(abs);
             _map.UnmarkOccupied(abs);
     }
 

@@ -62,8 +62,7 @@ public static class AStarPathfinder
                 int ng = cur.G + 1;
                 if (!bestG.TryGetValue(np, out int oldG) || ng < oldG)
                 {
-                    bestG[np] = ng;
-                    Node nn = new Node(np, cur, ng, Heu(np, goal));
+                    bestG[np] = ng;                    Node nn = new Node(np, cur, ng, Heu(np, goal));
 
                     int idx = open.FindIndex(n => n.P == np);
                     if (idx >= 0) open[idx] = nn; else open.Add(nn);

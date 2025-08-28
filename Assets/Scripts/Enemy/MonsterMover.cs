@@ -31,6 +31,9 @@ public class MonsterMover : MonoBehaviour
     private Monster _monster;
     private bool _allowDestructible = false;
 
+    private bool _allowWalls = false;
+    private bool _allowTowers = false;
+
     private void Start()
     {
         if (!_map) _map = FindAnyObjectByType<TestMap>();
@@ -48,21 +51,19 @@ public class MonsterMover : MonoBehaviour
         MoveToCell(dst);
     }
 
-    public void MoveToCell(Vector2Int dst, bool allowDestructible = false)
+    public void MoveToCell(Vector2Int dst, bool allowWalls , bool allowTowers)
     {
         _attackTimer = 0;
-
         _dstCell = dst;
-        _allowDestructible = allowDestructible;
+        _allowWalls = allowWalls;
+        _allowTowers = allowTowers;
         _hasDestination = true;
 
         List<Vector2Int> path = AStarPathfinder.FindPath(
-        _map.Height, _map.Width,
-        (r, c) => _allowDestructible
-                  ? (_map.IsWalkable(r, c) || _map.IsDestructible(r, c))
-                  : _map.IsWalkable(r, c),
-        Cell, _dstCell
-    );
+            _map.Height, _map.Width,
+            (r, c) => IsPassableOrTarget(r, c),
+            Cell, _dstCell
+        );
 
         if (path == null || path.Count <= 1)
         {
@@ -75,6 +76,21 @@ public class MonsterMover : MonoBehaviour
         if (_moveCo != null) StopCoroutine(_moveCo);
         IsFollowingPath = true;
         _moveCo = StartCoroutine(Follow(path));
+    }
+
+    private bool IsPassableOrTarget(int r, int c)
+    {
+        // 경로 탐색용: 이동 가능이거나, 이번 단계에서 '파괴 대상으로 허용'된 셀이면 true
+        if (_map.IsWalkable(r, c)) return true;
+        if (_allowWalls && _map.IsDestructible(r, c)) return true;
+        if (_allowTowers && _map.HasTower(r, c)) return true;
+        return false;
+    }
+
+    private bool IsPassableOnly(int r, int c)
+    {
+        // 실제 이동 중 '그 칸이 지금 즉시 통과 가능한가' (파괴 완료 전에는 false)
+        return _map.IsWalkable(r, c);
     }
 
     private IEnumerator Follow(List<Vector2Int> path)
@@ -94,24 +110,34 @@ public class MonsterMover : MonoBehaviour
 
             Vector2Int step = path[i];
 
-            if (_allowDestructible && _map.IsDestructible(step.x, step.y))
+            if ((_allowWalls && _map.IsDestructible(step.x, step.y)) ||
+    (_allowTowers && _map.HasTower(step.x, step.y)))
             {
                 if (_monster != null && _monster.IsAttackReady())
                     _monster.FireAttackTrigger();
 
+                // 공격 애니 끝까지 기다림(현재 애니 락 해제 신호 기준)
                 yield return new WaitUntil(() => _monster != null && _monster.IsAttackReady());
-                _map.SetDestructible(step.x, step.y, false);
+
+                // 실제 파괴
+                if (_allowWalls && _map.IsDestructible(step.x, step.y))
+                    _map.SetDestructible(step.x, step.y, false);
+                else if (_allowTowers && _map.HasTower(step.x, step.y))
+                    _map.SetTower(step.x, step.y, false);
+
+                // 이 칸이 이제 통과 가능해졌으므로 동일 인덱스 재시도
                 i--;
                 continue;
             }
 
-            if (_hasDestination && !IsPassable(step.x, step.y))
+
+            if (_hasDestination && !IsPassableOnly(step.x, step.y))
             {
                 List<Vector2Int> newPath = AStarPathfinder.FindPath(
-                    _map.Height, _map.Width,
-                    (r, c) => IsPassable(r, c),
-                    Cell, _dstCell
-                );
+        _map.Height, _map.Width,
+        (r, c) => IsPassableOrTarget(r, c),
+        Cell, _dstCell
+    );
 
 
                 if (newPath != null && newPath.Count > 1)
