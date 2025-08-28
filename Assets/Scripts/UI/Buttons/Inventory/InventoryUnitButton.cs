@@ -12,7 +12,6 @@ public class InventoryUnitButton : UnitButton
     private ColorType _originalColorType;
  
 
-
     public override InventoryData Data
     {
         get { return _data; }

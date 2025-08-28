@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 3507135904835128084}
   - component: {fileID: 6128640437987787614}
   - component: {fileID: 635801371913606175}
+  - component: {fileID: 2443476541087917817}
   m_Layer: 5
   m_Name: SelectableUnitButton
   m_TagString: Untagged
@@ -143,7 +144,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ca0aa50be6e934be5a3e1f0ed8ef4ccf, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e613fa5273df54cc8a6b9f3810ff8a75, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -209,3 +210,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1558bc62db0cfea4dacdc5837b9652ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2443476541087917817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4045594382095360603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 050c71cd99380eb49a5b6574f783d4fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorType: 1
