@@ -15,4 +15,6 @@ public class FusionData
     {
         get => _materialUnit.Select(type => (EUnitType)Enum.Parse(typeof(EUnitType), type)).ToList().AsReadOnly();
     }
+
+    public UnitState FusionUnitState { get => _fusionUnitState; }
 }

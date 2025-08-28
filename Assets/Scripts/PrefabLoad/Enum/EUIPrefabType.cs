@@ -1,6 +1,7 @@
 public enum EUIPrefabType
 {
     BuildUI,
-    TwoButtonPanel,
+    TwoButtonPanel, 
+    UnitHpBar,
     Max,
 }

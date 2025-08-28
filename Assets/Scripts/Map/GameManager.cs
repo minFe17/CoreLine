@@ -70,48 +70,48 @@ public class GameManager : MonoBehaviour
             else Debug.LogError("[GameManager] stagePrefab이 비어있습니다.");
         }
 
-        // 좌클릭
-        if (Input.GetMouseButtonDown(0))
-        {
-            // 1) 먼저 ObjectTile 클릭인지 검사 → 맞으면 '발동' 패널 열고 종료
-            if (TryOpenObjectTilePanel()) return;
+        //// 좌클릭
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    // 1) 먼저 ObjectTile 클릭인지 검사 → 맞으면 '발동' 패널 열고 종료
+        //    if (TryOpenObjectTilePanel()) return;
 
-            // 2) UI 위 클릭이면 무시
-            if (IsPointerOverUI()) return;
+        //    // 2) UI 위 클릭이면 무시
+        //    if (IsPointerOverUI()) return;
 
-            // 3) 파괴/빌드 로직
-            var map = MapManager.Instance;
-            if (!map || !map.IsReady) return;
+        //    // 3) 파괴/빌드 로직
+        //    var map = MapManager.Instance;
+        //    if (!map || !map.IsReady) return;
 
-            Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
-            world.z = 0f;
-            Vector3Int cell = map.WorldToCell(world);
+        //    Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
+        //    world.z = 0f;
+        //    Vector3Int cell = map.WorldToCell(world);
 
-            // 파괴 가능 벽이면 '파괴' 패널
-            if (map.IsDestructible(cell))
-            {
-                _panel.OpenAtCell(cell, "파괴", (id, payload) =>
-                {
-                    map.DestroyWallAt((Vector3Int)payload);
-                });
-                return;
-            }
+        //    // 파괴 가능 벽이면 '파괴' 패널
+        //    if (map.IsDestructible(cell))
+        //    {
+        //        _panel.OpenAtCell(cell, "파괴", (id, payload) =>
+        //        {
+        //            map.DestroyWallAt((Vector3Int)payload);
+        //        });
+        //        return;
+        //    }
 
-            // 일반 빌드 UI
-            if (_buildUI == null) return;
+        //    // 일반 빌드 UI
+        //    if (_buildUI == null) return;
 
-            var buildOptions = MakeOptionsForTest(8); // 실제 옵션으로 교체 가능
-            _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
-            {
-                if (picked.Prefab == null) return;
-                var info = map.GetPlaceInfo(selectedCell);
-                if (!info.Placeable) return;
+        //    var buildOptions = MakeOptionsForTest(8); // 실제 옵션으로 교체 가능
+        //    _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
+        //    {
+        //        if (picked.Prefab == null) return;
+        //        var info = map.GetPlaceInfo(selectedCell);
+        //        if (!info.Placeable) return;
 
-                Vector3 pos = map.CellCenterWorld(selectedCell);
-                var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
-                map.RegisterTower(selectedCell, go);
-            });
-        }
+        //        Vector3 pos = map.CellCenterWorld(selectedCell);
+        //        var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
+        //        map.RegisterTower(selectedCell, go);
+        //    });
+        //}
     }
 
     // ───────── 유틸 ─────────

@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Utils;
 
 public class TwoButtonUI : MonoBehaviour
 {
@@ -130,6 +131,7 @@ public class TwoButtonUI : MonoBehaviour
         _onPick = null;
         _payload = null;
         if (_root) _root.gameObject.SetActive(false);
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.EndSelectTile);
     }
 
     private void PlaceBtn(RectTransform rt, bool rightSide)

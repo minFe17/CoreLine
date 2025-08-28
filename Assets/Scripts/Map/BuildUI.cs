@@ -220,7 +220,7 @@ public class BuildUI : MonoBehaviour
         _onPickCell = null;
         _hasCurrentCell = false;
         if (_root) _root.gameObject.SetActive(false);
-        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.EndSelectUnit);
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.EndSelectTile);
     }
 
 

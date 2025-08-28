@@ -12,9 +12,9 @@ public class KingUnit : Unit
 
     void OnEnable()
     {
-        if (_data == null)
-            _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
-        _currentHp = _data.UnitState.HP;
+        if (_unitStateData == null)
+            _unitStateData = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level].UnitState;
+        _currentHp = _unitStateData.HP;
         _isDie = false;
     }
 

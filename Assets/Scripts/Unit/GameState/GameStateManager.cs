@@ -15,6 +15,16 @@ public class GameStateManager : MonoBehaviour
         Loop();
     }
 
+    public void SetState()
+    {
+        _gameStateDict = new Dictionary<EGameStateType, IState>
+        {
+            { EGameStateType.SelectKingTile, new SelectKingTileState() },
+            {EGameStateType.Game, new GameState() }
+        };
+        ChangeState(EGameStateType.SelectKingTile);
+    }
+
     public void ChangeState(EGameStateType key)
     {
         if (_currentState == _gameStateDict[key])
@@ -33,21 +43,9 @@ public class GameStateManager : MonoBehaviour
         _currentState.Loop();
     }
 
-    public void SetState()
-    {
-        _gameStateDict = new Dictionary<EGameStateType, IState>
-        {
-            { EGameStateType.SelectKingTile, new SelectKingTileState() },
-            {EGameStateType.Game, new GameState() }
-        };
-        ChangeState(EGameStateType.SelectKingTile);
-    }
-
     public void CreateUnit(EUnitType unitType)
     {
         if (_currentState is GameState gameState)
             gameState.CreateUnit(unitType);
     }
-
-    
 }

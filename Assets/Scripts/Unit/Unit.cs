@@ -4,21 +4,24 @@ using Utils;
 public class Unit : MonoBehaviour
 {
     Vector3Int _cell;
-    protected UnitLevelData _data;
+    HpBar _hpBar;
+
+    protected UnitState _unitStateData;
     protected Animator _animator;
     protected int _level;
 
     protected int _currentHp;
     protected bool _isDie;
 
-    public UnitLevelData Data { get => _data; }
     public Animator Animator { get => _animator; }
     public bool IsDie { get => _isDie; }
     public Vector3Int Cell { get => _cell; set => _cell = value; }
+    public UnitState UnitStateData { get => _unitStateData; }
+    public HpBar HpBar { set => _hpBar = value; }
 
-    protected virtual void CheckAttackRange()
+    public virtual void ClickUnit()
     {
-        if (_data.UnitState.AttackRange != 0)
+        if (_unitStateData.AttackRange != 0)
             SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
         else
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
@@ -30,10 +33,16 @@ public class Unit : MonoBehaviour
             return;
 
         _currentHp -= damage;
+        _hpBar.ChangeHp((float)_currentHp / _unitStateData.HP);
+
         if (_currentHp <= 0)
+        {
             _animator.SetTrigger("doDie");
+        }
         else
+        {
             _animator.SetTrigger("doHit");
+        }
     }
 
     public void UnregisterCell()
@@ -46,5 +55,6 @@ public class Unit : MonoBehaviour
     {
         _isDie = true;
         UnregisterCell();
+        MonoSingleton<ObjectPoolManager>.Instance.Push(EUIPrefabType.UnitHpBar, _hpBar.gameObject);
     }
 }

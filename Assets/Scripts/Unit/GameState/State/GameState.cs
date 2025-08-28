@@ -17,8 +17,8 @@ public class GameState : IState, IMediatorEvent
 
     public GameState()
     {
-        SimpleSingleton<MediatorManager>.Instance.Register(EMediatorType.EndSelectUnit, this);
-        
+        SimpleSingleton<MediatorManager>.Instance.Register(EMediatorType.EndSelectTile, this);
+        CreateUI();
     }
 
     void HandleMouseClick()
@@ -31,7 +31,7 @@ public class GameState : IState, IMediatorEvent
         _worldPosition = cellCenter;
 
         ShowBuildUI();
-        ShowDestructUI();
+        ShowMapInteractUI();
     }
 
     void CreateUI()
@@ -44,14 +44,18 @@ public class GameState : IState, IMediatorEvent
         }
         _buildUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
         _twoButtonUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.TwoButtonPanel)).GetComponent<TwoButtonUI>();
+        _twoButtonUI.transform.SetParent(_canvas.transform);
     }
 
     void ShowBuildUI()
     {
         MapManager.PlaceInfo info = MapManager.Instance.GetPlaceInfo(_cell);
+
         if (info.Occupied)
         {
-
+            Unit unit = SimpleSingleton<MapUnitManager>.Instance.GetUnit(_cell);
+            if(unit != null)
+                unit.ClickUnit();
         }
         if (!info.Placeable)
             return;
@@ -61,20 +65,52 @@ public class GameState : IState, IMediatorEvent
         _buildUI.OpenAtCell(_cell, _test);
     }
 
-    void ShowDestructUI()
+    void ShowMapInteractUI()
     {
-        //if (!MapManager.Instance.IsDestructible(_cell))
-        //    return;
-        //if (_canvas == null)
-        //    CreateUI();
-        //_isSelectTile = true;
-        //_destructUI.OpenAtCell(_cell);
+        if (TryOpenObjectTilePanel()) return;
+        if (MapManager.Instance.IsDestructible(_cell))
+        {
+            _isSelectTile = true;
+            _twoButtonUI.OpenAtCell(_cell, "파괴", (id, payload) =>
+            {
+                MapManager.Instance.DestroyWallAt((Vector3Int)payload);
+            });
+        }
+    }
+
+    bool TryOpenObjectTilePanel()
+    {
+        Camera camera = Camera.main;
+
+        Vector3 wp = camera.ScreenToWorldPoint(Input.mousePosition);
+        wp.z = 0f;
+
+        // 겹침 고려해서 전 레이어 검사
+        Collider2D[] hits = Physics2D.OverlapPointAll((Vector2)wp, ~0);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider2D h = hits[i];
+            if (h && h.TryGetComponent<ObjectTile>(out ObjectTile objectTile))
+            {
+                _isSelectTile = true;
+                _twoButtonUI.OpenAtObject(objectTile, "발동", (id, payload) =>
+                {
+                    if (payload is ObjectTile objectTile) objectTile.Activate();
+                });
+                return true;
+            }
+        }
+        return false;
     }
 
     public void CreateUnit(EUnitType unitType)
     {
         GameObject unit = MonoSingleton<ObjectPoolManager>.Instance.Pull(unitType);
+        GameObject hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar);
         unit.transform.position = _worldPosition;
+        hpBar.GetComponent<RectTransform>().position += unit.transform.position;
+        unit.GetComponent<Unit>().HpBar = hpBar.GetComponent<HpBar>();
+
 
         MapManager.Instance.RegisterTower(_cell, unit);
         SimpleSingleton<MapUnitManager>.Instance.AddUnit(_cell, unit.GetComponent<Unit>());

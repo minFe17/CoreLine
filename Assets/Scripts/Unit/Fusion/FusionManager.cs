@@ -64,15 +64,20 @@ public class FusionManager : MonoBehaviour
     void CreateFusedUnit(FusionData fusionData, Vector3 position)
     {
         SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
-        GameObject fusedObject = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType);
-        fusedObject.transform.position = position;
-        MapManager.Instance.RegisterTower(_baseUnit.Cell, fusedObject);
-        //fusedObject.GetComponent<FusionUnit>().Cell = _baseUnit.Cell;
+        FusionUnit fusionUnit = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType).GetComponent<FusionUnit>();
+        GameObject hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar);
+
+        fusionUnit.transform.position = position;
+        hpBar.GetComponent<RectTransform>().position += fusionUnit.transform.position;
+
+        fusionUnit.HpBar = hpBar.GetComponent<HpBar>();
+
+        MapManager.Instance.RegisterTower(_baseUnit.Cell, fusionUnit.gameObject);
+        fusionUnit.Cell = _baseUnit.Cell;
     }
 
     void ReturnUnitsToPool(TowerUnit unitA, TowerUnit unitB)
     {
-        unitA.UnregisterCell();
         unitB.UnregisterCell();
 
         _fusionableUnit[unitA.UnitType].Remove(unitA);

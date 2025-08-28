@@ -1,6 +1,6 @@
 public enum EMediatorType
 {
     Fusion,
-    EndSelectUnit,
+    EndSelectTile,
     Max,
 }

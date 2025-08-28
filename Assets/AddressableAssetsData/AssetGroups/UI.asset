@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: UI
   m_GUID: 175635f6a31f3b243a1bbbc4645de59f
   m_SerializeEntries:
+  - m_GUID: 502acc4e0346c63449881cbf9b7c46f4
+    m_Address: UnitHpBar
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c4e25915e8524994cbfd2de590d6c024
     m_Address: BuildUI
     m_ReadOnly: 0

@@ -5,9 +5,10 @@ using Utils;
 
 public class TowerUnit : Unit
 {
-
     [SerializeField] protected EUnitType _unitType;
     [SerializeField] List<GameObject> _levelUnit;
+
+    UnitLevelData _data;
 
     int _originalLayer;
 
@@ -21,7 +22,8 @@ public class TowerUnit : Unit
         _level = 0;
         UpgradeCharacter();
         SetLevel();
-        _currentHp = _data.UnitState.HP;
+        _unitStateData = _data.UnitState;
+        _currentHp = _unitStateData.HP;
     }
 
     // Test
@@ -37,8 +39,9 @@ public class TowerUnit : Unit
             TakeDamage(30);
     }
 
-    private void OnMouseUp()
+    public override void ClickUnit()
     {
+        base.ClickUnit();
         if (_level != _levelUnit.Count - 1)
             return;
         Fusion();
@@ -64,6 +67,7 @@ public class TowerUnit : Unit
     void UpgradeCharacter()
     {
         _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
+        _unitStateData = _data.UnitState;
         _animator = _levelUnit[_level].GetComponent<Animator>();
         DieEvent temp = GetCurrentUnit().AddComponent<DieEvent>();
         temp.Init(this);
@@ -112,7 +116,6 @@ public class TowerUnit : Unit
 
     public void Fusion()
     {
-        // 퓨전 가능한 유닛 누르면 지금 유닛이랑 그 유닛 없애고 이 위치에 퓨전 유닛 소환
         SimpleSingleton<FusionManager>.Instance.Fusion(this);
     }
 }

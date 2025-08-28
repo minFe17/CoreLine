@@ -291,9 +291,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stagePrefab: {fileID: 8145642074313702623, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
   buildUIPrefab: {fileID: 2185940711290431863, guid: e66f2226204a8ea448b4b19b4fcbcf01, type: 3}
-  destructUIPrefab: {fileID: 0}
-  _cancelIcon: {fileID: 0}
-  _destroyIcon: {fileID: 0}
+  twoButtonUIPrefab: {fileID: 0}
 --- !u!4 &618426915
 Transform:
   m_ObjectHideFlags: 0
@@ -371,7 +369,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

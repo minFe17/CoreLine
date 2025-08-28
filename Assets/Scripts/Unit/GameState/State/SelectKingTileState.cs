@@ -21,7 +21,10 @@ public class SelectKingTileState : IState
             return false;
 
         GameObject king = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUnitType.King);
+        GameObject hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar);
         king.transform.position = worldPosition;
+        hpBar.GetComponent<RectTransform>().position += king.transform.position;
+        king.GetComponent<Unit>().HpBar = hpBar.GetComponent<HpBar>();
 
         MapManager.Instance.ConvertKingToBuildable(cell);
         MapManager.Instance.RegisterTower(cell, king);
