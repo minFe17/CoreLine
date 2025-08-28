@@ -2,15 +2,22 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using static UnityEditor.PlayerSettings;
 
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance => Utils.MonoSingleton<MapManager>.Instance;
+
     private bool _hasSpawn;
     private Vector3Int _spawnCell;
+
+    private bool _hasBossSpawn;
+    private Vector3Int _bossSpawnCell;
+
     private GameObject _stageRoot;
     private Grid _grid;
-    private Tilemap _tmBuildable, _tmUnbuildable, _tmWall, _tmDestructible, _tmDeco, _tmKing, _tmObjects, _tmMonsterSpawn;
+    private Tilemap _tmBuildable, _tmUnbuildable, _tmWall, _tmDestructible, 
+                    _tmDeco, _tmKing, _tmObjects, _tmMonsterSpawn, _tmBossSpawn;
 
     private readonly HashSet<Vector3Int> _occupied = new();
     private readonly Dictionary<Vector3Int, GameObject> _towers = new(); // 셀 → 타워 오브젝트
@@ -24,7 +31,12 @@ public class MapManager : MonoBehaviour
     // 네비/배치 변경 알림(타워 설치/제거, 파괴벽 변경 등)
     public Action<Vector3Int> OnCellChanged;
     public event Action<Vector3Int> OnPlayerBasePlaced; // 플레이어 베이스가 배치됐을 때
+    public bool HasBossSpawn => _hasBossSpawn;
+    public Vector3Int BossSpawnCell => _bossSpawnCell;
+    public Vector3 BossSpawnWorld => (IsReady && _hasBossSpawn) ? CellCenterWorld(_bossSpawnCell) : Vector3.zero;
 
+    //맵 로드시 바로 소환하고 싶을 때
+    public event Action<Vector3Int> OnBossSpawnFound;
     // ───────────────────────────────────────────────────────────────────────
     // 스테이지 로드/바인드/언로드
     // ───────────────────────────────────────────────────────────────────────
@@ -48,6 +60,7 @@ public class MapManager : MonoBehaviour
         //SetupCollisionLayers();
         WireDestructibleController();
         InitSpawnCell();
+        InitBossSpawnCell();
     }
 
     public void BindStageRoot(Transform stageRoot)
@@ -59,6 +72,7 @@ public class MapManager : MonoBehaviour
         //SetupCollisionLayers();
         WireDestructibleController();
         InitSpawnCell();
+        InitBossSpawnCell();
     }
 
     public void UnloadStage()
@@ -70,6 +84,8 @@ public class MapManager : MonoBehaviour
         _playerBaseCell = default;
         _hasSpawn = false;
         _spawnCell = default;
+        _hasBossSpawn = false;
+        _bossSpawnCell = default;
 
         _grid = null;
         _tmBuildable = _tmUnbuildable = _tmWall = _tmDestructible = _tmDeco = null;
@@ -92,12 +108,40 @@ public class MapManager : MonoBehaviour
                 if (_hasSpawn)
                 {
                     Debug.LogWarning($"[MapManager] Spawn 타일이 여러 개입니다. 첫 번째({_spawnCell})만 사용, 나머지 {cell} 무시.");
-                    continue;
+                    break; // 첫 번째만 쓰고 바로 종료
                 }
+
                 _spawnCell = cell;
                 _hasSpawn = true;
+                break; // 첫 번째 찾았으면 바로 종료
             }
         }
+    }
+
+    private void InitBossSpawnCell()
+    {
+        _hasBossSpawn = false;
+        _bossSpawnCell = default;
+        if (_tmBossSpawn == null) return;
+
+        foreach (Vector3Int cell in _tmBossSpawn.cellBounds.allPositionsWithin)
+        {
+            if (_tmBossSpawn.HasTile(cell))
+            {
+                if (_hasBossSpawn)
+                {
+                    Debug.LogWarning($"[MapManager] BossSpawn 타일이 여러 개입니다. 첫 번째({_bossSpawnCell})만 사용, {cell} 무시.");
+                    break; // 첫 번째만 쓰고 바로 종료
+                }
+
+                _bossSpawnCell = cell;
+                _hasBossSpawn = true;
+                break; // 첫 번째 찾았으면 바로 종료
+            }
+        }
+
+        if (_hasBossSpawn)
+            OnBossSpawnFound?.Invoke(_bossSpawnCell);
     }
 
     // ───────────────────────────────────────────────────────────────────────
@@ -223,14 +267,6 @@ public class MapManager : MonoBehaviour
     }
     public NavInfo GetNavInfoWorld(Vector3 worldPos) => GetNavInfo(WorldToCell(worldPos));
 
-    //public List<Vector3Int> GetSpawnCells()
-    //{
-    //    var list = new List<Vector3Int>();
-    //    if (_tmMonsterSpawn == null) return list;
-    //    foreach (var c in _tmMonsterSpawn.cellBounds.allPositionsWithin)
-    //        if (_tmMonsterSpawn.HasTile(c)) list.Add(c);
-    //    return list;
-    //}
     //실수 방지
     public bool TryGetSpawnCell(out Vector3Int cell)
     {
@@ -242,23 +278,27 @@ public class MapManager : MonoBehaviour
     {
         return _hasSpawn ? CellCenterWorld(_spawnCell) : Vector3.zero;
     }
-    //
-    //public bool IsTowerPlaceableCell(Vector3Int cell) => GetPlaceInfo(cell).placeable;
-    //public bool IsTowerPlaceableWorld(Vector3 worldPos) => GetPlaceInfoWorld(worldPos).placeable;
-    //
-    //public bool IsBlockedCell(Vector3Int cell) => GetNavInfo(cell).blocked;
-    //public bool IsBlockedWorld(Vector3 worldPos) => GetNavInfoWorld(worldPos).blocked;
-    //
-    //public bool IsBlockedByTower(Vector3Int cell) => GetNavInfo(cell).blockedByTower;
+    public bool TryGetBossSpawnCell(out Vector3Int cell)
+    {
+        cell = _bossSpawnCell;
+        return _hasBossSpawn;
+    }
+    public Vector3 GetBossSpawnWorld()
+    {
+        return _hasBossSpawn? CellCenterWorld(_bossSpawnCell) : Vector3.zero;
+    }
+    // ───────────────────────────────────────────────────────────────────────
+    // 스테이지 로드하고 바로 보스 소환시
+    // ───────────────────────────────────────────────────────────────────────
+    // MapManager.Instance.OnBossSpawnFound += cell =>
+    // {
+    //     Vector3 pos = MapManager.Instance.CellCenterWorld(cell);
+    //     Instantiate(bossPrefab, pos, Quaternion.identity);
+    // };
 
     //몬스터가 타워 공격 하는 용
     public bool TryGetTowerAt(Vector3Int cell, out GameObject tower) => _towers.TryGetValue(cell, out tower);
-    //
-    //public bool HasTower(Vector3Int cell) => _towers.ContainsKey(cell);
-    //public bool IsWall(Vector3Int cell) => _tmWall && _tmWall.HasTile(cell);
-    //public bool IsDestructible(Vector3Int cell) => _tmDestructible && _tmDestructible.HasTile(cell);
-    //public bool IsBuildable(Vector3Int cell) => _tmBuildable && _tmBuildable.HasTile(cell);
-
+    
     // ───────────────────────────────────────────────────────────────────────
     // 배치/점유 갱신
     // ───────────────────────────────────────────────────────────────────────
@@ -346,6 +386,8 @@ public class MapManager : MonoBehaviour
         _tmKing = FindByName(stageRoot, "KingTile")?.GetComponent<Tilemap>();
         _tmObjects = FindByName(stageRoot, "ObjectsTile")?.GetComponent<Tilemap>();
         _tmMonsterSpawn = FindByName(stageRoot, "MonsterSpawnTile")?.GetComponent<Tilemap>();
+        _tmBossSpawn = FindByName(stageRoot, "BossSpawnTile")?.GetComponent<Tilemap>();
+
     }
 
     private Transform FindByName(Transform root, string name)
@@ -367,29 +409,6 @@ public class MapManager : MonoBehaviour
         if (!ctrl) ctrl = _tmDestructible.gameObject.AddComponent<DestructibleWall>();
         ctrl.Init(this, _tmDestructible);
     }
-
-    // ───────────────────────────────────────────────────────────────────────
-    // 오브젝트 타일 상호작용 관련
-    // ───────────────────────────────────────────────────────────────────────
-    // 해당 셀이 ObjectsTile인가?
-    //public bool IsObjectTile(Vector3Int cell) => _tmObjects && _tmObjects.HasTile(cell);
-
-    // 효과 트리거 이벤트(타일 이름을 함께 넘김)
-    //public event Action<Vector3Int, string> OnObjectTileTriggered;
-
-    // 효과 사용: 타일 제거 + 이벤트 발행
-    //public bool UseObjectTile(Vector3Int cell)
-    //{
-    //    if (_tmObjects == null || !_tmObjects.HasTile(cell)) return false;
-    //
-    //    // 어떤 오브젝트였는지 식별(타일 이름 활용)
-    //    string tileName = _tmObjects.GetTile(cell)?.name ?? "Object";
-    //    _tmObjects.SetTile(cell, null);
-    //
-    //    OnObjectTileTriggered?.Invoke(cell, tileName);
-    //    OnCellChanged?.Invoke(cell); // 필요 시 네비 갱신(비차단이라 영향은 없음)
-    //    return true;
-    //}
 
     // ───────────────────────────────────────────────────────────────────────
     // 맵 바운드/디버그
