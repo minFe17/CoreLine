@@ -24,6 +24,8 @@ public class MapManager : MonoBehaviour
     public bool IsReady => _grid != null;
     private bool _hasPlayerBase;
     private Vector3Int _playerBaseCell;
+    private Transform _objectsRoot;
+    private readonly HashSet<Vector3Int> _objectCells = new();
 
     public bool HasPlayerBase => _hasPlayerBase;
     public Vector3Int PlayerBaseCell => _playerBaseCell;
@@ -384,10 +386,37 @@ public class MapManager : MonoBehaviour
         _tmDestructible = FindByName(stageRoot, "DeWall")?.GetComponent<Tilemap>();
         _tmDeco = FindByName(stageRoot, "Decotile")?.GetComponent<Tilemap>();
         _tmKing = FindByName(stageRoot, "KingTile")?.GetComponent<Tilemap>();
-        _tmObjects = FindByName(stageRoot, "ObjectsTile")?.GetComponent<Tilemap>();
+        //_tmObjects = FindByName(stageRoot, "ObjectsTile")?.GetComponent<Tilemap>();
         _tmMonsterSpawn = FindByName(stageRoot, "MonsterSpawnTile")?.GetComponent<Tilemap>();
         _tmBossSpawn = FindByName(stageRoot, "BossSpawnTile")?.GetComponent<Tilemap>();
 
+        Transform objRoot = FindByName(stageRoot, "ObjectsTile");
+        _objectsRoot = objRoot;
+        _tmObjects = objRoot ? objRoot.GetComponent<Tilemap>() : null;
+
+        RebuildObjectsIndex();
+
+    }
+
+    private void RebuildObjectsIndex()
+    {
+        _objectCells.Clear();
+        if (_objectsRoot == null || _grid == null) return;
+
+        for (int i = 0; i < _objectsRoot.childCount; i++)
+        {
+            Transform child = _objectsRoot.GetChild(i);
+            if (!child.gameObject.activeInHierarchy) continue;
+
+            Vector3Int cell = _grid.WorldToCell(child.position);
+            _objectCells.Add(cell);
+            OnCellChanged?.Invoke(cell); 
+        }
+    }
+
+    private void OnTransformChildrenChanged()
+    {
+        if (_objectsRoot != null) RebuildObjectsIndex();
     }
 
     private Transform FindByName(Transform root, string name)
@@ -456,7 +485,7 @@ public class MapManager : MonoBehaviour
 
 
     // 실험/디버그용
-    public void GetCellFlags(Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied)
+    public void GetCellFlags(Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied, out bool objects)
     {
         buildable = _tmBuildable && _tmBuildable.HasTile(c);
         unbuildable = _tmUnbuildable && _tmUnbuildable.HasTile(c);
@@ -464,6 +493,10 @@ public class MapManager : MonoBehaviour
         destructible = _tmDestructible && _tmDestructible.HasTile(c);
         deco = _tmDeco && _tmDeco.HasTile(c);
         occupied = _towers.ContainsKey(c) || _occupied.Contains(c);
+
+        bool byTilemap = _tmObjects && _tmObjects.HasTile(c);
+        bool byChildren = _objectCells.Contains(c);
+        objects = byTilemap || byChildren;
     }
 
     public void DebugCheckTowerPlace(Vector3 worldPos)

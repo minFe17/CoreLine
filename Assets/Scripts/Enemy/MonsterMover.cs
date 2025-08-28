@@ -45,11 +45,6 @@ public class MonsterMover : MonoBehaviour
         transform.position = _map.CellToWorld(rc.x, rc.y);
     }
 
-    public void MoveToWorld(Vector3 world)
-    {
-        Vector2Int dst = _map.WorldToCell(world);
-        MoveToCell(dst);
-    }
 
     public void MoveToCell(Vector2Int dst, bool allowWalls , bool allowTowers)
     {
@@ -80,7 +75,7 @@ public class MonsterMover : MonoBehaviour
 
     private bool IsPassableOrTarget(int r, int c)
     {
-        // 경로 탐색용: 이동 가능이거나, 이번 단계에서 '파괴 대상으로 허용'된 셀이면 true
+        
         if (_map.IsWalkable(r, c)) return true;
         if (_allowWalls && _map.IsDestructible(r, c)) return true;
         if (_allowTowers && _map.HasTower(r, c)) return true;
@@ -89,7 +84,6 @@ public class MonsterMover : MonoBehaviour
 
     private bool IsPassableOnly(int r, int c)
     {
-        // 실제 이동 중 '그 칸이 지금 즉시 통과 가능한가' (파괴 완료 전에는 false)
         return _map.IsWalkable(r, c);
     }
 
@@ -110,22 +104,35 @@ public class MonsterMover : MonoBehaviour
 
             Vector2Int step = path[i];
 
-            if ((_allowWalls && _map.IsDestructible(step.x, step.y)) ||
-    (_allowTowers && _map.HasTower(step.x, step.y)))
+            if ((_allowWalls && _map.IsDestructible(step.x, step.y)) ||(_allowTowers && _map.HasTower(step.x, step.y)))
             {
-                if (_monster != null && _monster.IsAttackReady())
-                    _monster.FireAttackTrigger();
+                if (_monster != null)
+                {
+                    yield return new WaitUntil(() => _monster.IsAttackReady()); // 준비 대기
+                    _monster.FireAttackTrigger();                                // 트리거
+                    yield return new WaitUntil(() => _monster.IsAttackReady()); // 종료 대기
+                }
 
-                // 공격 애니 끝까지 기다림(현재 애니 락 해제 신호 기준)
-                yield return new WaitUntil(() => _monster != null && _monster.IsAttackReady());
-
-                // 실제 파괴
                 if (_allowWalls && _map.IsDestructible(step.x, step.y))
                     _map.SetDestructible(step.x, step.y, false);
                 else if (_allowTowers && _map.HasTower(step.x, step.y))
-                    _map.SetTower(step.x, step.y, false);
+                {
+                    Vector3 targetWorld = _map.CellToWorld(step.x, step.y);
+                    Vector3Int abs = MapManager.Instance.WorldToCell(targetWorld);
 
-                // 이 칸이 이제 통과 가능해졌으므로 동일 인덱스 재시도
+                    if (MapManager.Instance.TryGetTowerAt(abs, out GameObject towerGo) && towerGo)
+                    {
+                        var unit = towerGo.GetComponent<Unit>();
+                        if (unit != null && !unit.IsDie)
+                        {
+                            unit.TakeDamage(1);  
+
+                            i--;
+                            continue;
+                        }
+                    }
+                }
+                    
                 i--;
                 continue;
             }
@@ -134,10 +141,8 @@ public class MonsterMover : MonoBehaviour
             if (_hasDestination && !IsPassableOnly(step.x, step.y))
             {
                 List<Vector2Int> newPath = AStarPathfinder.FindPath(
-        _map.Height, _map.Width,
-        (r, c) => IsPassableOrTarget(r, c),
-        Cell, _dstCell
-    );
+                    _map.Height, _map.Width, (r, c) => IsPassableOrTarget(r, c),Cell, _dstCell
+                );
 
 
                 if (newPath != null && newPath.Count > 1)
@@ -158,7 +163,7 @@ public class MonsterMover : MonoBehaviour
             Vector3 target = _map.CellToWorld(step.x, step.y);
             while ((transform.position - target).sqrMagnitude > _arriveEps * _arriveEps)
             {
-                if (_hasDestination && !IsPassable(step.x, step.y))
+                if (_hasDestination && !IsPassableOnly(step.x, step.y))
                     break;
 
                 Vector3 prev = transform.position;
@@ -203,16 +208,6 @@ public class MonsterMover : MonoBehaviour
         _moveCo = null;
     }
 
-    private bool IsPassable(int r, int c)
-    {
-        return _allowDestructible
-            ? (_map.IsWalkable(r, c) || _map.IsDestructible(r, c))
-            : _map.IsWalkable(r, c);
-    }
-
-
-
-
     private bool CheckGoalRange()
     {
         if (_route == null) return false;
@@ -224,13 +219,6 @@ public class MonsterMover : MonoBehaviour
 
     private void Update()
     {
-        //if (Input.GetMouseButtonDown(1))
-        //{
-        //    Vector3 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //    wp.z = 0f;
-        //    MoveToWorld(wp);
-        //}
-
         if (CheckGoalRange())
         {
             if (IsFollowingPath)

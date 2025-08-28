@@ -15,6 +15,7 @@ public class GridVisualizer : MonoBehaviour
     [SerializeField] private Color _wallColor = new Color(1f, 0.2f, 0.2f, 0.45f);
     [SerializeField] private Color _destructibleColor = new Color(0.9f, 0.2f, 0.9f, 0.45f);
     [SerializeField] private Color _towerColor = new Color(1f, 0.6f, 0.2f, 0.5f);
+    [SerializeField] Color objectsColor = new Color(0.8f, 0.6f, 1f, 0.35f);
 
     private GameObject[,] _overlays;
 
@@ -87,6 +88,7 @@ public class GridVisualizer : MonoBehaviour
         if ((f & TestMap.CellFlags.Wall) != 0) sr.color = _wallColor;
         else if ((f & TestMap.CellFlags.Tower) != 0) sr.color = _towerColor;
         else if ((f & TestMap.CellFlags.Destructible) != 0) sr.color = _destructibleColor;
+        else if ((f & TestMap.CellFlags.Object) != 0) sr.color = objectsColor;
         else sr.color = _walkableColor;
     }
 
@@ -103,6 +105,7 @@ public class GridVisualizer : MonoBehaviour
                 if ((f & TestMap.CellFlags.Wall) != 0) col = _wallColor;
                 else if ((f & TestMap.CellFlags.Tower) != 0) col = _towerColor;
                 else if ((f & TestMap.CellFlags.Destructible) != 0) col = _destructibleColor;
+                else if ((f & TestMap.CellFlags.Object) != 0) col = objectsColor;
 
                 Gizmos.color = col;
                 Vector3 p = _map.CellToWorld(r, c);

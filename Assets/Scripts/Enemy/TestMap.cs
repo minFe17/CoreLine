@@ -6,7 +6,7 @@ public class TestMap : MonoBehaviour
 {
   
     [Flags]
-    public enum CellFlags { None = 0, Wall = 1 << 0, Destructible = 1 << 1, Tower = 1 << 2 }
+    public enum CellFlags { None = 0, Wall = 1 << 0, Destructible = 1 << 1, Tower = 1 << 2 , Object = 1 << 3 }
 
     public int Width { get; private set; }
     public int Height { get; private set; }
@@ -111,7 +111,6 @@ public class TestMap : MonoBehaviour
             _map.MarkOccupied(abs);
         else
             _map.UnregisterTower(abs);
-            _map.UnmarkOccupied(abs);
     }
 
     private void BuildSnapshotAll()
@@ -137,12 +136,16 @@ public class TestMap : MonoBehaviour
 
         _map.GetCellFlags(absCell,
             out bool buildable, out bool unbuildable,
-            out bool wall, out bool destructible, out bool deco, out bool occupied);
+            out bool wall, out bool destructible, out bool deco, 
+            out bool occupied, out bool objects);
 
         CellFlags f = CellFlags.None;
         if (wall) f |= CellFlags.Wall;
         if (destructible) f |= CellFlags.Destructible;
-        if (occupied) f |= CellFlags.Tower;  
+        if (objects) f |= CellFlags.Object;
+        bool hasTowerGO = MapManager.Instance.TryGetTowerAt(absCell, out _);
+        if (hasTowerGO)
+            f |= CellFlags.Tower;
         return f;
     }
 
