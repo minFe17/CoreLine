@@ -1,10 +1,5 @@
 [
     {
-        "UnitType" : "King",
-        "UnlockPrice":100,
-        "Information":"왕입니다요"
-    },
-    {
         "UnitType" : "Archer",
         "UnlockPrice":500,
         "Information":"궁수입니다요"
@@ -26,6 +21,51 @@
     },
     {
         "UnitType" : "Pirate",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "ThunderWizard",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "ShieldSoldier",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "Priest",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "Hunter",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "Hammer",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "FireWizard",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "Dwarf",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "Assassin",
+        "UnlockPrice":3000,
+        "Information":"도둑입니다요"
+    },
+    {
+        "UnitType" : "Gunner",
         "UnlockPrice":3000,
         "Information":"도둑입니다요"
     }

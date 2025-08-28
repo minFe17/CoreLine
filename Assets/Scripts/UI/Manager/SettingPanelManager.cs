@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,12 +23,18 @@ public class SettingPanelManager : MonoBehaviour
         _seleced = GameObject.Find("SelectedUnit");
         CreateSelectableButtons();
         CreateSelectedButtons();
-        EventManager.Instance.Subscribe("AddSelectedUnit", UpdateSelectedButtons);
-        EventManager.Instance.Subscribe("DeleteSelectedUnit", UpdateSelectedButtons);
+
     }
     private void OnEnable()
     {
         UpdateSelectableButtons();
+        EventManager.Instance.Subscribe("AddSelectedUnit", UpdateSelectedButtons);
+        EventManager.Instance.Subscribe("DeleteSelectedUnit", UpdateSelectedButtons);
+    }
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe("AddSelectedUnit", (Action)UpdateSelectedButtons);
+        EventManager.Instance.UnSubscribe("DeleteSelectedUnit", (Action)UpdateSelectedButtons);
     }
     private void CreateSelectableButtons()
     {
