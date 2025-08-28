@@ -7,7 +7,7 @@ using Newtonsoft.Json.Converters;
 [JsonConverter(typeof(StringEnumConverter))]
 public enum UpgradeType
 {
-    AttackDamage, AttackRange, HealthPoint
+    AttackDamage, AttackRange, HealthPoint,AttackSpeed
 }
 public class DataManager : SimpleSingleton<DataManager>
 {

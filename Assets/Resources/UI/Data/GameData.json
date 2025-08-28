@@ -5,7 +5,8 @@
             "UnitType":"Warrior",
             "AttackDamageLevel" :0,
             "HealthPointLevel":0,
-            "AttackRangeLevel":0 
+            "AttackRangeLevel":0 ,
+            "AttackSpeedLevel":0
         }
     ],
     "UnlockedLaboratoryId" : [],

@@ -15,4 +15,5 @@ public class UnlockedUnit
     public int AttackDatamageLevel;
     public int HealthPointLevel;
     public int AttackRangeLevel;
+    public int AttackSpeedLevel;
 }

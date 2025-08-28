@@ -5,7 +5,10 @@
       "_levelData": [
         {
           "_unitState": {
-            "_hp": 300
+            "_hp": 300,
+            "_attackDamage": 25,
+            "_attackSpeed": 3.5,
+            "_attackRange": 2.0
           }
         }
       ]
