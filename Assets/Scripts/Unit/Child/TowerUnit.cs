@@ -21,6 +21,7 @@ public class TowerUnit : Unit
         _level = 0;
         UpgradeCharacter();
         SetLevel();
+        _currentHp = _data.UnitState.HP;
     }
 
     // Test
@@ -32,6 +33,8 @@ public class TowerUnit : Unit
                 return;
             Upgrade();
         }
+        if(Input.GetKeyDown(KeyCode.Alpha4))
+            TakeDamage(30);
     }
 
     private void OnMouseUp()
@@ -39,6 +42,12 @@ public class TowerUnit : Unit
         if (_level != _levelUnit.Count - 1)
             return;
         Fusion();
+    }
+
+    public override void Die()
+    {
+        base.Die();
+        MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
     }
 
     void SetLevel()
@@ -56,6 +65,8 @@ public class TowerUnit : Unit
     {
         _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
         _animator = _levelUnit[_level].GetComponent<Animator>();
+        DieEvent temp = GetCurrentUnit().AddComponent<DieEvent>();
+        temp.Init(this);
     }
 
     void SetLayerRecursively(GameObject targetObject, int layer)
@@ -94,7 +105,7 @@ public class TowerUnit : Unit
         UpgradeCharacter();
         SetLevel();
         OnUpgrade?.Invoke();
-
+        
         if (IsMaxLevel())
             SimpleSingleton<FusionManager>.Instance.AddFusionableUnit(_unitType, this);
     }

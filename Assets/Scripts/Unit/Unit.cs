@@ -16,19 +16,12 @@ public class Unit : MonoBehaviour
     public bool IsDie { get => _isDie; }
     public Vector3Int Cell { get => _cell; set => _cell = value; }
 
-    void OnMouseDown()
+    protected virtual void CheckAttackRange()
     {
-        // UI 소환 
-
         if (_data.UnitState.AttackRange != 0)
             SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
         else
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
-    }
-
-    protected virtual void CheckAttackRange()
-    {
-        SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
     }
 
     public void TakeDamage(int damage)
@@ -46,14 +39,12 @@ public class Unit : MonoBehaviour
     public void UnregisterCell()
     {
         MapManager.Instance.UnregisterTower(_cell);
+        SimpleSingleton<MapUnitManager>.Instance.RemoveUnit(_cell);
     }
 
-    #region Animation Event
-    protected virtual void Die()
+    public virtual void Die()
     {
         _isDie = true;
-        // 오브젝트 풀링
-
+        UnregisterCell();
     }
-    #endregion
 }

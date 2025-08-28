@@ -25,6 +25,8 @@ public class SelectKingTileState : IState
 
         MapManager.Instance.ConvertKingToBuildable(cell);
         MapManager.Instance.RegisterTower(cell, king);
+        SimpleSingleton<MapUnitManager>.Instance.AddUnit(cell, king.GetComponent<Unit>());
+
 
         return true;
     }

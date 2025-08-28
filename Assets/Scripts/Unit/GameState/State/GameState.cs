@@ -6,9 +6,10 @@ using Utils;
 public class GameState : IState, IMediatorEvent
 {
     BuildUI _buildUI;
+    DestructUI _destructUI;
     Canvas _canvas;
 
-    bool _isSelectUnit;
+    bool _isSelectTile;
     Vector3Int _cell;
     Vector3 _worldPosition;
 
@@ -17,6 +18,7 @@ public class GameState : IState, IMediatorEvent
     public GameState()
     {
         SimpleSingleton<MediatorManager>.Instance.Register(EMediatorType.EndSelectUnit, this);
+        
     }
 
     void HandleMouseClick()
@@ -27,27 +29,46 @@ public class GameState : IState, IMediatorEvent
 
         _cell = cell;
         _worldPosition = cellCenter;
-        CreateUI();
-        //CheckDestory();
+
+        ShowBuildUI();
+        ShowDestructUI();
     }
 
     void CreateUI()
     {
-        MapManager.PlaceInfo info = MapManager.Instance.GetPlaceInfo(_cell);
-        if (!info.Placeable || info.Occupied)
-            return;
-        _isSelectUnit = true;
-        if (_buildUI == null)
+        if (_canvas == null)
         {
-            if(_canvas == null)
-            {
-                var temp = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-                _canvas = temp.GetComponent<Canvas>();
-                _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            }
-            _buildUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
+            GameObject temp = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            _canvas = temp.GetComponent<Canvas>();
+            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+        _buildUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
+        _destructUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.DestructUI)).GetComponent<DestructUI>();
+    }
+
+    void ShowBuildUI()
+    {
+        MapManager.PlaceInfo info = MapManager.Instance.GetPlaceInfo(_cell);
+        if (info.Occupied)
+        {
+
+        }
+        if (!info.Placeable)
+            return;
+        if (_canvas == null)
+            CreateUI();
+        _isSelectTile = true;
         _buildUI.OpenAtCell(_cell, _test);
+    }
+
+    void ShowDestructUI()
+    {
+        //if (!MapManager.Instance.IsDestructible(_cell))
+        //    return;
+        //if (_canvas == null)
+        //    CreateUI();
+        //_isSelectTile = true;
+        //_destructUI.OpenAtCell(_cell);
     }
 
     public void CreateUnit(EUnitType unitType)
@@ -56,22 +77,18 @@ public class GameState : IState, IMediatorEvent
         unit.transform.position = _worldPosition;
 
         MapManager.Instance.RegisterTower(_cell, unit);
+        SimpleSingleton<MapUnitManager>.Instance.AddUnit(_cell, unit.GetComponent<Unit>());
         unit.GetComponent<TowerUnit>().Cell = _cell;
         _buildUI.Close();
     }
 
-    //public void CheckDestory()
-    //{
-    //    if(MapManager.Instance.IsDestructible(_cell))
-    //}
-
     #region Interface
     void IState.Loop()
     {
-        
+
         if (Input.GetMouseButtonDown(0))
         {
-            if (_isSelectUnit)
+            if (_isSelectTile)
                 return;
             HandleMouseClick();
         }
@@ -89,7 +106,7 @@ public class GameState : IState, IMediatorEvent
 
     void IMediatorEvent.HandleEvent(object data)
     {
-        _isSelectUnit = false;
+        _isSelectTile = false;
     }
     #endregion
 }

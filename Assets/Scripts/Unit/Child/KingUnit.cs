@@ -18,9 +18,10 @@ public class KingUnit : Unit
         _isDie = false;
     }
 
-    protected override void Die()
+    public override void Die()
     {
         base.Die();
-        // GameOver
+        MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
+        //GAmeOver
     }
 }
