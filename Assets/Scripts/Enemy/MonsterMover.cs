@@ -56,12 +56,6 @@ public class MonsterMover : MonoBehaviour
         _allowDestructible = allowDestructible;
         _hasDestination = true;
 
-        //List<Vector2Int> path = AStarPathfinder.FindPath(
-        //    _map.Height, _map.Width,
-        //    (r, c) => _map.IsWalkable(r, c),
-        //    Cell, _dstCell
-        //);
-
         List<Vector2Int> path = AStarPathfinder.FindPath(
         _map.Height, _map.Width,
         (r, c) => _allowDestructible
@@ -204,12 +198,12 @@ public class MonsterMover : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            Vector3 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            wp.z = 0f;
-            MoveToWorld(wp);
-        }
+        //if (Input.GetMouseButtonDown(1))
+        //{
+        //    Vector3 wp = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //    wp.z = 0f;
+        //    MoveToWorld(wp);
+        //}
 
         if (CheckGoalRange())
         {

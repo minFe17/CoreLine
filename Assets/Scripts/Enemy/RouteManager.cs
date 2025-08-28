@@ -29,17 +29,51 @@ public class RouteManager : MonoBehaviour
     {
         if (_map != null) _map.OnCellChanged += HandleCellChanged;
 
-        if (_map && _map.TryGetSpawnCell(out var spawnRC))
+        if (MapManager.Instance != null)
+            MapManager.Instance.OnPlayerBasePlaced += HandleBasePlaced;
+
+
+        if (_map && _map.TryGetSpawnCell(out Vector2Int spawnRC))
         {
             _spawnX = spawnRC.y;
             _spawnY = spawnRC.x;
         }
+        SyncEndpointsFromMap();
+
         RebuildAndApply(force: true);
     }
 
     private void OnDisable()
     {
         if (_map != null) _map.OnCellChanged -= HandleCellChanged;
+
+        if (MapManager.Instance != null)
+            MapManager.Instance.OnPlayerBasePlaced -= HandleBasePlaced;
+    }
+
+    private void SyncEndpointsFromMap()
+    {
+        MapManager mm = MapManager.Instance;
+        if (mm == null) return;
+
+        if (mm.HasPlayerBase)
+            SetGoalFromAbsCell(mm.PlayerBaseCell);
+    }
+
+    private void SetGoalFromAbsCell(Vector3Int absCell)
+    {
+        if (_map == null) return;
+        
+        Vector3 world = MapManager.Instance.GetCellCenterWorld(absCell);
+        Vector2Int rc = _map.WorldToCell(world);
+        _goalX = rc.y;         
+        _goalY = rc.x;          
+    }
+
+    private void HandleBasePlaced(Vector3Int baseCell)
+    {
+        SetGoalFromAbsCell(baseCell);
+        RebuildAndApply(force: true);
     }
 
     private void HandleCellChanged(int r, int c)
@@ -51,13 +85,25 @@ public class RouteManager : MonoBehaviour
     {
         if (_map == null) { _renderer?.Clear(); _lastPath = null; return; }
 
+
+        // 기지 설치 전에는 경로 표시 비활성
+
+        MapManager mm = MapManager.Instance;
+        if (mm == null || !mm.HasPlayerBase)
+        {
+            _renderer?.Clear();
+            _lastPath = null;
+            return;
+        }
+
+        // 기본 경로 탐색
         List<Vector2Int> path = AStarPathfinder.FindPath(
             _map.Height, _map.Width,
             (r, c) => _map.IsWalkable(r, c),
             SpawnCell, GoalCell
         );
 
-        //----------------------------test----------------------------------
+        // 탐색 실패 시 파괴벽 허용해서 재시도
         _allowDestructibleForRoute = false;
         if (path == null || path.Count == 0)
         {
@@ -68,8 +114,7 @@ public class RouteManager : MonoBehaviour
             );
             _allowDestructibleForRoute = (path != null && path.Count > 0);
         }
-        //-------------------------------------------------------------------
-
+        
         if (path == null || path.Count == 0)
         {
             _renderer?.Clear();
@@ -104,4 +149,5 @@ public class RouteManager : MonoBehaviour
         return false;
     }
 
+    
 }

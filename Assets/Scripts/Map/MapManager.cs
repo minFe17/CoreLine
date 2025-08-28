@@ -23,6 +23,7 @@ public class MapManager : MonoBehaviour
     public Vector3 PlayerBaseWorld => IsReady && _hasPlayerBase ? CellCenterWorld(_playerBaseCell) : Vector3.zero;
     // 네비/배치 변경 알림(타워 설치/제거, 파괴벽 변경 등)
     public Action<Vector3Int> OnCellChanged;
+    public event Action<Vector3Int> OnPlayerBasePlaced; // 플레이어 베이스가 배치됐을 때
 
     // ───────────────────────────────────────────────────────────────────────
     // 스테이지 로드/바인드/언로드
@@ -64,6 +65,12 @@ public class MapManager : MonoBehaviour
     {
         _occupied.Clear();
         _towers.Clear();
+
+        _hasPlayerBase = false;
+        _playerBaseCell = default;
+        _hasSpawn = false;
+        _spawnCell = default;
+
         _grid = null;
         _tmBuildable = _tmUnbuildable = _tmWall = _tmDestructible = _tmDeco = null;
 
@@ -135,6 +142,9 @@ public class MapManager : MonoBehaviour
             !occupied &&
             !((_tmWall && _tmWall.HasTile(cell)) || (_tmDestructible && _tmDestructible.HasTile(cell)));
 
+        if (_hasPlayerBase && cell == _playerBaseCell)
+            placeable = false;
+
         return new PlaceInfo(cell, placeable, occupied);
     }
     public PlaceInfo GetPlaceInfoWorld(Vector3 worldPos) => GetPlaceInfo(WorldToCell(worldPos));
@@ -187,6 +197,10 @@ public class MapManager : MonoBehaviour
 
             OnCellChanged?.Invoke(c);      // (있던) 네비 갱신은 그대로
         }
+
+        if (_hasPlayerBase)
+            OnPlayerBasePlaced?.Invoke(_playerBaseCell); // 플레이어 베이스 배치 알림
+
         return true;
     }
 

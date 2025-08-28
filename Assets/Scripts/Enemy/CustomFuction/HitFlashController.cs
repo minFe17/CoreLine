@@ -47,14 +47,12 @@ public class HitFlashTest : MonoBehaviour
             var cam = clickCamera != null ? clickCamera : Camera.main;
             if (cam == null) return;
 
-            // 마우스 좌표에서 카메라 레이 생성
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 
-            // 2D Physics 레이캐스트
             RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity, interactMask);
             if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
-                TriggerHitEffect(); // 자기 자신만 반응
+                TriggerHitEffect(); 
             }
         }
 
