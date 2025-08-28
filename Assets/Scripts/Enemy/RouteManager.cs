@@ -98,7 +98,7 @@ public class RouteManager : MonoBehaviour
             return;
         }
 
-        // 1단계: Walkable만
+        // 기본 경로 탐색: Walkable만
         List<Vector2Int> path = AStarPathfinder.FindPath(
             _map.Height, _map.Width,
             (r, c) => _map.IsWalkable(r, c),
@@ -106,7 +106,7 @@ public class RouteManager : MonoBehaviour
         );
         _routeAllowance = RouteAllowance.None;
 
-        // 2단계: 실패 시 "벽만" 허용
+        // 탐색 실패 시 파괴벽 허용해서 재시도
         if (path == null || path.Count == 0)
         {
             path = AStarPathfinder.FindPath(
@@ -118,7 +118,7 @@ public class RouteManager : MonoBehaviour
                 _routeAllowance = RouteAllowance.WallsOnly;
         }
 
-        // 3단계: 그래도 실패면 "벽 + 타워" 허용
+        // 파괴벽 허용해도 실패 시 유닛 타워 허용해서 재시도
         if (path == null || path.Count == 0)
         {
             path = AStarPathfinder.FindPath(

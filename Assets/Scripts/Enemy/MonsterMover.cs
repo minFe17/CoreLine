@@ -108,9 +108,9 @@ public class MonsterMover : MonoBehaviour
             {
                 if (_monster != null)
                 {
-                    yield return new WaitUntil(() => _monster.IsAttackReady()); // 준비 대기
-                    _monster.FireAttackTrigger();                                // 트리거
-                    yield return new WaitUntil(() => _monster.IsAttackReady()); // 종료 대기
+                    yield return new WaitUntil(() => _monster.IsAttackReady()); 
+                    _monster.FireAttackTrigger();                               
+                    yield return new WaitUntil(() => _monster.IsAttackReady());
                 }
 
                 if (_allowWalls && _map.IsDestructible(step.x, step.y))
@@ -122,7 +122,7 @@ public class MonsterMover : MonoBehaviour
 
                     if (MapManager.Instance.TryGetTowerAt(abs, out GameObject towerGo) && towerGo)
                     {
-                        var unit = towerGo.GetComponent<Unit>();
+                        Unit unit = towerGo.GetComponent<Unit>();
                         if (unit != null && !unit.IsDie)
                         {
                             unit.TakeDamage(1);  
