@@ -6,7 +6,7 @@ using Utils;
 public class GameState : IState, IMediatorEvent
 {
     BuildUI _buildUI;
-    DestructUI _destructUI;
+    TwoButtonUI _twoButtonUI;
     Canvas _canvas;
 
     bool _isSelectTile;
@@ -43,7 +43,7 @@ public class GameState : IState, IMediatorEvent
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
         _buildUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
-        _destructUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.DestructUI)).GetComponent<DestructUI>();
+        _twoButtonUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.TwoButtonPanel)).GetComponent<TwoButtonUI>();
     }
 
     void ShowBuildUI()

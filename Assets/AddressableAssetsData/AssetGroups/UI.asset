@@ -15,13 +15,13 @@ MonoBehaviour:
   m_GroupName: UI
   m_GUID: 175635f6a31f3b243a1bbbc4645de59f
   m_SerializeEntries:
-  - m_GUID: c178e96cf1774234bbcca438717b7adb
-    m_Address: DestructUI
+  - m_GUID: c4e25915e8524994cbfd2de590d6c024
+    m_Address: BuildUI
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c4e25915e8524994cbfd2de590d6c024
-    m_Address: BuildUI
+  - m_GUID: e4673b19dc21c4643a81e9aacc660d41
+    m_Address: TwoButtonPanel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
