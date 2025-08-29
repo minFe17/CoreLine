@@ -417,7 +417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706cfd64218a738449283534c48db7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stagePrefab: {fileID: 8145642074313702623, guid: c23c33db6cd4ad647a978c29de47f70b, type: 3}
+  stagePrefab: {fileID: 1038764967427080588, guid: e46098d3bd9cf7d40afe19a84864c50d, type: 3}
   buildUIPrefab: {fileID: 0}
   twoButtonUIPrefab: {fileID: 0}
 --- !u!4 &515757424
@@ -651,10 +651,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _map: {fileID: 253710709}
   _route: {fileID: 2125745506}
-  _monsterPrefab: {fileID: 5957591340127595148, guid: bb74a1e0990e0c94582f8f4a93bfd331, type: 3}
-  _initialSpawnCount: 1
-  _snapToCellCenter: 1
-  _spawnOnStart: 1
+  _csvWaveFile: {fileID: 4900000, guid: 86b5c54b7b385fd4f98847ed43bda59b, type: 3}
+  _runCsvOnStart: 1
 --- !u!4 &1356733908
 Transform:
   m_ObjectHideFlags: 0
@@ -732,7 +730,7 @@ Camera:
   far clip plane: 1
   field of view: 60
   orthographic: 1
-  orthographic size: 7.2
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -918,7 +916,7 @@ Camera:
   far clip plane: 1
   field of view: 60
   orthographic: 1
-  orthographic size: 7.2
+  orthographic size: 10
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2

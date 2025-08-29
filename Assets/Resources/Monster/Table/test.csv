@@ -1,0 +1,3 @@
+﻿MonsterId,Prefab,Count,Interval,Delay
+Golem,Monster/Prefab/Golem,3,1,0
+Skeleton,Monster/Prefab/Skeleton,3,1.25,5

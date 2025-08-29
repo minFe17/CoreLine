@@ -193,11 +193,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5057c0e136fb11428525e6a61d90381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _flashColor: {r: 1, g: 1, b: 1, a: 1}
-  _flashDuration: 0.5
-  _scaleUpAmount: 0.1
-  _scaleReturnSpeed: 10
-  _clickCamera: {fileID: 0}
-  _interactMask:
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.5
+  scaleUpAmount: 0.1
+  scaleReturnSpeed: 10
+  clickCamera: {fileID: 0}
+  interactMask:
     serializedVersion: 2
     m_Bits: 4294967295

@@ -34,15 +34,22 @@ public class MonsterMover : MonoBehaviour
     private bool _allowWalls = false;
     private bool _allowTowers = false;
 
-    private void Start()
+
+    private void Awake()
     {
         if (!_map) _map = FindAnyObjectByType<TestMap>();
         if (!_route) _route = FindAnyObjectByType<RouteManager>();
         _monster = GetComponent<Monster>();
-
-        Vector2Int rc = _map.WorldToCell(transform.position);
-        Cell = rc;
-        transform.position = _map.CellToWorld(rc.x, rc.y);
+    }
+    private void Start()
+    {
+        
+        if(_map)
+        {
+            Vector2Int rc = _map.WorldToCell(transform.position);
+            Cell = rc;
+            transform.position = _map.CellToWorld(rc.x, rc.y);
+        }
     }
 
 
@@ -56,7 +63,7 @@ public class MonsterMover : MonoBehaviour
 
         List<Vector2Int> path = AStarPathfinder.FindPath(
             _map.Height, _map.Width,
-            (r, c) => IsPassableOrTarget(r, c),
+            (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
             Cell, _dstCell
         );
 
@@ -84,6 +91,7 @@ public class MonsterMover : MonoBehaviour
 
     private bool IsPassableOnly(int r, int c)
     {
+        if (r == Cell.x && c == Cell.y) return true;
         return _map.IsWalkable(r, c);
     }
 
@@ -104,7 +112,12 @@ public class MonsterMover : MonoBehaviour
 
             Vector2Int step = path[i];
 
-            if ((_allowWalls && _map.IsDestructible(step.x, step.y)) ||(_allowTowers && _map.HasTower(step.x, step.y)))
+            bool isUnderFeet = (step.x == Cell.x && step.y == Cell.y);
+            if (!isUnderFeet && 
+                (
+                  (_allowWalls && _map.IsDestructible(step.x, step.y)) ||
+                  (_allowTowers && _map.HasTower(step.x, step.y))
+                ))
             {
                 if (_monster != null)
                 {
@@ -141,7 +154,7 @@ public class MonsterMover : MonoBehaviour
             if (_hasDestination && !IsPassableOnly(step.x, step.y))
             {
                 List<Vector2Int> newPath = AStarPathfinder.FindPath(
-                    _map.Height, _map.Width, (r, c) => IsPassableOrTarget(r, c),Cell, _dstCell
+                    _map.Height, _map.Width, (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y), Cell, _dstCell
                 );
 
 
@@ -238,4 +251,11 @@ public class MonsterMover : MonoBehaviour
         else
             _attackTimer = 0f;
     }
+
+    public void SetCellAndSnap(Vector2Int rc)
+    {
+        Cell = rc;
+        transform.position = _map.CellToWorld(rc.x, rc.y);
+    }
+
 }
