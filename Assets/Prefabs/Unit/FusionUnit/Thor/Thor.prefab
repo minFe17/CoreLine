@@ -4889,8 +4889,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2671421253352513051}
+  - component: {fileID: 7854168813159755902}
+  - component: {fileID: 7260849399971823089}
   - component: {fileID: 4725274111253067589}
   - component: {fileID: 7493737088511044224}
+  - component: {fileID: -4696948775274325102}
   m_Layer: 0
   m_Name: Thor
   m_TagString: Untagged
@@ -4915,6 +4918,31 @@ Transform:
   - {fileID: 6215793962211098269}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7854168813159755902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8969265315206938064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d359117344841474293998697b62f9f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _unitType: 1
+--- !u!114 &7260849399971823089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8969265315206938064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66fd218dc18ff5749848ff5854b144e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!95 &4725274111253067589
 Animator:
   serializedVersion: 7
@@ -4925,7 +4953,7 @@ Animator:
   m_GameObject: {fileID: 8969265315206938064}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: c0fbc9a82051e94429aa17cc4b2f48e5, type: 2}
+  m_Controller: {fileID: 9100000, guid: eea95bd7f8cd22446982bf6e90fb7454, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -4949,6 +4977,43 @@ SortingGroup:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_SortAtRoot: 0
+--- !u!70 &-4696948775274325102
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8969265315206938064}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 1}
+  m_Size: {x: 1.45, y: 2.1}
+  m_Direction: 0
 --- !u!1 &9050453170300448569
 GameObject:
   m_ObjectHideFlags: 0

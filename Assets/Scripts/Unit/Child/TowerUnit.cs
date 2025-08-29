@@ -24,11 +24,13 @@ public class TowerUnit : Unit
         SetLevel();
         _unitStateData = _data.UnitState;
         _currentHp = _unitStateData.HP;
+        _isDie = false;
     }
 
     // Test
     void Update()
     {
+        LookTarget();
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             if (_level == _levelUnit.Count - 1)
@@ -69,8 +71,12 @@ public class TowerUnit : Unit
         _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
         _unitStateData = _data.UnitState;
         _animator = _levelUnit[_level].GetComponent<Animator>();
-        DieEvent temp = GetCurrentUnit().AddComponent<DieEvent>();
-        temp.Init(this);
+
+        DieEvent dieEvent;
+        if (GetCurrentUnit().TryGetComponent<DieEvent>(out dieEvent))
+            return;
+        dieEvent = GetCurrentUnit().AddComponent<DieEvent>();
+        dieEvent.Init(this);
     }
 
     void SetLayerRecursively(GameObject targetObject, int layer)

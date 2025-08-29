@@ -13,7 +13,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Archer, EUnitType.Warrior, EUnitType.Wizard, EUnitType.Assassin, EUnitType.Chef, EUnitType.Pirate };
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.ShieldSoldier, EUnitType.Warrior, EUnitType.Wizard, EUnitType.Dwarf, EUnitType.Chef, EUnitType.Pirate };
 
     public GameState()
     {
@@ -106,10 +106,10 @@ public class GameState : IState, IMediatorEvent
     public void CreateUnit(EUnitType unitType)
     {
         GameObject unit = MonoSingleton<ObjectPoolManager>.Instance.Pull(unitType);
-        GameObject hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar);
+        HpBar hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar).GetComponent<HpBar>();
         unit.transform.position = _worldPosition;
-        hpBar.GetComponent<RectTransform>().position += unit.transform.position;
-        unit.GetComponent<Unit>().HpBar = hpBar.GetComponent<HpBar>();
+        hpBar.SetPosition(unit.transform.position);
+        unit.GetComponent<Unit>().HpBar = hpBar;
 
 
         MapManager.Instance.RegisterTower(_cell, unit);

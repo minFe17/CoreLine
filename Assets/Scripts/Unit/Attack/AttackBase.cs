@@ -2,10 +2,9 @@ using UnityEngine;
 
 public abstract class AttackBase : MonoBehaviour
 {
-    Unit _unit;
-    Vector3 _leftDirection = new Vector3(0, 180f, 0f);
-
     float _attackTimer;
+
+    protected Unit _unit;
 
     public abstract void Attack();
 
@@ -20,7 +19,6 @@ public abstract class AttackBase : MonoBehaviour
     void Update()
     {
         AttackTimer();
-        LookTarget();
     }
 
     void AttackTimer()
@@ -43,22 +41,6 @@ public abstract class AttackBase : MonoBehaviour
             temp.Init(this);
         }
     }
-
-    void LookTarget()
-    {
-        // 타겟이 없으면
-        LookMonsterSpawn();
-    }
-
-    void LookMonsterSpawn()
-    {
-        Vector3 spawnPos = MapManager.Instance.GetSpawnWorld();
-        if (transform.position.x - spawnPos.x > 0f)
-            transform.rotation = Quaternion.Euler(_leftDirection);
-        else
-            transform.rotation = Quaternion.Euler(Vector3.zero);
-    }
-
 
     protected virtual void PlayAttackAnimation()
     {

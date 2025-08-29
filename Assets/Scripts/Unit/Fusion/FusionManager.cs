@@ -61,23 +61,25 @@ public class FusionManager : MonoBehaviour
         FindFusionUnits(unit);
     }
 
-    void CreateFusedUnit(FusionData fusionData, Vector3 position)
+    FusionUnit CreateFusedUnit(FusionData fusionData, Vector3 position)
     {
         SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
         FusionUnit fusionUnit = MonoSingleton<ObjectPoolManager>.Instance.Pull(fusionData.UnitType).GetComponent<FusionUnit>();
-        GameObject hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar);
+        HpBar hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar).GetComponent<HpBar>();
+        SimpleSingleton<MapUnitManager>.Instance.AddUnit(_baseUnit.Cell, fusionUnit.GetComponent<Unit>());
 
         fusionUnit.transform.position = position;
-        hpBar.GetComponent<RectTransform>().position += fusionUnit.transform.position;
+        hpBar.SetPosition(position);
 
-        fusionUnit.HpBar = hpBar.GetComponent<HpBar>();
+        fusionUnit.HpBar = hpBar;
 
-        MapManager.Instance.RegisterTower(_baseUnit.Cell, fusionUnit.gameObject);
         fusionUnit.Cell = _baseUnit.Cell;
+        return fusionUnit;
     }
 
     void ReturnUnitsToPool(TowerUnit unitA, TowerUnit unitB)
     {
+        unitA.UnregisterCell();
         unitB.UnregisterCell();
 
         _fusionableUnit[unitA.UnitType].Remove(unitA);
@@ -85,6 +87,8 @@ public class FusionManager : MonoBehaviour
 
         MonoSingleton<ObjectPoolManager>.Instance.Push(unitA.UnitType, unitA.gameObject);
         MonoSingleton<ObjectPoolManager>.Instance.Push(unitB.UnitType, unitB.gameObject);
+        MonoSingleton<ObjectPoolManager>.Instance.Push(EUIPrefabType.UnitHpBar, unitA.HpBar.gameObject);
+        MonoSingleton<ObjectPoolManager>.Instance.Push(EUIPrefabType.UnitHpBar, unitB.HpBar.gameObject);
     }
 
     void NotifyFusion(bool value)
@@ -137,11 +141,13 @@ public class FusionManager : MonoBehaviour
             return;
         }
 
-        CreateFusedUnit(fusionData, _baseUnit.transform.position);
+        FusionUnit fusionUnit = CreateFusedUnit(fusionData, _baseUnit.transform.position);
         ApplyFusionLayer("Default");
         ReturnUnitsToPool(_baseUnit, unit);
 
         _baseUnit = null;
+        MapManager.Instance.RegisterTower(fusionUnit.Cell, fusionUnit.gameObject);
+        SimpleSingleton<MapUnitManager>.Instance.AddUnit(fusionUnit.Cell, fusionUnit.GetComponent<Unit>());
 
         NotifyFusion(false);
     }
