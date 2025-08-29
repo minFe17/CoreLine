@@ -12,8 +12,8 @@ public class GameData
 public class UnlockedUnit
 {
     public EUnitType UnitType; //이거 enum으로 매칭해줘야됨
-    public int AttackDatamageLevel;
-    public int HealthPointLevel;
-    public int AttackRangeLevel;
-    public int AttackSpeedLevel;
+    public int AttackDamageLevel = 1;
+    public int HealthPointLevel = 1;
+    public int AttackRangeLevel = 1;
+    public int AttackSpeedLevel = 1;
 }

@@ -41,7 +41,15 @@ public class DataManager : SimpleSingleton<DataManager>
         LoadUpgradeData();
 
     }
-
+    public UpgradeData GetUpgradeData(UpgradeType type)
+    {
+        foreach (UpgradeData data in _upgradeDatas) 
+        {
+            if (data.UpgradeType == type)
+                return data;
+        }
+        return new UpgradeData();
+    }
     public void SaveData()
     {//데이터 세이브구현
 

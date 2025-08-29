@@ -61,6 +61,15 @@ public class UnitManager : SimpleSingleton<UnitManager>
     {
         return _unlockedUnits.FindIndex(unit => unit.UnitType == ChoiceUnit.UnitType);
     }
+    public UnlockedUnit GetUnlockedUnit(EUnitType type)
+    {
+        foreach (UnlockedUnit unit in _unlockedUnits)
+        {
+            if(unit.UnitType == type)
+                return unit;
+        }
+        return null;
+    }
     private void UpgradeUnit(UpgradeType type)
     {
         UnlockedUnit findUnit = _unlockedUnits.FirstOrDefault(unit => unit.UnitType == _choiceUnit.UnitType);
@@ -73,7 +82,7 @@ public class UnitManager : SimpleSingleton<UnitManager>
         switch (type)
         {
             case UpgradeType.AttackDamage:
-                findUnit.AttackDatamageLevel++;
+                findUnit.AttackDamageLevel++;
                 Debug.Log("damage++");
                 break;
             case UpgradeType.AttackRange:
@@ -83,6 +92,9 @@ public class UnitManager : SimpleSingleton<UnitManager>
             case UpgradeType.HealthPoint:
                 findUnit.HealthPointLevel++;
                 Debug.Log("healthPoint++");
+                break;
+            case UpgradeType.AttackSpeed:
+                findUnit.AttackSpeedLevel++;
                 break;
         }
     }

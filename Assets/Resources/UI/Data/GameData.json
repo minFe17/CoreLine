@@ -3,10 +3,10 @@
     [
         {
             "UnitType":"Warrior",
-            "AttackDamageLevel" :0,
-            "HealthPointLevel":0,
-            "AttackRangeLevel":0 ,
-            "AttackSpeedLevel":0
+            "AttackDamageLevel" :1,
+            "HealthPointLevel":1,
+            "AttackRangeLevel":1 ,
+            "AttackSpeedLevel":1
         }
     ],
     "UnlockedLaboratoryId" : [],

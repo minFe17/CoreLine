@@ -26,13 +26,12 @@ public abstract class DualButtonController<T> : MonoBehaviour
     protected void Awake()
     {
         MatchButtons();
-    }
-    protected void Start()
-    {
         SettingList();
     }
+
     protected virtual void OnEnable()
     {
+        //SettingList();
         _index = 0;
         ChangeButtonStatus();
     }
@@ -45,7 +44,7 @@ public abstract class DualButtonController<T> : MonoBehaviour
             _prevButton.gameObject.SetActive(false);
             isPrevActive = false;
         }
-        else if(_index>=_list.Count-1)
+        if(_index>=_list.Count-1)
         {
             _nextButton.gameObject.SetActive(false);
             isNextActive = false;
