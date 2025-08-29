@@ -154,7 +154,7 @@ MonoBehaviour:
   hoverWidth: 0.05
   hoverPulse: 1
   pulseSpeed: 2
-  pulseWidthAmp: 0.015
+  pulseWidthAmp: 0.15
   pulseAlphaAmp: 0.25
   autoHideSec: 2
   sortingLayerName: Default
