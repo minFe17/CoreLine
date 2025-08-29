@@ -503,7 +503,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706cfd64218a738449283534c48db7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stagePrefab: {fileID: 1038764967427080588, guid: e46098d3bd9cf7d40afe19a84864c50d, type: 3}
+  stagePrefab: {fileID: 5356388453792775713, guid: 648af1f6160dda147bb0e94b9aa44320, type: 3}
   buildUIPrefab: {fileID: 7574205945123929063, guid: c4e25915e8524994cbfd2de590d6c024, type: 3}
   twoButtonUIPrefab: {fileID: 7504113353635689655, guid: e4673b19dc21c4643a81e9aacc660d41, type: 3}
   invalidPlacementPrefab: {fileID: -8677692378153511767, guid: 675c1908df02613418dbddb8cb076689, type: 3}
