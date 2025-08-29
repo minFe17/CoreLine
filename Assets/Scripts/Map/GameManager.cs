@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BuildUI buildUIPrefab;   // 빌드 선택 링 등
     [SerializeField] private TwoButtonUI twoButtonUIPrefab; // 공용 2버튼 패널(취소/파괴 or 취소/발동)
 
+    [SerializeField] private InvalidPlacementToast invalidPlacementPrefab; // 인스펙터에 연결
+    private InvalidPlacementToast _invalidToast;
+
     private Camera _cam;
     private BuildUI _buildUI;
     private TwoButtonUI _panel;
@@ -70,48 +73,64 @@ public class GameManager : MonoBehaviour
             else Debug.LogError("[GameManager] stagePrefab이 비어있습니다.");
         }
 
-        //// 좌클릭
-        //if (Input.GetMouseButtonDown(0))
-        //{
-        //    // 1) 먼저 ObjectTile 클릭인지 검사 → 맞으면 '발동' 패널 열고 종료
-        //    if (TryOpenObjectTilePanel()) return;
+        // 좌클릭
+        if (Input.GetMouseButtonDown(0))
+        {
+            // 1) 먼저 ObjectTile 클릭인지 검사 → 맞으면 '발동' 패널 열고 종료
+            if (TryOpenObjectTilePanel()) return;
 
-        //    // 2) UI 위 클릭이면 무시
-        //    if (IsPointerOverUI()) return;
+            // 2) UI 위 클릭이면 무시
+            if (IsPointerOverUI()) return;
 
-        //    // 3) 파괴/빌드 로직
-        //    var map = MapManager.Instance;
-        //    if (!map || !map.IsReady) return;
+            // 3) 파괴/빌드 로직
+            var map = MapManager.Instance;
+            if (!map || !map.IsReady) return;
 
-        //    Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
-        //    world.z = 0f;
-        //    Vector3Int cell = map.WorldToCell(world);
+            Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
+            world.z = 0f;
+            Vector3Int cell = map.WorldToCell(world);
 
-        //    // 파괴 가능 벽이면 '파괴' 패널
-        //    if (map.IsDestructible(cell))
-        //    {
-        //        _panel.OpenAtCell(cell, "파괴", (id, payload) =>
-        //        {
-        //            map.DestroyWallAt((Vector3Int)payload);
-        //        });
-        //        return;
-        //    }
+            // 파괴 가능 벽이면 '파괴' 패널
+            if (map.IsDestructible(cell))
+            {
+                _panel.OpenAtCell(cell, "파괴", (id, payload) =>
+                {
+                    map.DestroyWallAt((Vector3Int)payload);
+                });
+                return;
+            }
 
-        //    // 일반 빌드 UI
-        //    if (_buildUI == null) return;
+            // 일반 빌드 UI
+            if (_buildUI == null) return;
 
-        //    var buildOptions = MakeOptionsForTest(8); // 실제 옵션으로 교체 가능
-        //    _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
-        //    {
-        //        if (picked.Prefab == null) return;
-        //        var info = map.GetPlaceInfo(selectedCell);
-        //        if (!info.Placeable) return;
+            var infoAtClick = map.GetPlaceInfo(cell);
 
-        //        Vector3 pos = map.CellCenterWorld(selectedCell);
-        //        var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
-        //        map.RegisterTower(selectedCell, go);
-        //    });
-        //}
+            // 1) 빌드 불가면(또는 이미 점유) → UI 안 띄우고 토스트만
+            if (!infoAtClick.Placeable || infoAtClick.Occupied)
+            {
+                // (주의) 파괴 가능 / 오브젝트 발동은 별도 분기로 이미 처리했다는 가정
+                PingInvalidAtCell(cell);
+                return;
+            }
+
+            // 2) 여기서부터 빌드 가능한 타일만 BuildUI 오픈
+            var buildOptions = MakeOptionsForTest(8); // 실제 옵션으로 교체
+            _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
+            {
+                if (picked.Prefab == null) return;
+
+                var info = map.GetPlaceInfo(selectedCell);
+                if (!info.Placeable || info.Occupied)
+                {
+                    PingInvalidAtCell(selectedCell);
+                    return;
+                }
+
+                Vector3 pos = map.CellCenterWorld(selectedCell);
+                var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
+                map.RegisterTower(selectedCell, go);
+            });
+        }
     }
 
     // ───────── 유틸 ─────────
@@ -157,5 +176,46 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < count; i++)
             list.Add(new TowerOption($"opt_{i + 1}", null, null, (i + 1) * 10));
         return list;
+    }
+    Canvas FindOrCreateCanvas()
+    {
+        var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+        if (canvas == null)
+        {
+            var go = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            canvas = go.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        }
+        return canvas;
+    }
+    InvalidPlacementToast EnsureInvalidToast()
+    {
+        if (_invalidToast != null) return _invalidToast;
+
+        if (invalidPlacementPrefab == null)
+        {
+            Debug.LogError("[GameManager] invalidPlacementPrefab 이 비어있습니다. 인스펙터에 프리팹을 넣어주세요.");
+            return null;
+        }
+
+        var canvas = FindOrCreateCanvas();
+        _invalidToast = Instantiate(invalidPlacementPrefab, canvas.transform);
+        _invalidToast.gameObject.name = "InvalidPlacementToast(Runtime)";
+        return _invalidToast;
+    }
+
+    // 셀 위에 토스트 띄우기
+    void PingInvalidAtCell(Vector3Int cell)
+    {
+        if (_invalidToast == null)
+        {
+            // 인스펙터에서 프리팹 할당했다면 Instantiate만 하고 꺼두지 마세요.
+            var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+            _invalidToast = Instantiate(invalidPlacementPrefab, canvas.transform);
+            _invalidToast.name = "InvalidPlacementToast(Runtime)";
+            // Awake에서 알아서 active=true + alpha=0 으로 준비됨
+        }
+
+        _invalidToast.ShowAtCell(cell);
     }
 }
