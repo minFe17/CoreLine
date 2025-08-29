@@ -41,7 +41,7 @@ Grid:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1159757770287013041}
   m_Enabled: 1
-  m_CellSize: {x: 1, y: 1, z: 0}
+  m_CellSize: {x: 2, y: 2, z: 0}
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
@@ -77,6 +77,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3817818300799810083}
+  - {fileID: 7523743497310470676}
   m_Father: {fileID: 8487501254847335495}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1839735485 &5270062230103658560
@@ -20442,7 +20443,7 @@ Tilemap:
   - m_RefCount: 1451
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   - m_RefCount: 1
-    m_Data: {r: 0.7729321, g: 0.4996691, b: 0.5873919, a: 1}
+    m_Data: {r: 0.89059347, g: 0.60385996, b: 0.63252044, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -20512,13 +20513,75 @@ TilemapRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
-  m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
+  m_ChunkCullingBounds: {x: 0.5, y: 0.5, z: 0}
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!1001 &3437154670251749
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2545864218135757743}
+    m_Modifications:
+    - target: {fileID: 711961498045898787, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_Name
+      value: fish shop_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -41
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+--- !u!4 &7523743497310470676 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+  m_PrefabInstance: {fileID: 3437154670251749}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6673806124411025106
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20530,6 +20593,14 @@ PrefabInstance:
     - target: {fileID: 711961498045898787, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
       propertyPath: m_Name
       value: fish shop_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5132434136985446299, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5132434136985446299, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
+      propertyPath: m_LightProbeUsage
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
       propertyPath: m_LocalPosition.x
@@ -20581,7 +20652,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7522562564294708465, guid: dd72f57a530dfc04493338d0889ac08a, type: 3}
   m_PrefabInstance: {fileID: 6673806124411025106}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &62275281699653566
+--- !u!114 &7394260503909564019
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
