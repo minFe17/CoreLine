@@ -10,7 +10,7 @@ public class ObjectTile : MonoBehaviour, IPointerClickHandler
 
     private static bool s_quitting = false;   // 종료 가드
 
-    void Start()
+    private void Start()
     {
         _map = MapManager.Instance;           // ← 여기서만 한 번 접근 (플레이 중일 때)
         if (_map != null && _map.IsReady)
@@ -40,7 +40,7 @@ public class ObjectTile : MonoBehaviour, IPointerClickHandler
         Destroy(gameObject);
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         // 종료 중에는 아무 것도 하지 않음(새 생성 방지)
         if (s_quitting) return;
@@ -52,7 +52,7 @@ public class ObjectTile : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    void OnApplicationQuit()
+    private void OnApplicationQuit()
     {
         s_quitting = true;
     }

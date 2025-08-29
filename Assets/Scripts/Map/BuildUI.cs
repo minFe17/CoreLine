@@ -66,7 +66,7 @@ public class BuildUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     // Unity Lifecycle
     // ─────────────────────────────────────────────────────────────────────
-    void Awake()
+    private void Awake()
     {
         Wire();         // 필요한 참조/프리팹 배선
         LogWireState(); // 에디터에서 확인용
@@ -155,7 +155,7 @@ public class BuildUI : MonoBehaviour
         // 2) 월드→스크린→로컬 변환
         Camera uiCam = GetUiCamera();
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out var local);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out Vector2 local);
         _anchor.anchoredPosition = local;
 
         // 3) 기존 버튼들 정리
@@ -229,18 +229,18 @@ public class BuildUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     // 파괴 가능 벽 눌렀을때 레이아웃
 
-    void LayoutGrids()
+    private void LayoutGrids()
     {
         // 2×2 고정
-        void Apply(GridLayoutGroup gl)
+        void Apply(GridLayoutGroup grid)
         {
-            gl.cellSize = new Vector2(cell, cell);
-            gl.spacing = new Vector2(spacing, spacing);
-            gl.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gl.constraintCount = cols; // 고정: 2
-            gl.startCorner = GridLayoutGroup.Corner.UpperLeft;
-            gl.startAxis = GridLayoutGroup.Axis.Horizontal;
-            gl.childAlignment = TextAnchor.UpperLeft;
+            grid.cellSize = new Vector2(cell, cell);
+            grid.spacing = new Vector2(spacing, spacing);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = cols; // 고정: 2
+            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            grid.childAlignment = TextAnchor.UpperLeft;
         }
         Apply(_leftGrid.GetComponent<GridLayoutGroup>());
         Apply(_rightGrid.GetComponent<GridLayoutGroup>());
@@ -268,7 +268,7 @@ public class BuildUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     // 화면 가장자리 보정(좌/우 공간이 너무 없으면 한쪽만)
     // ─────────────────────────────────────────────────────────────────────
-    void AutoKeepInside()
+    private void AutoKeepInside()
     {
         Camera uiCam = GetUiCamera();
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam, _anchor.position);
@@ -315,7 +315,7 @@ public class BuildUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     // 배선/탐색
     // ─────────────────────────────────────────────────────────────────────
-    void Wire()
+    private void Wire()
     {
         _wired = false;
         _canvas = GetComponentInParent<Canvas>(true);
@@ -337,11 +337,11 @@ public class BuildUI : MonoBehaviour
 
         if (_dimmer && closeOnBackground)
         {
-            Button bgBtn = _dimmer.GetComponent<Button>();
-            if (bgBtn)
+            Button backButton = _dimmer.GetComponent<Button>();
+            if (backButton)
             {
-                bgBtn.onClick.RemoveAllListeners();
-                bgBtn.onClick.AddListener(Close);
+                backButton.onClick.RemoveAllListeners();
+                backButton.onClick.AddListener(Close);
             }
         }
 
@@ -353,7 +353,7 @@ public class BuildUI : MonoBehaviour
         _wired = (_canvas && _root && _anchor && _leftGrid && _rightGrid && _runtimeButtonPrefab);
     }
 
-    void LogWireState()
+    private void LogWireState()
     {
         Debug.Log(
             $"[BuildUI] wired={_wired}\n" +
@@ -364,7 +364,7 @@ public class BuildUI : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     // 버튼 채우기 (최대 8칸: 좌4 + 우4)
     // ─────────────────────────────────────────────────────────────────────
-    void FillGrids(List<TowerOption> options)
+    private void FillGrids(List<TowerOption> options)
     {
         if (_runtimeButtonPrefab == null)
         { Debug.LogError("[BuildUI] No TowerPlaceButton prefab."); return; }
@@ -378,16 +378,16 @@ public class BuildUI : MonoBehaviour
         for (int i = 0; i < total; i++)
         {
             RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
-            TowerPlaceButton btn = Instantiate(_runtimeButtonPrefab, parent);
-            btn.gameObject.SetActive(true);
+            TowerPlaceButton button = Instantiate(_runtimeButtonPrefab, parent);
+            button.gameObject.SetActive(true);
 
-            RectTransform rt = (RectTransform)btn.transform;
-            if (rt.sizeDelta == Vector2.zero) rt.sizeDelta = new Vector2(cell, cell);
+            RectTransform rect = (RectTransform)button.transform;
+            if (rect.sizeDelta == Vector2.zero) rect.sizeDelta = new Vector2(cell, cell);
 
             if (i < options.Count)
             {
                 TowerOption opt = options[i];
-                btn.Bind(opt, picked =>
+                button.Bind(opt, picked =>
                 {
                     if (_onPickCell != null && _hasCurrentCell)
                         _onPickCell.Invoke(picked, _currentCell);
@@ -399,12 +399,12 @@ public class BuildUI : MonoBehaviour
             }
             else
             {
-                btn.Bind((TowerOption)default, null); // 빈 슬롯
+                button.Bind((TowerOption)default, null); // 빈 슬롯
             }
         }
     }
 
-    void FillGrids(List<EUnitType> options)
+    private void FillGrids(List<EUnitType> options)
     {
         if (_runtimeButtonPrefab == null)
         { Debug.LogError("[BuildUI] No TowerPlaceButton prefab."); return; }
@@ -418,16 +418,16 @@ public class BuildUI : MonoBehaviour
         for (int i = 0; i < total; i++)
         {
             RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
-            TowerPlaceButton btn = Instantiate(_runtimeButtonPrefab, parent);
-            btn.gameObject.SetActive(true);
+            TowerPlaceButton button = Instantiate(_runtimeButtonPrefab, parent);
+            button.gameObject.SetActive(true);
 
-            RectTransform rt = (RectTransform)btn.transform;
-            if (rt.sizeDelta == Vector2.zero) rt.sizeDelta = new Vector2(cell, cell);
+            RectTransform rect = (RectTransform)button.transform;
+            if (rect.sizeDelta == Vector2.zero) rect.sizeDelta = new Vector2(cell, cell);
 
             if (i < options.Count)
             {
                 EUnitType opt = options[i];
-                btn.Bind(opt, picked =>
+                button.Bind(opt, picked =>
                 {
                     if (_onPickCell != null && _hasCurrentCell)
                         _onPickCell.Invoke(picked, _currentCell);
@@ -439,7 +439,7 @@ public class BuildUI : MonoBehaviour
             }
             else
             {
-                btn.Bind((TowerOption)default, null); // 빈 슬롯
+                button.Bind((TowerOption)default, null); // 빈 슬롯
             }
         }
     }
@@ -448,28 +448,28 @@ public class BuildUI : MonoBehaviour
     // 내부 유틸
     // ─────────────────────────────────────────────────────────────────────
 
-    Camera GetUiCamera()
+    private Camera GetUiCamera()
     {
         // Overlay → null, 그 외(스크린-카메라/월드) → canvas.worldCamera(없으면 Main)
         if (_canvas == null || _canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
         return _canvas.worldCamera != null ? _canvas.worldCamera : Camera.main;
     }
 
-    static void StretchToFullScreen(RectTransform rt)
+    static void StretchToFullScreen(RectTransform rect)
     {
-        if (!rt) return;
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        if (!rect) return;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     static RectTransform FindChildRT(Transform root, string name)
     {
         if (!root) return null;
-        foreach (RectTransform rt in root.GetComponentsInChildren<RectTransform>(true))
-            if (rt.name == name) return rt;
+        foreach (RectTransform rect in root.GetComponentsInChildren<RectTransform>(true))
+            if (rect.name == name) return rect;
         return null;
     }
 
@@ -481,12 +481,12 @@ public class BuildUI : MonoBehaviour
         return null;
     }
 
-    static void ClearChildrenExceptTemplate(Transform t, Transform keep)
+    static void ClearChildrenExceptTemplate(Transform transform, Transform keep)
     {
-        if (!t) return;
-        for (int i = t.childCount - 1; i >= 0; --i)
+        if (!transform) return;
+        for (int i = transform.childCount - 1; i >= 0; --i)
         {
-            var child = t.GetChild(i);
+            var child = transform.GetChild(i);
             if (keep && child == keep) continue; // 템플릿은 보존
             UnityEngine.Object.Destroy(child.gameObject);
         }

@@ -198,10 +198,10 @@ public class MapManager : MonoBehaviour
     // 현재 맵의 모든 KingTile 셀 나열
     public List<Vector3Int> GetAllKingCells()
     {
-        var list = new List<Vector3Int>();
+        List<Vector3Int> list = new List<Vector3Int>();
         if (_tmKing == null) return list;
-        foreach (var c in _tmKing.cellBounds.allPositionsWithin)
-            if (_tmKing.HasTile(c)) list.Add(c);
+        foreach (Vector3Int cell in _tmKing.cellBounds.allPositionsWithin)
+            if (_tmKing.HasTile(cell)) list.Add(cell);
         return list;
     }
 
@@ -218,30 +218,30 @@ public class MapManager : MonoBehaviour
         if (_tmKing == null) return false;
         if (!_tmKing.HasTile(selectedCell)) return false;
 
-        var kings = GetAllKingCells();
+        List<Vector3Int> kings = GetAllKingCells();
         if (kings.Count == 0) return false;
 
-        foreach (var c in kings)
+        foreach (Vector3Int cell in kings)
         {
-            _tmKing.SetTile(c, null);
+            _tmKing.SetTile(cell, null);
 
-            if (c == selectedCell)
+            if (cell == selectedCell)
             {
                 if (basePrefab != null)
                 {
-                    var pos = CellCenterWorld(c);
-                    var go = Instantiate(basePrefab, pos, Quaternion.identity, _stageRoot?.transform);
-                    go.name = basePrefab.name;
+                    Vector3 pos = CellCenterWorld(cell);
+                    GameObject gameObject = Instantiate(basePrefab, pos, Quaternion.identity, _stageRoot?.transform);
+                    gameObject.name = basePrefab.name;
                 }
 
                 if (occupyBaseCell)
-                    MarkOccupied(c);        // 설치 제한은 유지하고
+                    MarkOccupied(cell);        // 설치 제한은 유지하고
 
-                _playerBaseCell = c;       // ★ 목적지로 쓸 셀 저장
+                _playerBaseCell = cell;       // ★ 목적지로 쓸 셀 저장
                 _hasPlayerBase = true;
             }
 
-            OnCellChanged?.Invoke(c);      // (있던) 네비 갱신은 그대로
+            OnCellChanged?.Invoke(cell);      // (있던) 네비 갱신은 그대로
         }
 
         if (_hasPlayerBase)
@@ -477,25 +477,25 @@ public class MapManager : MonoBehaviour
     // 맵 전체 셀 범위/크기/셀 월드 크기
     public void GetNavFrame(out Vector3Int originCell, out Vector3Int sizeCells, out Vector3 cellSize)
     {
-        BoundsInt b = GetNavBounds();
-        originCell = b.min;      
-        sizeCells = b.size;      
+        BoundsInt bounds = GetNavBounds();
+        originCell = bounds.min;      
+        sizeCells = bounds.size;      
         cellSize = _grid != null ? _grid.cellSize : Vector3.one;
     }
 
 
     // 실험/디버그용
-    public void GetCellFlags(Vector3Int c, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied, out bool objects)
+    public void GetCellFlags(Vector3Int cell, out bool buildable, out bool unbuildable, out bool wall, out bool destructible, out bool deco, out bool occupied, out bool objects)
     {
-        buildable = _tmBuildable && _tmBuildable.HasTile(c);
-        unbuildable = _tmUnbuildable && _tmUnbuildable.HasTile(c);
-        wall = _tmWall && _tmWall.HasTile(c);
-        destructible = _tmDestructible && _tmDestructible.HasTile(c);
-        deco = _tmDeco && _tmDeco.HasTile(c);
-        occupied = _towers.ContainsKey(c) || _occupied.Contains(c);
+        buildable = _tmBuildable && _tmBuildable.HasTile(cell);
+        unbuildable = _tmUnbuildable && _tmUnbuildable.HasTile(cell);
+        wall = _tmWall && _tmWall.HasTile(cell);
+        destructible = _tmDestructible && _tmDestructible.HasTile(cell);
+        deco = _tmDeco && _tmDeco.HasTile(cell);
+        occupied = _towers.ContainsKey(cell) || _occupied.Contains(cell);
 
-        bool byTilemap = _tmObjects && _tmObjects.HasTile(c);
-        bool byChildren = _objectCells.Contains(c);
+        bool byTilemap = _tmObjects && _tmObjects.HasTile(cell);
+        bool byChildren = _objectCells.Contains(cell);
         objects = byTilemap || byChildren;
     }
 

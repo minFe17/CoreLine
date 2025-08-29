@@ -30,24 +30,24 @@ public class BuildableHighlighter : MonoBehaviour
     [SerializeField] string sortingLayerName = "Default";
     [SerializeField] int sortingOrder = 1000;
 
-    Material _baseMat;
-    Material _hoverMat;
+    private Material _baseMat;
+    private Material _hoverMat;
 
-    readonly List<LineRenderer> _pool = new();
-    int _used; // 이번 프레임에 사용된 개수
-    LineRenderer _hoverLR;
+    private readonly List<LineRenderer> _pool = new();
+    private int _used; // 이번 프레임에 사용된 개수
+    private LineRenderer _hoverLR;
 
-    MapManager _map;
-    Camera _cam;
-    Vector3 _cellSize = Vector3.one;
+    private MapManager _map;
+    private Camera _cam;
+    private Vector3 _cellSize = Vector3.one;
 
     // 상태
-    bool _showAll = false;
-    Vector3Int _selectedCell;
-    bool _selectedPlaceable = false;
-    float _hideAt = -1f;
+    private bool _showAll = false;
+    private Vector3Int _selectedCell;
+    private bool _selectedPlaceable = false;
+    private float _hideAt = -1f;
 
-    void Awake()
+    private void Awake()
     {
         _map = MapManager.Instance;
         _cam = Camera.main;
@@ -57,23 +57,23 @@ public class BuildableHighlighter : MonoBehaviour
         _hoverMat = new Material(shader); _hoverMat.color = hoverColor;
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         if (_map != null) _map.OnCellChanged += OnCellChanged;
     }
-    void OnDisable()
+    private void OnDisable()
     {
         if (_map != null) _map.OnCellChanged -= OnCellChanged;
     }
 
-    void Start()
+    private void Start()
     {
         if (_map == null || !_map.IsReady) return;
         _map.GetNavFrame(out _, out _, out _cellSize);
         ClearAllImmediate();
     }
 
-    void Update()
+    private void Update()
     {
         if (_map == null || !_map.IsReady) return;
 
@@ -112,7 +112,7 @@ public class BuildableHighlighter : MonoBehaviour
     }
 
     // 맵 셀 상태 변경 시: 켜져있는 경우 다시 그리기
-    void OnCellChanged(Vector3Int _)
+    private void OnCellChanged(Vector3Int _)
     {
         if (_showAll)
         {
@@ -124,19 +124,19 @@ public class BuildableHighlighter : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     // 전체 빌드가능 외곽선
     // ─────────────────────────────────────────────────────────
-    void DrawAllBuildables()
+    private void DrawAllBuildables()
     {
-        var bounds = _map.GetNavBounds();
-        foreach (var c in bounds.allPositionsWithin)
+        BoundsInt bounds = _map.GetNavBounds();
+        foreach (Vector3Int cell in bounds.allPositionsWithin)
         {
-            var info = _map.GetPlaceInfo(c);
+            MapManager.PlaceInfo info = _map.GetPlaceInfo(cell);
             if (!info.Placeable) continue;
 
-            var center = _map.CellCenterWorld(c);
-            var lr = GetLR();
-            SetupBaseLR(lr);
-            SetSquare(lr, center, _cellSize);
-            lr.enabled = true;
+            Vector3 center = _map.CellCenterWorld(cell);
+            LineRenderer linerenderer = GetLR();
+            SetupBaseLR(linerenderer);
+            SetSquare(linerenderer, center, _cellSize);
+            linerenderer.enabled = true;
         }
 
         DisableUnusedPool();
@@ -145,7 +145,7 @@ public class BuildableHighlighter : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     // 선택 셀 강조(펄스)
     // ─────────────────────────────────────────────────────────
-    void UpdateHoverSelected()
+    private void UpdateHoverSelected()
     {
         if (_hoverLR == null)
         {
@@ -172,11 +172,11 @@ public class BuildableHighlighter : MonoBehaviour
             alphaMul = Mathf.Clamp01(1f - pulseAlphaAmp + s * pulseAlphaAmp);
         }
 
-        var c = hoverColor; c.a *= alphaMul;
+        Color c = hoverColor; c.a *= alphaMul;
         _hoverLR.material.color = c;
         _hoverLR.widthMultiplier = width;
 
-        var center = _map.CellCenterWorld(_selectedCell);
+        Vector3 center = _map.CellCenterWorld(_selectedCell);
         SetSquare(_hoverLR, center, _cellSize);
         _hoverLR.enabled = true;
     }
@@ -184,7 +184,7 @@ public class BuildableHighlighter : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     // LineRenderer 풀/생성/셋업
     // ─────────────────────────────────────────────────────────
-    LineRenderer GetLR()
+    private LineRenderer GetLR()
     {
         if (_used < _pool.Count)
             return _pool[_used++];
@@ -195,32 +195,32 @@ public class BuildableHighlighter : MonoBehaviour
         return lineRenderer;
     }
 
-    LineRenderer CreateLR(string name)
+    private LineRenderer CreateLR(string name)
     {
-        GameObject go = new GameObject(name);
-        go.transform.SetParent(transform, false);
-        var lr = go.AddComponent<LineRenderer>();
-        lr.useWorldSpace = true;
-        lr.loop = false;
-        lr.textureMode = LineTextureMode.Stretch;
-        lr.numCornerVertices = 2;
-        lr.numCapVertices = 0;
-        lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        lr.receiveShadows = false;
-        lr.sortingLayerName = sortingLayerName;
-        lr.sortingOrder = sortingOrder;
-        lr.enabled = false;
-        return lr;
+        GameObject gameObject = new GameObject(name);
+        gameObject.transform.SetParent(transform, false);
+        LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.useWorldSpace = true;
+        lineRenderer.loop = false;
+        lineRenderer.textureMode = LineTextureMode.Stretch;
+        lineRenderer.numCornerVertices = 2;
+        lineRenderer.numCapVertices = 0;
+        lineRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        lineRenderer.receiveShadows = false;
+        lineRenderer.sortingLayerName = sortingLayerName;
+        lineRenderer.sortingOrder = sortingOrder;
+        lineRenderer.enabled = false;
+        return lineRenderer;
     }
 
-    void SetupBaseLR(LineRenderer lr)
+    private void SetupBaseLR(LineRenderer lineRenderer)
     {
-        lr.material = _baseMat;
-        lr.widthMultiplier = baseWidth;
+        lineRenderer.material = _baseMat;
+        lineRenderer.widthMultiplier = baseWidth;
     }
 
     static readonly Vector3[] _pts = new Vector3[5];
-    void SetSquare(LineRenderer lr, Vector3 center, Vector3 size)
+    private void SetSquare(LineRenderer lineRenderer, Vector3 center, Vector3 size)
     {
         float hx = size.x * 0.5f;
         float hy = size.y * 0.5f;
@@ -231,17 +231,17 @@ public class BuildableHighlighter : MonoBehaviour
         _pts[3] = new Vector3(center.x + hx, center.y - hy, 0f);
         _pts[4] = _pts[0];
 
-        lr.positionCount = 5;
-        lr.SetPositions(_pts);
+        lineRenderer.positionCount = 5;
+        lineRenderer.SetPositions(_pts);
     }
 
-    void DisableUnusedPool()
+    private void DisableUnusedPool()
     {
         for (int i = _used; i < _pool.Count; i++)
             if (_pool[i].enabled) _pool[i].enabled = false;
     }
 
-    void ClearAllImmediate()
+    private void ClearAllImmediate()
     {
         _showAll = false;
         _selectedPlaceable = false;
@@ -254,7 +254,7 @@ public class BuildableHighlighter : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     // 입력 유틸 (마우스/터치 공통 '탭' 체크)
     // ─────────────────────────────────────────────────────────
-    bool JustTapped(out Vector3 world)
+    private bool JustTapped(out Vector3 world)
     {
         world = default;
 
@@ -267,17 +267,17 @@ public class BuildableHighlighter : MonoBehaviour
 #endif
         if (Input.touchCount > 0)
         {
-            var t = Input.GetTouch(0);
-            if (t.phase == TouchPhase.Began)
+            Touch touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began)
             {
-                world = _cam ? _cam.ScreenToWorldPoint(t.position) : (Vector3)t.position;
+                world = _cam ? _cam.ScreenToWorldPoint(touch.position) : (Vector3)touch.position;
                 return true;
             }
         }
         return false;
     }
 
-    bool IsPointerOverUI()
+    private bool IsPointerOverUI()
     {
 #if UNITY_EDITOR || UNITY_STANDALONE
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -285,8 +285,8 @@ public class BuildableHighlighter : MonoBehaviour
 #endif
         if (Input.touchCount > 0 && EventSystem.current != null)
         {
-            var t = Input.GetTouch(0);
-            if (EventSystem.current.IsPointerOverGameObject(t.fingerId))
+            Touch touch = Input.GetTouch(0);
+            if (EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 return true;
         }
         return false;

@@ -25,13 +25,13 @@ public class TwoButtonUI : MonoBehaviour
     private object _payload;
     private bool _wired;
 
-    void Awake()
+    private void Awake()
     {
         Wire();
         if (_root) _root.gameObject.SetActive(false);
     }
 
-    void Wire()
+    private void Wire()
     {
         _canvas = GetComponentInParent<Canvas>(true);
         _root = transform as RectTransform;
@@ -49,11 +49,11 @@ public class TwoButtonUI : MonoBehaviour
 
         if (_dimmer)
         {
-            var bgBtn = _dimmer.GetComponent<Button>();
-            if (bgBtn != null)
+            Button backButton = _dimmer.GetComponent<Button>();
+            if (backButton != null)
             {
-                bgBtn.onClick.RemoveAllListeners();
-                bgBtn.onClick.AddListener(Close);
+                backButton.onClick.RemoveAllListeners();
+                backButton.onClick.AddListener(Close);
             }
         }
 
@@ -66,7 +66,7 @@ public class TwoButtonUI : MonoBehaviour
     /// </summary>
     public void OpenAtCell(Vector3Int cell, string rightLabel, Action<string, object> onPick)
     {
-        var map = MapManager.Instance;
+        MapManager map = MapManager.Instance;
         Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
         OpenInternal(world, rightLabel, onPick, payload: cell);
     }
@@ -76,13 +76,13 @@ public class TwoButtonUI : MonoBehaviour
     /// </summary>
     public void OpenAtObject(ObjectTile target, string rightLabel, Action<string, object> onPick)
     {
-        var map = MapManager.Instance;
+        MapManager map = MapManager.Instance;
         Vector3 world = target.transform.position;
         if (map && map.IsReady) world = map.CellCenterWorld(map.WorldToCell(world));
         OpenInternal(world, rightLabel, onPick, payload: target);
     }
 
-    void OpenInternal(Vector3 world, string rightLabel, Action<string, object> onPick, object payload)
+    private void OpenInternal(Vector3 world, string rightLabel, Action<string, object> onPick, object payload)
     {
         if (!_wired) Wire();
         if (!_wired) return;
@@ -134,19 +134,19 @@ public class TwoButtonUI : MonoBehaviour
         SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.EndSelectTile);
     }
 
-    private void PlaceBtn(RectTransform rt, bool rightSide)
+    private void PlaceBtn(RectTransform rect, bool rightSide)
     {
-        if (rt == null) return;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(rightSide ? 0f : 1f, 0.5f);
-        rt.anchoredPosition = new Vector2((rightSide ? +1 : -1) * gapFromTile, 0f);
+        if (rect == null) return;
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(rightSide ? 0f : 1f, 0.5f);
+        rect.anchoredPosition = new Vector2((rightSide ? +1 : -1) * gapFromTile, 0f);
     }
 
     private static RectTransform FindRT(Transform root, string name)
     {
         if (!root) return null;
-        foreach (RectTransform r in root.GetComponentsInChildren<RectTransform>(true))
-            if (r.name == name) return r;
+        foreach (RectTransform rect in root.GetComponentsInChildren<RectTransform>(true))
+            if (rect.name == name) return rect;
         return null;
     }
 }

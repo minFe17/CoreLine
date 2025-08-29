@@ -9,24 +9,24 @@ public class InvalidPlacementToast : MonoBehaviour
 
     Canvas _canvas;
     RectTransform _root;   // 이 스크립트가 붙은 오브젝트(RT)
-    CanvasGroup _cg;       // 투명도 제어용
-    Coroutine _co;
+    CanvasGroup _canvasGroup;       // 투명도 제어용
+    Coroutine _coroutine;
 
     void Awake()
     {
         _canvas = GetComponentInParent<Canvas>(true);
         _root = (RectTransform)transform;
-        _cg = gameObject.GetComponent<CanvasGroup>();
-        if (_cg == null) _cg = gameObject.AddComponent<CanvasGroup>();
+        _canvasGroup = gameObject.GetComponent<CanvasGroup>();
+        if (_canvasGroup == null) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
         // 항상 활성화 상태로 두고 투명하게 숨김
         gameObject.SetActive(true);
-        _cg.alpha = 0f;
+        _canvasGroup.alpha = 0f;
     }
 
     public void ShowAtCell(Vector3Int cell)
     {
-        var map = MapManager.Instance;
+        MapManager map = MapManager.Instance;
         Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
         ShowAtWorld(world);
     }
@@ -48,7 +48,7 @@ public class InvalidPlacementToast : MonoBehaviour
 
         // 부모 기준 스크린→로컬
         RectTransform parent = (RectTransform)_root.parent ?? _root;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, uiCam, out var local);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, uiCam, out Vector2 local);
 
         // 배치
         _root.anchorMin = _root.anchorMax = new Vector2(0.5f, 0.5f);
@@ -57,35 +57,35 @@ public class InvalidPlacementToast : MonoBehaviour
 
         // 표시
         if (!gameObject.activeSelf) gameObject.SetActive(true);
-        if (_co != null) StopCoroutine(_co);
-        _co = StartCoroutine(PlayOnce());
+        if (_coroutine != null) StopCoroutine(_coroutine);
+        _coroutine = StartCoroutine(PlayOnce());
     }
 
 
     IEnumerator PlayOnce()
     {
         // 페이드 인
-        float t = 0f;
-        while (t < fadeSec)
+        float timer = 0f;
+        while (timer < fadeSec)
         {
-            t += Time.deltaTime;
-            _cg.alpha = Mathf.Lerp(0f, 1f, t / fadeSec);
+            timer += Time.deltaTime;
+            _canvasGroup.alpha = Mathf.Lerp(0f, 1f, timer / fadeSec);
             yield return null;
         }
-        _cg.alpha = 1f;
+        _canvasGroup.alpha = 1f;
 
         // 잠시 유지
         yield return new WaitForSeconds(showSec);
 
         // 페이드 아웃 (비활성화하지 말고 알파만 0으로!)
-        t = 0f;
-        while (t < fadeSec)
+        timer = 0f;
+        while (timer < fadeSec)
         {
-            t += Time.deltaTime;
-            _cg.alpha = Mathf.Lerp(1f, 0f, t / fadeSec);
+            timer += Time.deltaTime;
+            _canvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeSec);
             yield return null;
         }
-        _cg.alpha = 0f;
-        _co = null;
+        _canvasGroup.alpha = 0f;
+        _coroutine = null;
     }
 }
