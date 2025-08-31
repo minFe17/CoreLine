@@ -43,7 +43,6 @@ public class UnitManager : SimpleSingleton<UnitManager>
         return _settingUnits.ContainsKey(_choiceUnit.UnitType);
     }
 
-    
     public InventoryData GetInventoryData(EUnitType type)
     {
         return _inventoryDatas.Find(data => data.UnitType == type);
