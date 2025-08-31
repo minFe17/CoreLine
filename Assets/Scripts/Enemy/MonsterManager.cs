@@ -133,18 +133,16 @@ public class MonsterManager : MonoBehaviour
     [Tooltip("Start에서 CSV를 자동 실행할지 여부")]
     [SerializeField] private bool _runCsvOnStart = false;
 
-    // 내부 상태
     private readonly List<MonsterMover> _monsters = new();
-    private readonly Dictionary<string, MonsterMover> _prefabCache = new(); // id→prefab 캐시(동일 id 재사용)
+    private readonly Dictionary<string, MonsterMover> _prefabCache = new();
 
     private Coroutine _scheduleCo;
 
-    // CSV 한 줄 = 한 그룹
     [Serializable]
     public class CsvSpawnRow
     {
-        public string monsterId;   // 논리 ID(디버그 용)
-        public string prefabPath;  // Resources 경로 (e.g., "Monsters/Golem")
+        public string monsterId;   
+        public string prefabPath;  
         public int count = 1;
         public float interval = 0f;
         public float delay = 0f;
@@ -165,10 +163,10 @@ public class MonsterManager : MonoBehaviour
             StartScheduleFromCsv(_csvWaveFile);
     }
 
-    // ────────────────────────── 외부에서 쓰는 API ──────────────────────────
+   
     public void StartScheduleFromCsv(TextAsset csvFile)
     {
-        var rows = ParseCsv(csvFile);
+        List<CsvSpawnRow> rows = ParseCsv(csvFile);
         if (rows.Count == 0)
         {
             Debug.LogWarning("[MonsterManager] CSV가 비었거나 파싱 실패.");
@@ -185,24 +183,22 @@ public class MonsterManager : MonoBehaviour
         _scheduleCo = null;
     }
 
-    /// <summary>RouteManager 경로가 바뀌었을 때(예: 타워 설치), 모든 몬스터에 목적지 재지시</summary>
     public void OnRouteChanged()
     {
         if (_route == null) return;
 
-        var allowance = _route.Allowance;
+        RouteManager.RouteAllowance allowance = _route.Allowance;
         bool allowWalls = (allowance == RouteManager.RouteAllowance.WallsOnly
                          || allowance == RouteManager.RouteAllowance.WallsAndTowers);
         bool allowTowers = (allowance == RouteManager.RouteAllowance.WallsAndTowers);
 
-        foreach (var m in _monsters)
+        foreach (MonsterMover m in _monsters)
         {
             if (!m) continue;
             m.MoveToCell(_route.GoalCell, allowWalls, allowTowers);
         }
     }
 
-    // ────────────────────────── CSV 스케줄 실행 ──────────────────────────
     private IEnumerator RunScheduleCsv(IList<CsvSpawnRow> rows)
     {
         if (_map == null || _route == null) yield break;
@@ -210,20 +206,18 @@ public class MonsterManager : MonoBehaviour
         yield return new WaitUntil(() => MapManager.Instance != null && MapManager.Instance.HasPlayerBase);
 
 
-        // 스폰셀/목적지 최신화 보장
         _route.RebuildAndApply(force: true);
 
         for (int ri = 0; ri < rows.Count; ri++)
         {
-            var row = rows[ri];
+            CsvSpawnRow row = rows[ri];
             if (row == null || string.IsNullOrWhiteSpace(row.prefabPath) || row.count <= 0)
                 continue;
 
             if (row.delay > 0f)
                 yield return new WaitForSeconds(row.delay);
 
-            // 미리 프리팹 확보(캐시)
-            var prefab = GetOrLoadPrefab(row.monsterId, row.prefabPath);
+            MonsterMover prefab = GetOrLoadPrefab(row.monsterId, row.prefabPath);
             if (!prefab)
             {
                 Debug.LogWarning($"[MonsterManager] Prefab load 실패: id='{row.monsterId}', path='{row.prefabPath}'");
@@ -232,7 +226,7 @@ public class MonsterManager : MonoBehaviour
 
             for (int i = 0; i < row.count; i++)
             {
-                var m = SpawnOneOf(prefab);
+                MonsterMover m = SpawnOneOf(prefab);
 
                 yield return null;
                 SendToGoal(m);
@@ -247,11 +241,10 @@ public class MonsterManager : MonoBehaviour
 
     private MonsterMover GetOrLoadPrefab(string monsterId, string resourcesPath)
     {
-        // 같은 id에 대해 한 번 로드하면 캐시 재사용
         if (!string.IsNullOrWhiteSpace(monsterId) && _prefabCache.TryGetValue(monsterId, out var cached) && cached)
             return cached;
 
-        var loaded = Resources.Load<MonsterMover>(resourcesPath);
+        MonsterMover loaded = Resources.Load<MonsterMover>(resourcesPath);
         if (loaded && !string.IsNullOrWhiteSpace(monsterId))
             _prefabCache[monsterId] = loaded;
 
@@ -269,7 +262,7 @@ public class MonsterManager : MonoBehaviour
         Vector3 pos = _map.CellToWorld(rc.x, rc.y);
         pos.z = 0f;
 
-        var m = Instantiate(prefab, pos, Quaternion.identity);
+        MonsterMover m = Instantiate(prefab, pos, Quaternion.identity);
         m.Map = _map;
 
         _monsters.Add(m);
@@ -280,7 +273,7 @@ public class MonsterManager : MonoBehaviour
     {
         if (!m || _route == null) return;
 
-        var allowance = _route.Allowance;
+        RouteManager.RouteAllowance allowance = _route.Allowance;
         bool allowWalls = (allowance == RouteManager.RouteAllowance.WallsOnly
                          || allowance == RouteManager.RouteAllowance.WallsAndTowers);
         bool allowTowers = (allowance == RouteManager.RouteAllowance.WallsAndTowers);
@@ -290,13 +283,13 @@ public class MonsterManager : MonoBehaviour
 
     private List<CsvSpawnRow> ParseCsv(TextAsset csvFile)
     {
-        var list = new List<CsvSpawnRow>();
+        List<CsvSpawnRow> list = new List<CsvSpawnRow>();
         if (csvFile == null) return list;
 
         string text = csvFile.text;
         if (string.IsNullOrWhiteSpace(text)) return list;
 
-        var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        string[] lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
         int start = 0;
         if (lines.Length > 0 && lines[0].ToLowerInvariant().Contains("monsterid"))
@@ -304,13 +297,13 @@ public class MonsterManager : MonoBehaviour
 
         for (int i = start; i < lines.Length; i++)
         {
-            var line = lines[i].Trim();
+            string line = lines[i].Trim();
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var parts = line.Split(',');
+            string[] parts = line.Split(',');
             if (parts.Length < 5) continue;
 
-            var row = new CsvSpawnRow
+            CsvSpawnRow row = new CsvSpawnRow
             {
                 monsterId = parts[0].Trim(),
                 prefabPath = parts[1].Trim(),

@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5957591340127595148}
   - component: {fileID: 8923165808409025291}
   - component: {fileID: 971656304818782371}
+  - component: {fileID: 2038600625596742507}
   m_Layer: 3
   m_Name: Golem
   m_TagString: Untagged
@@ -198,6 +199,10 @@ MonoBehaviour:
   flashDuration: 0.5
   scaleUpAmount: 0.1
   scaleReturnSpeed: 10
+  clickCamera: {fileID: 0}
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &971656304818782371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -212,3 +217,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flashDuration: 0.5
   flashInterval: 0.1
+--- !u!114 &2038600625596742507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8472593775564949861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00d36b9b4cedd3246b5d832a923560e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplitudeCells: 0.3
+  wavelength: 2
+  cornerFade: 0.35

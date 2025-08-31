@@ -171,7 +171,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 253710708}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 574edfd36c106d44b9154f47a2fa75d5, type: 3}
   m_Name: 
@@ -420,6 +420,7 @@ MonoBehaviour:
   stagePrefab: {fileID: 1038764967427080588, guid: e46098d3bd9cf7d40afe19a84864c50d, type: 3}
   buildUIPrefab: {fileID: 0}
   twoButtonUIPrefab: {fileID: 0}
+  invalidPlacementPrefab: {fileID: 0}
 --- !u!4 &515757424
 Transform:
   m_ObjectHideFlags: 0
