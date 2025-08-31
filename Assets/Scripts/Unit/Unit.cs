@@ -4,13 +4,13 @@ using Utils;
 public class Unit : MonoBehaviour
 {
     Vector3 _leftDirection = new Vector3(0, 180f, 0f);
-    Vector3Int _cell;
     HpBar _hpBar;
 
     protected UnitState _unitStateData;
     protected Animator _animator;
-    protected int _level;
+    protected Vector3Int _cell;
 
+    protected int _level;
     protected int _currentHp;
     protected bool _isDie;
 

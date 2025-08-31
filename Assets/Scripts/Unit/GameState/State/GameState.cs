@@ -7,6 +7,7 @@ public class GameState : IState, IMediatorEvent
 {
     BuildUI _buildUI;
     TwoButtonUI _twoButtonUI;
+    UnitUI _unitUI;
     Canvas _canvas;
 
     bool _isSelectTile;
@@ -42,9 +43,11 @@ public class GameState : IState, IMediatorEvent
             _canvas = temp.GetComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
-        _buildUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
-        _twoButtonUI = UnityEngine.Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.TwoButtonPanel)).GetComponent<TwoButtonUI>();
+        _buildUI = Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.BuildUI)).GetComponent<BuildUI>();
+        _twoButtonUI = Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.TwoButtonPanel)).GetComponent<TwoButtonUI>();
         _twoButtonUI.transform.SetParent(_canvas.transform);
+        _unitUI = Object.Instantiate(SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.UnitUI)).GetComponent<UnitUI>();
+        _unitUI.transform.SetParent(_canvas.transform);
     }
 
     void ShowBuildUI()
@@ -54,7 +57,7 @@ public class GameState : IState, IMediatorEvent
         if (info.Occupied)
         {
             Unit unit = SimpleSingleton<MapUnitManager>.Instance.GetUnit(_cell);
-            if(unit != null)
+            if (unit != null)
                 unit.ClickUnit();
         }
         if (!info.Placeable)
@@ -125,6 +128,8 @@ public class GameState : IState, IMediatorEvent
         if (Input.GetMouseButtonDown(0))
         {
             if (_isSelectTile)
+                return;
+            if (_unitUI.IsClickOnBlockButton())
                 return;
             HandleMouseClick();
         }

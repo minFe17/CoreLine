@@ -44,6 +44,7 @@ public class TowerUnit : Unit
     public override void ClickUnit()
     {
         base.ClickUnit();
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.OpenUnitUI, _cell);
         if (_level != _levelUnit.Count - 1)
             return;
         Fusion();

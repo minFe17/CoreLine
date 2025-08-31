@@ -292,6 +292,7 @@ MonoBehaviour:
   stagePrefab: {fileID: 1038764967427080588, guid: e46098d3bd9cf7d40afe19a84864c50d, type: 3}
   buildUIPrefab: {fileID: 2185940711290431863, guid: e66f2226204a8ea448b4b19b4fcbcf01, type: 3}
   twoButtonUIPrefab: {fileID: 0}
+  invalidPlacementPrefab: {fileID: 0}
 --- !u!4 &618426915
 Transform:
   m_ObjectHideFlags: 0
