@@ -6,7 +6,8 @@ using UnityEngine.EventSystems; // UI 위 클릭 무시용
 /// - 기본: 외곽선 비표시
 /// - 아무 타일이든 터치/클릭 시: 빌드 가능 전체 외곽선 표시
 /// - 그때 탭한 타일이 빌드 가능이면 해당 타일만 반짝
-/// - (선택) autoHideSec > 0 이면 일정 시간 뒤 자동으로 감춤
+/// - (신규) 플레이어 베이스가 아직 배치되지 않았다면 킹타일을 자동 강조(펄스) 표시
+/// - (선택) autoHideSec > 0 이면 빌드가능 강조만 일정 시간 뒤 자동 숨김
 /// </summary>
 [DefaultExecutionOrder(1000)]
 public class BuildableHighlighter : MonoBehaviour
@@ -23,7 +24,16 @@ public class BuildableHighlighter : MonoBehaviour
     [SerializeField] float pulseWidthAmp = 0.015f; // 두께 펌핑
     [SerializeField] float pulseAlphaAmp = 0.25f;  // 알파 펌핑(0~1 가중치)
 
-    [Header("표시/숨김 옵션")]
+    [Header("킹타일 강조(베이스 미배치 시 항상 표시)")]
+    [SerializeField] bool highlightKingsUntilBasePlaced = true;
+    [SerializeField] Color kingColor = new Color(1f, 0.85f, 0.2f, 0.95f);
+    [SerializeField] float kingWidth = 0.055f;
+    [SerializeField] bool kingPulse = true;            // 펄스 여부
+    [SerializeField] float kingPulseSpeed = 2.0f;      // 펄스 속도
+    [SerializeField] float kingPulseWidthAmp = 0.02f;  // 두께 펌핑
+    [SerializeField] float kingPulseAlphaAmp = 0.2f;   // 알파 펌핑
+
+    [Header("표시/숨김 옵션 (빌드가능 하이라이트에만 적용)")]
     [SerializeField] float autoHideSec = 1f; // -1이면 자동 숨김 안함
 
     [Header("정렬(2D 기준)")]
@@ -32,9 +42,14 @@ public class BuildableHighlighter : MonoBehaviour
 
     private Material _baseMat;
     private Material _hoverMat;
+    private Material _kingMat;
 
-    private readonly List<LineRenderer> _pool = new();
-    private int _used; // 이번 프레임에 사용된 개수
+    private readonly List<LineRenderer> _poolBuildables = new();
+    private int _usedBuildables; // 이번 프레임 빌드가능 라인 사용 수
+
+    private readonly List<LineRenderer> _poolKings = new();
+    private int _usedKings; // 이번 프레임 킹 라인 사용 수
+
     private LineRenderer _hoverLR;
 
     private MapManager _map;
@@ -46,6 +61,7 @@ public class BuildableHighlighter : MonoBehaviour
     private Vector3Int _selectedCell;
     private bool _selectedPlaceable = false;
     private float _hideAt = -1f;
+    [SerializeField] bool buildablesOnlyAfterBasePlaced = true; // 베이스 전: 비활성, 후: 활성
 
     private void Awake()
     {
@@ -55,15 +71,25 @@ public class BuildableHighlighter : MonoBehaviour
         var shader = Shader.Find("Sprites/Default");
         _baseMat = new Material(shader); _baseMat.color = baseColor;
         _hoverMat = new Material(shader); _hoverMat.color = hoverColor;
+        _kingMat = new Material(shader); _kingMat.color = kingColor;
     }
 
     private void OnEnable()
     {
-        if (_map != null) _map.OnCellChanged += OnCellChanged;
+        if (_map != null)
+        {
+            _map.OnCellChanged += OnCellChanged;
+            _map.OnPlayerBasePlaced += OnPlayerBasePlaced;
+        }
     }
+
     private void OnDisable()
     {
-        if (_map != null) _map.OnCellChanged -= OnCellChanged;
+        if (_map != null)
+        {
+            _map.OnCellChanged -= OnCellChanged;
+            _map.OnPlayerBasePlaced -= OnPlayerBasePlaced;
+        }
     }
 
     private void Start()
@@ -77,26 +103,47 @@ public class BuildableHighlighter : MonoBehaviour
     {
         if (_map == null || !_map.IsReady) return;
 
-        // 입력 체크(마우스 & 터치)
+        // ── 베이스 미배치 구간: 킹타일만 상시 강조, 빌드가능 하이라이트는 아예 끔 ──
+        if (buildablesOnlyAfterBasePlaced && !_map.HasPlayerBase)
+        {
+            // 입력으로 _showAll 켜지지 않게 차단
+            _showAll = false;
+            _selectedPlaceable = false;
+            _hideAt = -1f;
+
+            _usedBuildables = 0; // 혹시 켜져 있던 라인들 정리
+            _usedKings = 0;
+
+            DrawAllKings();                            // 킹타일 펄스 상시표시
+            DisableUnusedPool(_poolBuildables, 0, true); // 빌드가능 라인 전부 OFF
+            DisableUnusedPool(_poolKings, _usedKings);   // 남는 킹 라인 OFF
+            if (_hoverLR) _hoverLR.enabled = false;    // 선택 펄스도 OFF
+            return;                                    // ← 여기서 프레임 종료
+        }
+
+        // ── 베이스 배치 이후: 기존 로직(탭 → 빌드가능 표시 + autoHide) ──
         if (JustTapped(out Vector3 world) && !IsPointerOverUI())
         {
             world.z = 0f;
             _selectedCell = _map.WorldToCell(world);
             _selectedPlaceable = _map.GetPlaceInfo(_selectedCell).Placeable;
 
-            // 표시 켜기
             _showAll = true;
             if (autoHideSec > 0f) _hideAt = Time.unscaledTime + autoHideSec;
         }
 
-        // 자동 숨김
         if (_showAll && autoHideSec > 0f && Time.unscaledTime >= _hideAt)
         {
-            ClearAllImmediate();
+            _showAll = false;
+            _selectedPlaceable = false;
+            _hideAt = -1f;
         }
 
-        // 풀 재사용 카운트 초기화
-        _used = 0;
+        _usedBuildables = 0;
+        _usedKings = 0;
+
+        // 베이스가 이미 있으므로 킹 강조는 필요 없음(혹시 남아있다면 닫기)
+        DisableUnusedPool(_poolKings, 0, true);
 
         if (_showAll)
         {
@@ -105,20 +152,27 @@ public class BuildableHighlighter : MonoBehaviour
         }
         else
         {
-            // 사용 안 한 외곽선 전부 끄기
-            DisableUnusedPool();
+            DisableUnusedPool(_poolBuildables, _usedBuildables);
             if (_hoverLR) _hoverLR.enabled = false;
         }
+
+        // 안전망: 남은 킹 라인 정리
+        DisableUnusedPool(_poolKings, _usedKings);
     }
 
-    // 맵 셀 상태 변경 시: 켜져있는 경우 다시 그리기
+
+    // 맵 셀 상태 변경 시
     private void OnCellChanged(Vector3Int _)
     {
-        if (_showAll)
-        {
-            // 다음 Update에서 다시 배치되므로 여기선 풀만 정리
-            // (필요 시 확장 가능)
-        }
+        // 풀은 매 프레임 재배치되므로 별도 즉시 처리 없음
+        // 필요하면 플래그만 세워 다음 Update에서 다시 그리기
+    }
+
+    // 플레이어 베이스 배치 완료 시: 킹 강조 종료
+    private void OnPlayerBasePlaced(Vector3Int _)
+    {
+        // 킹 강조를 끄기 위해 풀린 라인 비활성화
+        DisableUnusedPool(_poolKings, 0, forceAll: true);
     }
 
     // ─────────────────────────────────────────────────────────
@@ -133,13 +187,44 @@ public class BuildableHighlighter : MonoBehaviour
             if (!info.Placeable) continue;
 
             Vector3 center = _map.CellCenterWorld(cell);
-            LineRenderer linerenderer = GetLR();
-            SetupBaseLR(linerenderer);
-            SetSquare(linerenderer, center, _cellSize);
-            linerenderer.enabled = true;
+            LineRenderer lr = GetLR(_poolBuildables, ref _usedBuildables, "BuildableOutline_");
+            SetupLR(lr, _baseMat, baseWidth, sortingOrder);
+            SetSquare(lr, center, _cellSize);
+            lr.enabled = true;
         }
 
-        DisableUnusedPool();
+        DisableUnusedPool(_poolBuildables, _usedBuildables);
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // 킹타일 강조(상시)
+    // ─────────────────────────────────────────────────────────
+    private void DrawAllKings()
+    {
+        var kings = _map.GetAllKingCells();
+        for (int i = 0; i < kings.Count; i++)
+        {
+            Vector3 center = _map.CellCenterWorld(kings[i]);
+            LineRenderer lr = GetLR(_poolKings, ref _usedKings, "KingOutline_");
+            // 펄스
+            float width = kingWidth;
+            float alphaMul = 1f;
+            if (kingPulse)
+            {
+                float s = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f * kingPulseSpeed);
+                width += (s - 0.5f) * 2f * kingPulseWidthAmp;
+                alphaMul = Mathf.Clamp01(1f - kingPulseAlphaAmp + s * kingPulseAlphaAmp);
+            }
+            Color c = kingColor; c.a *= alphaMul;
+
+            // 머티리얼 컬러 갱신(독립 인스턴스라 안전)
+            _kingMat.color = c;
+
+            SetupLR(lr, _kingMat, width, sortingOrder + 2);
+            SetSquare(lr, center, _cellSize);
+            lr.enabled = true;
+        }
+        // 사용 안 한 킹 라인 끄기는 프레임 말미에서 공통 처리
     }
 
     // ─────────────────────────────────────────────────────────
@@ -184,43 +269,45 @@ public class BuildableHighlighter : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     // LineRenderer 풀/생성/셋업
     // ─────────────────────────────────────────────────────────
-    private LineRenderer GetLR()
+    private LineRenderer GetLR(List<LineRenderer> pool, ref int used, string namePrefix)
     {
-        if (_used < _pool.Count)
-            return _pool[_used++];
+        if (used < pool.Count)
+            return pool[used++];
 
-        LineRenderer lineRenderer = CreateLR($"BuildableOutline_{_pool.Count}");
-        _pool.Add(lineRenderer);
-        _used++;
-        return lineRenderer;
+        LineRenderer lr = CreateLR($"{namePrefix}{pool.Count}");
+        pool.Add(lr);
+        used++;
+        return lr;
     }
 
     private LineRenderer CreateLR(string name)
     {
-        GameObject gameObject = new GameObject(name);
-        gameObject.transform.SetParent(transform, false);
-        LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.useWorldSpace = true;
-        lineRenderer.loop = false;
-        lineRenderer.textureMode = LineTextureMode.Stretch;
-        lineRenderer.numCornerVertices = 2;
-        lineRenderer.numCapVertices = 0;
-        lineRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        lineRenderer.receiveShadows = false;
-        lineRenderer.sortingLayerName = sortingLayerName;
-        lineRenderer.sortingOrder = sortingOrder;
-        lineRenderer.enabled = false;
-        return lineRenderer;
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(transform, false);
+        LineRenderer lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.loop = false;
+        lr.textureMode = LineTextureMode.Stretch;
+        lr.numCornerVertices = 2;
+        lr.numCapVertices = 0;
+        lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        lr.receiveShadows = false;
+        lr.sortingLayerName = sortingLayerName;
+        lr.sortingOrder = sortingOrder;
+        lr.enabled = false;
+        return lr;
     }
 
-    private void SetupBaseLR(LineRenderer lineRenderer)
+    private void SetupLR(LineRenderer lr, Material mat, float width, int sortOrder)
     {
-        lineRenderer.material = _baseMat;
-        lineRenderer.widthMultiplier = baseWidth;
+        lr.material = mat;
+        lr.widthMultiplier = width;
+        lr.sortingLayerName = sortingLayerName;
+        lr.sortingOrder = sortOrder;
     }
 
     static readonly Vector3[] _pts = new Vector3[5];
-    private void SetSquare(LineRenderer lineRenderer, Vector3 center, Vector3 size)
+    private void SetSquare(LineRenderer lr, Vector3 center, Vector3 size)
     {
         float hx = size.x * 0.5f;
         float hy = size.y * 0.5f;
@@ -231,14 +318,15 @@ public class BuildableHighlighter : MonoBehaviour
         _pts[3] = new Vector3(center.x + hx, center.y - hy, 0f);
         _pts[4] = _pts[0];
 
-        lineRenderer.positionCount = 5;
-        lineRenderer.SetPositions(_pts);
+        lr.positionCount = 5;
+        lr.SetPositions(_pts);
     }
 
-    private void DisableUnusedPool()
+    private void DisableUnusedPool(List<LineRenderer> pool, int usedCount, bool forceAll = false)
     {
-        for (int i = _used; i < _pool.Count; i++)
-            if (_pool[i].enabled) _pool[i].enabled = false;
+        int start = forceAll ? 0 : usedCount;
+        for (int i = start; i < pool.Count; i++)
+            if (pool[i] && pool[i].enabled) pool[i].enabled = false;
     }
 
     private void ClearAllImmediate()
@@ -246,8 +334,10 @@ public class BuildableHighlighter : MonoBehaviour
         _showAll = false;
         _selectedPlaceable = false;
         _hideAt = -1f;
-        for (int i = 0; i < _pool.Count; i++)
-            if (_pool[i]) _pool[i].enabled = false;
+
+        DisableUnusedPool(_poolBuildables, 0, forceAll: true);
+        DisableUnusedPool(_poolKings, 0, forceAll: true);
+
         if (_hoverLR) _hoverLR.enabled = false;
     }
 

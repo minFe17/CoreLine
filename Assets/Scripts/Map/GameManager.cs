@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TwoButtonUI twoButtonUIPrefab; // 공용 2버튼 패널(취소/파괴 or 취소/발동)
 
     [SerializeField] private InvalidPlacementToast invalidPlacementPrefab; // 인스펙터에 연결
+    [SerializeField] private GameObject playerBasePrefab;
+
     private InvalidPlacementToast _invalidToast;
 
     private Camera _cam;
@@ -72,7 +74,32 @@ public class GameManager : MonoBehaviour
             }
             else Debug.LogError("[GameManager] stagePrefab이 비어있습니다.");
         }
+        if (Input.GetMouseButtonDown(1))
+        {
+            // UI 위면 무시
+            if (IsPointerOverUI()) return;
 
+            var map = MapManager.Instance;
+            if (!map || !map.IsReady) return;
+
+            Vector3 world = _cam.ScreenToWorldPoint(Input.mousePosition);
+            world.z = 0f;
+            Vector3Int cell = map.WorldToCell(world);
+
+            //킹타일이 아니면 false 반환됨
+            bool placed = map.SelectPlayerBase(cell, playerBasePrefab /* null이면 오브젝트 생성 안함 */, occupyBaseCell: true);
+            if (placed)
+            {
+                Debug.Log($"[GameManager] 플레이어 베이스 선택: {cell}");
+                // 이후 하이라이터는 OnPlayerBasePlaced 이벤트로 킹 강조를 자동 종료함
+            }
+            else
+            {
+                // 킹타일이 아니면 아무것도 안 함(원하면 토스트/사운드 추가 가능)
+                // PingInvalidAtCell(cell); // 필요하면 주석 해제
+            }
+            return; // 우클릭 동작 후 종료(좌클릭 로직과 분리)
+        }
         // 좌클릭
         if (Input.GetMouseButtonDown(0))
         {
