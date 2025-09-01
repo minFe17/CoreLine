@@ -1,4 +1,3 @@
-// ÆÄÀÏ: PauseGate.cs
 using System;
 
 public static class PauseControl
