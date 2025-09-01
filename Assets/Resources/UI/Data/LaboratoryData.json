@@ -5,7 +5,7 @@
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Value" : 1.1,
-        "ValueType" : "Multi",
+        "ValueType" : "Mul",
         "TargetType": "Unit",
         "TargetStatus":"AttackSpeed",
         "Prerequisite": null
@@ -17,7 +17,7 @@
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Value" : 1.2,
-        "ValueType" : "Multi",
+        "ValueType" : "Mul",
         "TargetType": "Unit",
         "TargetStatus":"AttackSpeed",
         "Prerequisite": "Attack_Num1"
