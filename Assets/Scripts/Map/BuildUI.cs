@@ -31,17 +31,20 @@ public struct TowerOption
 public class BuildUI : MonoBehaviour
 {
     // ─────────────────────────────────────────────────────────────────────
-    // 레이아웃: 좌/우 각각 2×2 = 총 8칸
+    // 레이아웃: 좌/우 각각 2×2 = 총 8칸 (인스펙터 무시, 코드 고정)
     // ─────────────────────────────────────────────────────────────────────
-    [Header("Grid Layout (per side)")]
-    [SerializeField] int cols = 2;                     // 열 수(고정: 2)
-    [SerializeField] int rows = 2;                     // 행 수(고정: 2)
-    [SerializeField] float cell = 96f;                 // 버튼 한 변(px)
-    [SerializeField] float spacing = 8f;               // 버튼 간격(px)
-    [SerializeField] float gapFromTile = 16f;          // 타일 중심과 그리드 사이 거리(px)
+    private const int COLS = 2;
+    private const int ROWS = 2;
+
+    private const float SPACING_PX = 20f;      // 버튼 간격
+    private const float GAP_FROM_TILE_PX = 20f;// 타일 중심과 그리드 사이 거리
+    private const float CLUSTER_GAP_PX = 20f;  // 같은 편 묶음 사이 간격
+
+    private static readonly Vector2 FALLBACK_CELL = new(80f, 120f); // 프리팹 크기 없으면 기본
+
+    private Vector2 _cellSizePx;               // 버튼 크기(프리팹→기본 80×120)
+    private Vector2 _lastGridSize;             // 2×2 하나의 실제 픽셀 크기
     [SerializeField] bool closeOnBackground = true;    // Dimmer 클릭 시 닫기
-    [SerializeField] float clusterGap = 12f; // 같은 편에 2x2 묶음 두 개를 나란히 둘 때 사이 간격
-    private Vector2 _lastGridSize;           // LayoutGrids 때 계산한 2x2 하나의 실제 픽셀 크기
     // 캔버스/필수 노드
     private Canvas _canvas;
     private RectTransform _root;        // BuildPanel(기준 사각형)
@@ -234,10 +237,10 @@ public class BuildUI : MonoBehaviour
         // 2×2 고정
         void Apply(GridLayoutGroup grid)
         {
-            grid.cellSize = new Vector2(cell, cell);
-            grid.spacing = new Vector2(spacing, spacing);
+            grid.cellSize = _cellSizePx;                       // ← 프리팹(또는 80×120)
+            grid.spacing = new Vector2(SPACING_PX, SPACING_PX);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = cols; // 고정: 2
+            grid.constraintCount = COLS;
             grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
             grid.startAxis = GridLayoutGroup.Axis.Horizontal;
             grid.childAlignment = TextAnchor.UpperLeft;
@@ -245,10 +248,10 @@ public class BuildUI : MonoBehaviour
         Apply(_leftGrid.GetComponent<GridLayoutGroup>());
         Apply(_rightGrid.GetComponent<GridLayoutGroup>());
 
-        // 그리드 박스 크기 캐싱(2×2 기준)
+        // 2×2 그리드 박스 크기
         Vector2 gridSize = new(
-            cols * cell + (cols - 1) * spacing,
-            rows * cell + (rows - 1) * spacing
+            COLS * _cellSizePx.x + (COLS - 1) * SPACING_PX,
+            ROWS * _cellSizePx.y + (ROWS - 1) * SPACING_PX
         );
         _lastGridSize = gridSize;
 
@@ -256,61 +259,54 @@ public class BuildUI : MonoBehaviour
         _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
         _leftGrid.pivot = new Vector2(1f, 0.5f);
         _leftGrid.sizeDelta = gridSize;
-        _leftGrid.anchoredPosition = new Vector2(-gapFromTile, 0f);
+        _leftGrid.anchoredPosition = new Vector2(-GAP_FROM_TILE_PX, 0f);
 
         _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
         _rightGrid.pivot = new Vector2(0f, 0.5f);
         _rightGrid.sizeDelta = gridSize;
-        _rightGrid.anchoredPosition = new Vector2(+gapFromTile, 0f);
+        _rightGrid.anchoredPosition = new Vector2(+GAP_FROM_TILE_PX, 0f);
     }
+
 
 
     // ─────────────────────────────────────────────────────────────────────
     // 화면 가장자리 보정(좌/우 공간이 너무 없으면 한쪽만)
     // ─────────────────────────────────────────────────────────────────────
     private void AutoKeepInside()
+{
+    Camera uiCam = GetUiCamera();
+    Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam, _anchor.position);
+    float left = screen.x;
+    float right = Screen.width - screen.x;
+    const float edge = 80f;
+
+    _leftGrid.gameObject.SetActive(true);
+    _rightGrid.gameObject.SetActive(true);
+
+    if (left < edge && right >= edge)
     {
-        Camera uiCam = GetUiCamera();
-        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam, _anchor.position);
-        float left = screen.x;
-        float right = Screen.width - screen.x;
-        const float edge = 80f; // 이 값보다 작으면 "그쪽은 비좁다"로 판단
+        _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
+        _rightGrid.pivot = new Vector2(0f, 0.5f);
+        _rightGrid.anchoredPosition = new Vector2(+GAP_FROM_TILE_PX, 0f);
 
-        // 기본은 양쪽 보이도록
-        _leftGrid.gameObject.SetActive(true);
-        _rightGrid.gameObject.SetActive(true);
-
-        // 왼쪽이 좁고 오른쪽은 넉넉 → 오른쪽으로 8칸 몰아주기
-        if (left < edge && right >= edge)
-        {
-            // 둘 다 "오른쪽 모드" 피벗/앵커
-            _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
-            _rightGrid.pivot = new Vector2(0f, 0.5f);
-            _rightGrid.anchoredPosition = new Vector2(+gapFromTile, 0f); // 앵커에 더 가까운 묶음
-
-            _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
-            _leftGrid.pivot = new Vector2(0f, 0.5f);
-            _leftGrid.anchoredPosition = new Vector2(+gapFromTile + _lastGridSize.x + clusterGap, 0f); // 그 옆에 붙이기
-
-            return;
-        }
-        // 오른쪽이 좁고 왼쪽은 넉넉 → 왼쪽으로 8칸 몰아주기
-        else if (right < edge && left >= edge)
-        {
-            // 둘 다 "왼쪽 모드" 피벗/앵커
-            _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
-            _leftGrid.pivot = new Vector2(1f, 0.5f);
-            _leftGrid.anchoredPosition = new Vector2(-gapFromTile, 0f); // 앵커에 더 가까운 묶음
-
-            _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
-            _rightGrid.pivot = new Vector2(1f, 0.5f);
-            _rightGrid.anchoredPosition = new Vector2(-gapFromTile - _lastGridSize.x - clusterGap, 0f); // 그 옆에 붙이기
-
-            return;
-        }
-
-        // 둘 다 애매하면 원래 양쪽 배치 유지(이미 LayoutGrids에서 셋업됨)
+        _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
+        _leftGrid.pivot = new Vector2(0f, 0.5f);
+        _leftGrid.anchoredPosition = new Vector2(+GAP_FROM_TILE_PX + _lastGridSize.x + CLUSTER_GAP_PX, 0f);
+        return;
     }
+    else if (right < edge && left >= edge)
+    {
+        _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
+        _leftGrid.pivot = new Vector2(1f, 0.5f);
+        _leftGrid.anchoredPosition = new Vector2(-GAP_FROM_TILE_PX, 0f);
+
+        _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
+        _rightGrid.pivot = new Vector2(1f, 0.5f);
+        _rightGrid.anchoredPosition = new Vector2(-GAP_FROM_TILE_PX - _lastGridSize.x - CLUSTER_GAP_PX, 0f);
+        return;
+    }
+}
+
 
     // ─────────────────────────────────────────────────────────────────────
     // 배선/탐색
@@ -351,8 +347,17 @@ public class BuildUI : MonoBehaviour
             _runtimeButtonPrefab = Resources.Load<TowerPlaceButton>("Map/TowerPlaceButton");
 
         _wired = (_canvas && _root && _anchor && _leftGrid && _rightGrid && _runtimeButtonPrefab);
-    }
 
+        // 프리팹 RectTransform 사이즈 → 버튼 크기 결정(없으면 기본 80×120)
+        _cellSizePx = GetPrefabButtonSize(_runtimeButtonPrefab);
+    }
+    private Vector2 GetPrefabButtonSize(TowerPlaceButton prefab)
+    {
+        if (!prefab) return FALLBACK_CELL;
+        var rt = prefab.GetComponent<RectTransform>();
+        if (rt && rt.sizeDelta != Vector2.zero) return rt.sizeDelta;
+        return FALLBACK_CELL;
+    }
     private void LogWireState()
     {
         Debug.Log(
@@ -371,8 +376,12 @@ public class BuildUI : MonoBehaviour
 
         options ??= new List<TowerOption>();
 
-        int perSide = cols * rows;   // 2×2 → 4
-        int maxTotal = perSide * 2;  // 8
+        // ▼ 버튼 크기: 프리팹 RT 기준, 없으면 80x120 기본
+        Vector2 cellSize = GetPrefabButtonSize(_runtimeButtonPrefab, new Vector2(80f, 120f));
+
+        // ▼ 2×2 고정
+        const int perSide = 4;   // 2x2
+        const int maxTotal = 8;  // 좌4 + 우4
         int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
 
         for (int i = 0; i < total; i++)
@@ -381,8 +390,9 @@ public class BuildUI : MonoBehaviour
             TowerPlaceButton button = Instantiate(_runtimeButtonPrefab, parent);
             button.gameObject.SetActive(true);
 
+            // ▼ 프리팹(또는 기본) 크기로 강제
             RectTransform rect = (RectTransform)button.transform;
-            if (rect.sizeDelta == Vector2.zero) rect.sizeDelta = new Vector2(cell, cell);
+            rect.sizeDelta = cellSize;
 
             if (i < options.Count)
             {
@@ -393,7 +403,6 @@ public class BuildUI : MonoBehaviour
                         _onPickCell.Invoke(picked, _currentCell);
                     else
                         _onPick?.Invoke(picked);
-
                     Close();
                 });
             }
@@ -402,6 +411,7 @@ public class BuildUI : MonoBehaviour
                 button.Bind((TowerOption)default, null); // 빈 슬롯
             }
         }
+
     }
 
     private void FillGrids(List<EUnitType> options)
@@ -411,18 +421,20 @@ public class BuildUI : MonoBehaviour
 
         options ??= new List<EUnitType>();
 
-        int perSide = cols * rows;   // 2×2 → 4
-        int maxTotal = perSide * 2;  // 8
+        const int perSide = 4;   // 2x2
+        const int maxTotal = 8;  // 좌4 + 우4
         int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
 
+        Vector2 cellSize = GetPrefabButtonSize(_runtimeButtonPrefab, new Vector2(80f, 120f));
         for (int i = 0; i < total; i++)
         {
             RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
             TowerPlaceButton button = Instantiate(_runtimeButtonPrefab, parent);
             button.gameObject.SetActive(true);
 
+            // ▼ 프리팹(또는 기본) 크기로 강제
             RectTransform rect = (RectTransform)button.transform;
-            if (rect.sizeDelta == Vector2.zero) rect.sizeDelta = new Vector2(cell, cell);
+            rect.sizeDelta = cellSize;
 
             if (i < options.Count)
             {
@@ -439,11 +451,19 @@ public class BuildUI : MonoBehaviour
             }
             else
             {
-                button.Bind((TowerOption)default, null); // 빈 슬롯
+                button.Bind((EUnitType)default, null); // 빈 슬롯
             }
         }
     }
 
+    // --- 로컬 헬퍼 ---
+    static Vector2 GetPrefabButtonSize(TowerPlaceButton prefab, Vector2 fallback)
+    {
+        if (!prefab) return fallback;
+        var rt = prefab.GetComponent<RectTransform>();
+        if (rt && rt.sizeDelta != Vector2.zero) return rt.sizeDelta;
+        return fallback;
+    }
     // ─────────────────────────────────────────────────────────────────────
     // 내부 유틸
     // ─────────────────────────────────────────────────────────────────────
