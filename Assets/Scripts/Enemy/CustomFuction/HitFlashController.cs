@@ -28,6 +28,13 @@ public class HitFlashTest : MonoBehaviour
     private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+
+        if (!sr)
+        {
+            enabled = false;
+            return;
+        }
+
         mpb = new MaterialPropertyBlock();
         ApplyFlash(0f);
 
@@ -37,24 +44,13 @@ public class HitFlashTest : MonoBehaviour
 
     private void Update()
     {
+        if (!enabled) return;
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             TriggerHitEffect();
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            var cam = clickCamera != null ? clickCamera : Camera.main;
-            if (cam == null) return;
-
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity, interactMask);
-            if (hit.collider != null && hit.collider.gameObject == gameObject)
-            {
-                TriggerHitEffect(); 
-            }
-        }
 
         if (flashTimer > 0f)
         {
@@ -70,6 +66,8 @@ public class HitFlashTest : MonoBehaviour
 
     private void ApplyFlash(float amount)
     {
+        if (!sr) return;
+
         sr.GetPropertyBlock(mpb);
         mpb.SetFloat(ID_FlashAmount, amount);
         mpb.SetColor(ID_FlashColor, flashColor);
@@ -78,6 +76,8 @@ public class HitFlashTest : MonoBehaviour
 
     public void TriggerHitEffect()
     {
+        if (!enabled || !sr) return;
+
         flashTimer = flashDuration;
         ApplyFlash(1f);
 
@@ -87,8 +87,18 @@ public class HitFlashTest : MonoBehaviour
         Invoke(nameof(ResetScale), flashDuration * 0.5f); 
     }
 
-    void ResetScale()
+    private void ResetScale()
     {
         targetScale = originalScale;
+    }
+
+
+    public void ClearFlash()
+    {
+        if (!enabled || !sr) return;
+
+        flashTimer = 0f;
+        ApplyFlash(0);
+        ResetScale();
     }
 }

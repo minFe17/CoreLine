@@ -98,131 +98,12 @@ public class MonsterMover : MonoBehaviour
         return _map.IsWalkable(r, c);
     }
 
-    //private IEnumerator Follow(List<Vector2Int> path)
-    //{
-    //    int i = (path[0] == Cell) ? 1 : 0;
-
-    //    for (; i < path.Count; i++)
-    //    {
-
-    //        if (CheckGoalRange())
-    //        {
-    //            IsFollowingPath = false;
-    //            _hasDestination = false;
-    //            _moveCo = null;
-    //            yield break;
-    //        }
-
-    //        Vector2Int step = path[i];
-
-    //        bool isUnderFeet = (step.x == Cell.x && step.y == Cell.y);
-    //        if (!isUnderFeet && 
-    //            (
-    //              (_allowWalls && _map.IsDestructible(step.x, step.y)) ||
-    //              (_allowTowers && _map.HasTower(step.x, step.y))
-    //            ))
-    //        {
-    //            if (_monster != null)
-    //            {
-    //                yield return new WaitUntil(() => _monster.IsAttackReady()); 
-    //                _monster.FireAttackTrigger();                               
-    //                yield return new WaitUntil(() => _monster.IsAttackReady());
-    //            }
-
-    //            if (_allowWalls && _map.IsDestructible(step.x, step.y))
-    //                _map.SetDestructible(step.x, step.y, false);
-    //            else if (_allowTowers && _map.HasTower(step.x, step.y))
-    //            {
-    //                Vector3 targetWorld = _map.CellToWorld(step.x, step.y);
-    //                Vector3Int abs = MapManager.Instance.WorldToCell(targetWorld);
-
-    //                if (MapManager.Instance.TryGetTowerAt(abs, out GameObject towerGo) && towerGo)
-    //                {
-    //                    Unit unit = towerGo.GetComponent<Unit>();
-    //                    if (unit != null && !unit.IsDie)
-    //                    {
-    //                        unit.TakeDamage(1);  
-
-    //                        i--;
-    //                        continue;
-    //                    }
-    //                }
-    //            }
-
-    //            i--;
-    //            continue;
-    //        }
-
-
-    //        if (_hasDestination && !IsPassableOnly(step.x, step.y))
-    //        {
-    //            List<Vector2Int> newPath = AStarPathfinder.FindPath(
-    //                _map.Height, _map.Width, (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y), Cell, _dstCell
-    //            );
-
-
-    //            if (newPath != null && newPath.Count > 1)
-    //            {
-    //                path = newPath;
-    //                i = (path[0] == Cell) ? 1 : 0;
-    //                step = path[i];
-    //            }
-    //            else
-    //            {
-    //                IsFollowingPath = false;
-    //                _hasDestination = false;
-    //                _moveCo = null;
-    //                yield break;
-    //            }
-    //        }
-
-    //        Vector3 target = _map.CellToWorld(step.x, step.y);
-    //        while ((transform.position - target).sqrMagnitude > _arriveEps * _arriveEps)
-    //        {
-    //            if (_hasDestination && !IsPassableOnly(step.x, step.y))
-    //                break;
-
-    //            Vector3 prev = transform.position;
-    //            transform.position = Vector3.MoveTowards(transform.position, target, _moveSpeed * Time.deltaTime);
-
-    //            if (_monster != null)
-    //            {
-    //                Vector3 delta = transform.position - prev;
-
-    //                if (Mathf.Abs(delta.y) > Mathf.Abs(delta.x))
-    //                {
-    //                    Vector3 goalWorld = _map.CellToWorld(_dstCell.x, _dstCell.y);
-    //                    float xdir = goalWorld.x - transform.position.x;
-    //                    _monster.SetFlip(new Vector3(xdir, 0f, 0f));
-    //                }
-    //                else
-    //                    _monster.SetFlip(delta);
-    //            }
-
-    //            if (CheckGoalRange())
-    //            {
-    //                IsFollowingPath = false;
-    //                _hasDestination = false;
-    //                _moveCo = null;
-    //                yield break;
-    //            }
-
-    //            yield return null;
-    //        }
-
-    //        if ((transform.position - target).sqrMagnitude > _arriveEps * _arriveEps)
-    //        {
-    //            i--;
-    //            continue;
-    //        }
-
-    //        transform.position = target;
-    //        Cell = step;
-    //    }
-
-    //    IsFollowingPath = false;
-    //    _moveCo = null;
-    //}
+    public void OnOwnerDied()
+    {
+        // 이동 중지
+        if (_moveCo != null) { StopCoroutine(_moveCo); _moveCo = null; }
+        IsFollowingPath = false;
+    }
 
     private IEnumerator Follow(List<Vector2Int> path)
     {
@@ -230,6 +111,8 @@ public class MonsterMover : MonoBehaviour
 
         for (; i < path.Count; i++)
         {
+            if (_monster != null && _monster.IsDead) yield break;
+
             if (CheckGoalRange())
             {
                 IsFollowingPath = false;
@@ -254,8 +137,24 @@ public class MonsterMover : MonoBehaviour
                     yield return new WaitUntil(() => _monster.IsAttackReady());
                 }
 
-                if (_allowWalls && _map.IsDestructible(step.x, step.y))
+                if (_allowWalls && _map.IsDestructible(step.x, step.y)) 
+                {
                     _map.SetDestructible(step.x, step.y, false);
+                    // 벽을 파괴했으니 경로 다시 탐색
+                    List<Vector2Int> newPath = AStarPathfinder.FindPath(
+                        _map.Height, _map.Width,
+                        (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
+                        Cell, _dstCell
+                    );
+                    if (newPath != null && newPath.Count > 1)
+                    {
+                        path = newPath;
+                        i = (path[0] == Cell) ? 1 : 0;
+                    }
+                    continue;
+                }
+                    
+
                 else if (_allowTowers && _map.HasTower(step.x, step.y))
                 {
                     Vector3 targetWorld = _map.CellToWorld(step.x, step.y);
@@ -306,6 +205,8 @@ public class MonsterMover : MonoBehaviour
 
             while ((transform.position - baseTarget).sqrMagnitude > _arriveEps * _arriveEps)
             {
+                if (_monster != null && _monster.IsDead) yield break;
+
                 if (_hasDestination && !IsPassableOnly(step.x, step.y))
                     break;
 
@@ -404,6 +305,8 @@ public class MonsterMover : MonoBehaviour
 
     private void Update()
     {
+        if (_monster != null && _monster.IsDead) return;
+
         if (CheckGoalRange())
         {
             if (IsFollowingPath)
