@@ -58,6 +58,8 @@ public class MonsterMover : MonoBehaviour
 
     public void MoveToCell(Vector2Int dst, bool allowWalls , bool allowTowers)
     {
+        if (!isActiveAndEnabled) return;
+
         _attackTimer = 0;
         _dstCell = dst;
         _allowWalls = allowWalls;

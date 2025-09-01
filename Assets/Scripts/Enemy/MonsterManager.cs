@@ -195,6 +195,7 @@ public class MonsterManager : MonoBehaviour
         foreach (MonsterMover m in _monsters)
         {
             if (!m) continue;
+            if (!m.gameObject.activeInHierarchy) continue;
             m.MoveToCell(_route.GoalCell, allowWalls, allowTowers);
         }
     }
