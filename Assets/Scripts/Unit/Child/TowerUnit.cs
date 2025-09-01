@@ -10,12 +10,15 @@ public class TowerUnit : Unit
 
     UnitLevelData _data;
 
+    int _level;
     int _originalLayer;
 
     public event Action OnUpgrade;
-    public EUnitType UnitType { get => _unitType; }
 
-    bool IsMaxLevel() => _level >= _levelUnit.Count - 1;
+    public EUnitType UnitType { get => _unitType; }
+    public int Level { get => _level; }
+
+    public bool IsMaxLevel() => _level >= _levelUnit.Count - 1;
 
     void OnEnable()
     {
@@ -31,29 +34,29 @@ public class TowerUnit : Unit
     void Update()
     {
         LookTarget();
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            if (_level == _levelUnit.Count - 1)
-                return;
-            Upgrade();
-        }
-        if(Input.GetKeyDown(KeyCode.Alpha4))
+        if (Input.GetKeyDown(KeyCode.Alpha4))
             TakeDamage(30);
     }
 
     public override void ClickUnit()
     {
         base.ClickUnit();
-        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.OpenUnitUI, _cell);
-        if (_level != _levelUnit.Count - 1)
+        if(SimpleSingleton<FusionManager>.Instance.IsFusionMode)
+        {
+            Fusion();
             return;
-        Fusion();
+        }
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.OpenUnitUI, this);
     }
 
     public override void Die()
     {
         base.Die();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
+        if(SimpleSingleton<AttackRangeManager>.Instance.IsSameUnit(this))
+            SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+        if (UnitUI.Unit == this)
+            UnitUI.Close();
     }
 
     void SetLevel()
@@ -116,7 +119,7 @@ public class TowerUnit : Unit
         UpgradeCharacter();
         SetLevel();
         OnUpgrade?.Invoke();
-        
+
         if (IsMaxLevel())
             SimpleSingleton<FusionManager>.Instance.AddFusionableUnit(_unitType, this);
     }

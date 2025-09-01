@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.U2D;
 using Utils;
 
 public abstract class PrefabLoadBase
@@ -18,4 +19,5 @@ public abstract class PrefabLoadBase
     public virtual T GetPrefab<T>() => default(T);
     public virtual GameObject GetPrefab<TEnum>(TEnum type) where TEnum : Enum => null;
     public virtual TextAsset GetPrefabTextAsset<TEnum>(TEnum type) where TEnum : Enum => null;
+    public virtual SpriteAtlas GetPrefabAtlas<TEnum>(TEnum type) where TEnum : Enum => null;
 }

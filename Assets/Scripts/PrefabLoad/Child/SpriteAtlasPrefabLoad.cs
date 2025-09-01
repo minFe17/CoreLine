@@ -1,30 +1,27 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.U2D;
-using Utils;
 
 public class SpriteAtlasPrefabLoad : PrefabLoadBase
 {
-    SpriteAtlas _atlasPrefab;
-    string _name;
-
-    public override void Init()
-    {
-        base.Init();
-        _name = "UnitSpriteAtlas";
-    }
+    Dictionary<EAtlasPrefabType, SpriteAtlas> _atlasDict = new Dictionary<EAtlasPrefabType, SpriteAtlas>();
 
     public override async Task LoadPrefab()
     {
         if (_addressableManager == null)
             Init();
-        _atlasPrefab = await _addressableManager.GetAddressableAsset<SpriteAtlas>(_name);
+
+        for (int i = 0; i < (int)EAtlasPrefabType.Max; i++)
+        {
+            SpriteAtlas prefab = await _addressableManager.GetAddressableAsset<SpriteAtlas>($"{(EAtlasPrefabType)i}");
+            if (prefab != null && !_atlasDict.ContainsKey((EAtlasPrefabType)i))
+                _atlasDict.Add((EAtlasPrefabType)i, prefab);
+        }
     }
 
-    public override T GetPrefab<T>()
+    public override SpriteAtlas GetPrefabAtlas<TEnum>(TEnum type)
     {
-        if (typeof(T) == typeof(SpriteAtlas))
-            return (T)(object)_atlasPrefab;
-        return default(T);
+        EAtlasPrefabType key = (EAtlasPrefabType)(object)type;
+        return _atlasDict[key];
     }
 }

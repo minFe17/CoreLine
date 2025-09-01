@@ -1,24 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.U2D;
+using UnityEngine.UI;
 using Utils;
 
 public class UnitUI : MonoBehaviour, IMediatorEvent
 {
     [SerializeField] List<RectTransform> _buttonPosition;
+    [SerializeField] Text _upgradeCostText;
 
+    Unit _unit;
+    SpriteAtlas _atlas;
     RectTransform _rectTransform;
-    float _radius = 100;
+    float _radius = 150;
     bool _isChangePosition;
+
+    public Unit Unit { get => _unit; }
 
     void Start()
     {
         _rectTransform = GetComponent<RectTransform>();
-        _rectTransform.offsetMin = Vector3.zero;
-        _rectTransform.offsetMax = Vector3.zero;
         SimpleSingleton<MediatorManager>.Instance.Register(EMediatorType.OpenUnitUI, this);
         CalculateButtonPosition();
         Close();
+        _atlas = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.SpriteAtlas).GetPrefabAtlas(EAtlasPrefabType.UnitUIIcon);
+        _buttonPosition[1].GetComponent<Image>().sprite = _atlas.GetSprite(EUnitUIIconType.Sell.ToString());
     }
 
     void CalculateButtonPosition()
@@ -52,12 +59,32 @@ public class UnitUI : MonoBehaviour, IMediatorEvent
         else
             _isChangePosition = false;
 
+        SetButton();
+
         gameObject.SetActive(true);
         Vector3 pos = MapManager.Instance.CellCenterWorld(cell);
         Camera uiCam = null;
         Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(Camera.main, pos);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform.parent as RectTransform, screenPoint, uiCam, out Vector2 localPoint);
         _rectTransform.anchoredPosition = localPoint;
+    }
+
+    void SetButton()
+    {
+        if (_unit is TowerUnit unit)
+        {
+            if (unit.IsMaxLevel())
+            {
+                _buttonPosition[0].GetComponent<Image>().sprite = _atlas.GetSprite(EUnitUIIconType.Fusion.ToString());
+                _upgradeCostText.gameObject.SetActive(false);
+            }
+            else
+            {
+                _buttonPosition[0].GetComponent<Image>().sprite = _atlas.GetSprite(EUnitUIIconType.Upgrade.ToString());
+                _upgradeCostText.gameObject.SetActive(true);
+                _upgradeCostText.text = SimpleSingleton<UnitDataList>.Instance.GetUnitData(unit.UnitType).LevelData[unit.Level + 1].Cost.ToString();
+            }
+        }
     }
 
     public bool IsClickOnBlockButton()
@@ -90,20 +117,30 @@ public class UnitUI : MonoBehaviour, IMediatorEvent
 
     public void UpgradeOrFusion()
     {
-
+        if (_unit is TowerUnit unit)
+        {
+            if (unit.IsMaxLevel())
+                unit.Fusion();
+            else
+                unit.Upgrade();
+            Close();
+        }
     }
 
     public void Sell()
     {
-
+        SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+        _unit.Die();
+        Close();
     }
     #endregion
 
     #region Interface
     void IMediatorEvent.HandleEvent(object data)
     {
-        Vector3Int cell = (Vector3Int)data;
-        Open(cell);
+        _unit = (Unit)data;
+        _unit.UnitUI = this;
+        Open(_unit.Cell);
     }
     #endregion
 }

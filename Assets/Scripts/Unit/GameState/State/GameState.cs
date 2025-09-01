@@ -14,7 +14,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.ShieldSoldier, EUnitType.Warrior, EUnitType.Wizard, EUnitType.Dwarf, EUnitType.Chef, EUnitType.Pirate };
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Hunter, EUnitType.Warrior, EUnitType.Wizard, EUnitType.Dwarf, EUnitType.Chef, EUnitType.Pirate };
 
     public GameState()
     {
@@ -24,6 +24,7 @@ public class GameState : IState, IMediatorEvent
 
     void HandleMouseClick()
     {
+        SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
         Vector3 mouseWorld = SimpleSingleton<UnitPlacementManager>.Instance.GetMouseWorldPosition();
         Vector3Int cell = SimpleSingleton<UnitPlacementManager>.Instance.GetCellFromWorld(mouseWorld);
         Vector3 cellCenter = MapManager.Instance.GetCellCenterWorld(cell);
@@ -65,6 +66,7 @@ public class GameState : IState, IMediatorEvent
         if (_canvas == null)
             CreateUI();
         _isSelectTile = true;
+        _unitUI.Close();
         _buildUI.OpenAtCell(_cell, _test);
     }
 
@@ -74,6 +76,7 @@ public class GameState : IState, IMediatorEvent
         if (MapManager.Instance.IsDestructible(_cell))
         {
             _isSelectTile = true;
+            _unitUI.Close();
             _twoButtonUI.OpenAtCell(_cell, "ÆÄ±«", (id, payload) =>
             {
                 MapManager.Instance.DestroyWallAt((Vector3Int)payload);
@@ -96,6 +99,7 @@ public class GameState : IState, IMediatorEvent
             if (h && h.TryGetComponent<ObjectTile>(out ObjectTile objectTile))
             {
                 _isSelectTile = true;
+                _unitUI.Close();
                 _twoButtonUI.OpenAtObject(objectTile, "¹ßµ¿", (id, payload) =>
                 {
                     if (payload is ObjectTile objectTile) objectTile.Activate();

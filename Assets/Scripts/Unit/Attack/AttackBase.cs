@@ -26,6 +26,8 @@ public abstract class AttackBase : MonoBehaviour
         if(_unit.IsDie)
             return;
         _attackTimer += Time.deltaTime;
+        if(_unit.TargetList.Count == 0) 
+            return;
         if(_unit.UnitStateData.AttackSpeed <= _attackTimer)
         {
             _attackTimer = 0;

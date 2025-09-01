@@ -5,5 +5,6 @@ public enum EPrefabType
     FusionUnit,
     UI,
     SpriteAtlas,
+    Bullet,
     Max,
 }

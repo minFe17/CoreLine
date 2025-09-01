@@ -8,7 +8,12 @@ public class FusionManager : MonoBehaviour
     // ╫л╠шео
     Dictionary<EUnitType, List<TowerUnit>> _fusionableUnit = new Dictionary<EUnitType, List<TowerUnit>>();
     List<EUnitType> _targetTypeList = new List<EUnitType>();
+
     TowerUnit _baseUnit;
+    bool _isFusionMode;
+
+    public TowerUnit BaseUnit { get => _baseUnit; }
+    public bool IsFusionMode { get => _isFusionMode; }
 
     bool TryGetFusionableTargetTypes(EUnitType selectedType, out List<EUnitType> targetTypes)
     {
@@ -120,6 +125,7 @@ public class FusionManager : MonoBehaviour
         _baseUnit = unit;
         ApplyFusionLayer("FusionUnit");
         NotifyFusion(true);
+        _isFusionMode = true;
     }
 
     public void Fusion(TowerUnit unit)
@@ -150,5 +156,6 @@ public class FusionManager : MonoBehaviour
         SimpleSingleton<MapUnitManager>.Instance.AddUnit(fusionUnit.Cell, fusionUnit.GetComponent<Unit>());
 
         NotifyFusion(false);
+        _isFusionMode = false;
     }
 }

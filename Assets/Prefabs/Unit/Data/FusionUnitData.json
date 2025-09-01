@@ -7,7 +7,7 @@
         "_hp": 120,
         "_attackDamage": 35,
         "_attackSpeed": 2.0,
-        "_attackRange": 1.7
+        "_attackRange": 3.5
       }
     },
     {
@@ -17,7 +17,7 @@
         "_hp": 140,
         "_attackDamage": 20,
         "_attackSpeed": 2.5,
-        "_attackRange": 1.5
+        "_attackRange": 3.0
       }
     },
     {
@@ -27,7 +27,7 @@
         "_hp": 150,
         "_attackDamage": 25,
         "_attackSpeed": 2.3,
-        "_attackRange": 1.5
+        "_attackRange": 3.0
       }
     },
     {
@@ -37,7 +37,7 @@
         "_hp": 110,
         "_attackDamage": 20,
         "_attackSpeed": 2.0,
-        "_attackRange": 1.6
+        "_attackRange": 3.5
       }
     },
     {
@@ -47,7 +47,7 @@
         "_hp": 100,
         "_attackDamage": 10,
         "_attackSpeed": 1.5,
-        "_attackRange": 1.6
+        "_attackRange": 3.2
       }
     },
     {
@@ -57,7 +57,7 @@
         "_hp": 110,
         "_attackDamage": 20,
         "_attackSpeed": 3.0,
-        "_attackRange": 1.5
+        "_attackRange": 3.0
       }
     },
     {
@@ -67,7 +67,7 @@
         "_hp": 120,
         "_attackDamage": 20,
         "_attackSpeed": 2.5,
-        "_attackRange": 1.5
+        "_attackRange": 3.0
       }
     }
   ]

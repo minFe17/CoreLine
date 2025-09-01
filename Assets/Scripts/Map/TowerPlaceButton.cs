@@ -37,7 +37,7 @@ public class TowerPlaceButton : BaseButton
 
         if (_icon != null)
         {
-            _icon.sprite = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.SpriteAtlas).GetPrefab<SpriteAtlas>().GetSprite(_unitType.ToString());
+            _icon.sprite = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.SpriteAtlas).GetPrefabAtlas(EAtlasPrefabType.UnitSpriteAtlas).GetSprite(_unitType.ToString());
         }
 
         if (_costText != null)

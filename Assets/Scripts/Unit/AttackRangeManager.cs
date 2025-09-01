@@ -7,9 +7,7 @@ public class AttackRangeManager
     GameObject _attackRange;
     Unit _targetUnit;
 
-    float _attctRangeDiameter = 2f;
-
-    bool IsSameUnit(Unit unit) => _targetUnit == unit;
+    public bool IsSameUnit(Unit unit) => _targetUnit == unit;
 
     void ShowAttackRange(Unit unit)
     {
@@ -17,7 +15,7 @@ public class AttackRangeManager
             _attackRange = MonoSingleton<ObjectPoolManager>.Instance.Pull(EPrefabType.AttackRange);
 
         _attackRange.transform.position = unit.transform.position;
-        float size = unit.UnitStateData.AttackRange * _attctRangeDiameter;
+        float size = unit.UnitStateData.AttackRange;
         _attackRange.transform.localScale = new Vector2(size, size);
 
         _targetUnit = unit;
