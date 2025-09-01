@@ -17336,8 +17336,8 @@ ParticleSystemRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1016584573
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_RenderMode: 1
   m_MeshDistribution: 0
@@ -26161,6 +26161,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddd7416d3446e624f8c0a135a45b7de6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bulletPosition: {fileID: 7390658748064835575}
+  _maxLevelBulletPosition: {fileID: 7993168947680445076}
+  _maxLevelEffect: {fileID: 5282625533712133537}
 --- !u!70 &712055945486725431
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

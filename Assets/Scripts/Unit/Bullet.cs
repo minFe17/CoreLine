@@ -45,7 +45,7 @@ public class Bullet : MonoBehaviour
     {
         if (collision.gameObject == _target.gameObject)
         {
-            // 데미지 주기
+            _target.TakeDamage(_damage);
             MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
         }
     }

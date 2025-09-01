@@ -107,14 +107,12 @@ MonoBehaviour:
   - m_GUID: c1544070195ca904a849d1176945cd3e
     m_Address: Arrow
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - Bullet
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c6a341563f1a641478d9adbd7b90782a
     m_Address: Bullet
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - Bullet
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c71d657d9655f89478f967fd68bc0d35
     m_Address: Pirate

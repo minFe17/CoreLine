@@ -18,7 +18,6 @@ public class Unit : MonoBehaviour
     protected int _currentHp;
     protected bool _isDie;
 
-
     public IReadOnlyList<Monster> TargetList { get => _orderedMonsters; }
     public Animator Animator { get => _animator; }
     public bool IsDie { get => _isDie; }
