@@ -66,6 +66,8 @@ public class TwoButtonUI : MonoBehaviour
     /// </summary>
     public void OpenAtCell(Vector3Int cell, string rightLabel, Action<string, object> onPick)
     {
+        if (PauseControl.IsPaused) return;
+
         MapManager map = MapManager.Instance;
         Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
         OpenInternal(world, rightLabel, onPick, payload: cell);
@@ -76,6 +78,8 @@ public class TwoButtonUI : MonoBehaviour
     /// </summary>
     public void OpenAtObject(ObjectTile target, string rightLabel, Action<string, object> onPick)
     {
+        if (PauseControl.IsPaused) return;
+
         MapManager map = MapManager.Instance;
         Vector3 world = target.transform.position;
         if (map && map.IsReady) world = map.CellCenterWorld(map.WorldToCell(world));
@@ -84,8 +88,11 @@ public class TwoButtonUI : MonoBehaviour
 
     private void OpenInternal(Vector3 world, string rightLabel, Action<string, object> onPick, object payload)
     {
+
         if (!_wired) Wire();
         if (!_wired) return;
+
+        if (PauseControl.IsPaused) return;
 
         _onPick = onPick;
         _payload = payload;

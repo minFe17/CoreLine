@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
@@ -99,6 +100,8 @@ public class BuildUI : MonoBehaviour
     /// </summary>
     public void OpenAtWorld(Vector3 worldPos, List<TowerOption> options, Action<TowerOption> onPick)
     {
+        if (PauseControl.IsPaused) return;
+
         _onPick = onPick;
 
         _onPickCell = null;            // <- 셀 없는 콜백 모드
@@ -138,6 +141,8 @@ public class BuildUI : MonoBehaviour
     }
     public void OpenAtWorld(Vector3 worldPos, List<EUnitType> options, Action<TowerOption> onPick)
     {
+        if (PauseControl.IsPaused) return;
+
         _onPick = onPick;
 
         _onPickCell = null;            // <- 셀 없는 콜백 모드
@@ -182,6 +187,8 @@ public class BuildUI : MonoBehaviour
     /// </summary>
     public void OpenAtCell(Vector3Int cell, List<TowerOption> options, Action<TowerOption, Vector3Int> onPickCell)
     {
+        if (PauseControl.IsPaused) return;
+
         _onPick = null;          // 셀 없는 콜백은 안 씀
         _onPickCell = null;      // ← 필드에 저장하지 않고
         _currentCell = cell;
@@ -199,6 +206,8 @@ public class BuildUI : MonoBehaviour
 
     public void OpenAtCell(Vector3Int cell, List<EUnitType> options, Action<TowerOption, Vector3Int> onPickCell)
     {
+        if (PauseControl.IsPaused) return;
+
         _onPick = null;          // 셀 없는 콜백은 안 씀
         _onPickCell = null;      // ← 필드에 저장하지 않고
         _currentCell = cell;

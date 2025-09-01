@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems; // UI 위 클릭 무시용
 
@@ -101,8 +102,13 @@ public class BuildableHighlighter : MonoBehaviour
 
     private void Update()
     {
-        if (_map == null || !_map.IsReady) return;
+        if (PauseControl.IsPaused)
+        {
+            //if (_showAll) ClearAllImmediate(); // 켜져 있던 표시 끄기
+            return;
+        }
 
+        if (_map == null || !_map.IsReady) return;
         // ── 베이스 미배치 구간: 킹타일만 상시 강조, 빌드가능 하이라이트는 아예 끔 ──
         if (buildablesOnlyAfterBasePlaced && !_map.HasPlayerBase)
         {
