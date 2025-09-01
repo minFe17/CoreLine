@@ -118,10 +118,11 @@ public class UnitManager : SimpleSingleton<UnitManager>
         _upgradeDatas = DataManager.Instance.UpgradeDatas;
         _gameData = DataManager.Instance.GameData;
         _unlockedUnits = _gameData.UnlockedUnit;
+        _choiceUnit = GetInventoryData(_unlockedUnits[0].UnitType);
     }
     private void ResetChoice()
     {
-        _choiceUnit = default;
+        _choiceUnit = GetInventoryData(_unlockedUnits[0].UnitType);
     }
     private void AddSelectedUnit()
     {

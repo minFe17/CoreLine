@@ -2,30 +2,36 @@
     {
         "Id" : "Attack_Num1",
         "Name" : "공격 속도 증가 Lv.1",
-        "Type" : "Attack",
+        "LaboratoryType" : "Attack",
         "Cost" : 1000,
-        "Value" : 5,
-        "ValueType" : "Add",
+        "Value" : 1.1,
+        "ValueType" : "Multi",
+        "TargetType": "Unit",
+        "TargetStatus":"AttackSpeed",
         "Prerequisite": null
     },
 
     {
         "Id" : "Attack_Num2",
         "Name" : "공격 속도 증가 Lv.2",
-        "Type" : "Attack",
+        "LaboratoryType" : "Attack",
         "Cost" : 1000,
-        "Value" : 10,
-        "ValueType" : "Add",
+        "Value" : 1.2,
+        "ValueType" : "Multi",
+        "TargetType": "Unit",
+        "TargetStatus":"AttackSpeed",
         "Prerequisite": "Attack_Num1"
     },
 
     {
         "Id" : "Defense_Num1",
-        "Name" : "기지 방어력 증가 Lv.1",
-        "Type" : "Defense",
+        "Name" : "기지 보호막 증가 Lv.1",
+        "LaboratoryType" : "Defense",
         "Cost" : 1000,
         "Value" : 50,
         "ValueType" : "Add",
+        "TargetType": "King",
+        "TargetStatus":"Shield",
         "Prerequisite": null
     }
     ]

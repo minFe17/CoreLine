@@ -2,10 +2,12 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class InventoryUnitButton : UnitButton
 {
     private bool _isBuy = false;
+    private bool _isStart = false;
     private Image _buyImage;
     private TextMeshProUGUI _buyText;
     private UIColorApplier _colorApplier;
@@ -35,7 +37,18 @@ public class InventoryUnitButton : UnitButton
     }
     private void Start()
     {
+        _isStart = true;
+        EventManager.Instance.Invoke<GameObject>("ChangeColorTypeToInventoryUnitButton", this.gameObject);
+    }
+    private void OnEnable()
+    {
         EventManager.Instance.Subscribe<GameObject>("ChangeColorTypeToInventoryUnitButton", ChangeColorType);
+        if(_isStart)
+            EventManager.Instance.Invoke<GameObject>("ChangeColorTypeToInventoryUnitButton", this.gameObject);
+    }
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe("ChangeColorTypeToInventoryUnitButton", (Action<GameObject>)ChangeColorType);
     }
     protected override void OnClick()
     {

@@ -5,22 +5,28 @@ using System;
 public class ShowUnitPanelController: MonoBehaviour
 {
     private bool _isBuyUnit = true;
+    private bool _isStart = false;
     private TextMeshProUGUI _text;
+
 
     private void Start()
     {
         FindAndGetComponent();
+        _isStart = true;
+        EventManager.Instance.Invoke<bool, EUnitType>("IsBuyUnit", UnitManager.Instance.IsGetUnit(UnitManager.Instance.ChoiceUnit.UnitType), UnitManager.Instance.ChoiceUnit.UnitType);
+        EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", UnitManager.Instance.ChoiceUnit.UnitType);
     }
     private void OnEnable()
     {
-        Debug.Log($"OnEnable 호출: {gameObject.name}");
-        //EventManager.Instance.Subscribe<EUnitType>("ChangeUnit", ChangeText);
         EventManager.Instance.Subscribe<bool, EUnitType>("IsBuyUnit", IsBuyUnit);
+        if(_isStart)
+        {
+            EventManager.Instance.Invoke<bool, EUnitType>("IsBuyUnit", UnitManager.Instance.IsGetUnit(UnitManager.Instance.ChoiceUnit.UnitType), UnitManager.Instance.ChoiceUnit.UnitType);
+            EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", UnitManager.Instance.ChoiceUnit.UnitType);
+        }  
     }
     private void OnDisable()
     {
-        Debug.Log($"OnDisable 호출: {gameObject.name}");
-        //EventManager.Instance.UnSubscribe("ChangeUnit", (Action<EUnitType>)ChangeText);
         EventManager.Instance.UnSubscribe("IsBuyUnit", (Action<bool, EUnitType>)IsBuyUnit);
     }
     private void IsBuyUnit(bool param,EUnitType type)

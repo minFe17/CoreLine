@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 
 public class ShowUnitController : MonoBehaviour
 {
+    private bool _isStart = false;
     private Dictionary<EUnitType, GameObject> _units = new Dictionary<EUnitType, GameObject>();
     private EUnitType _turnOntheUnitType;
 
@@ -18,7 +19,6 @@ public class ShowUnitController : MonoBehaviour
     {
         EventManager.Instance.Subscribe<EUnitType>("ChangeChoiceUnitData", TurnOnTheUnit);
         EventManager.Instance.Subscribe("Reset", ResetUnit);
-        
     }
     private void FindAndAddController()
     {
@@ -82,6 +82,7 @@ public class ShowUnitController : MonoBehaviour
     private void ResetUnit()
     {
         TurnOffTheUnit();
-        _turnOntheUnitType = EUnitType.King;
+        _turnOntheUnitType = UnitManager.Instance.ChoiceUnit.UnitType;
+        TurnOnTheUnit(_turnOntheUnitType);
     }
 }

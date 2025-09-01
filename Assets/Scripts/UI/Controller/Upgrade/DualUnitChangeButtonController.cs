@@ -21,4 +21,15 @@ public class DualUnitChangeButtonController : DualButtonController<UnlockedUnit>
         base.OnEnable();
         EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", _list[_index].UnitType);
     }
+    protected override void SettingIndex()
+    {
+        for (int i = 0; i < _list.Count; i++)
+        {
+            if (_list[i].UnitType == UnitManager.Instance.ChoiceUnit.UnitType)
+            {
+                _index = i;
+                return;
+            }
+        }
+    }
 }

@@ -6,11 +6,13 @@ using Utils;
 
 public class StatBarController : MonoBehaviour
 {
+    private bool _isSet = false;
     private Dictionary<UpgradeType, Slider> _sliders = new Dictionary<UpgradeType, Slider>();
 
     private void Start()
     {
         SetSliders();
+        ChangeStatus(UnitManager.Instance.ChoiceUnit.UnitType);
     }
     private void OnEnable()
     {
@@ -30,10 +32,11 @@ public class StatBarController : MonoBehaviour
             _sliders.Add(type, sl);
             SetMaxValue(sl, type);
         }
-
+        _isSet = true;
     }
     private void ChangeStatus(EUnitType unit)
     {
+        if (!_isSet) return;
         SetUnitValue(unit, UpgradeType.HealthPoint);
         SetUnitValue(unit, UpgradeType.AttackRange);
         SetUnitValue(unit, UpgradeType.AttackDamage);

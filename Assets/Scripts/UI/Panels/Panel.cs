@@ -3,13 +3,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public abstract class Panel : MonoBehaviour
+public class Panel : MonoBehaviour
 {
-    protected Image _backGroundImage;
+    [SerializeField]
     protected PanelStatus _status;
-    protected string _backGroundImagePath = "";
+
     protected List<Button> _buttons = new List<Button>();
 
+    public PanelStatus Status
+    {
+        get { return _status; }
+    }
     public void SwitchOnPanel()
     {
         gameObject.SetActive(true);
@@ -21,18 +25,13 @@ public abstract class Panel : MonoBehaviour
     }
     protected virtual void Awake()
     {
-        ChangeImage();
         SwitchOffPanel();
-        RegisterPanelStatus();
         UIManager.Instance.RegisterPanel(_status, this);
     }
-    protected virtual void ChangeImage()
-    {
-        _backGroundImage = GetComponent<Image>();
-        //_backGroundImage.sprite = Resources.Load<Sprite>(_backGroundImagePath); //이미지 리소스 변경
-    }
+
     protected void FindAllButtons()
     {
+        //이건 팝업이랑 엮을때 필요한거임
         _buttons.Clear(); // 기존 내용 초기화
         Button[] buttons = GetComponentsInChildren<Button>(true); // 비활성화 버튼까지 포함
         _buttons.AddRange(buttons);
@@ -42,5 +41,4 @@ public abstract class Panel : MonoBehaviour
             btn.interactable = false;
         }
     }
-    protected abstract void RegisterPanelStatus();
 }

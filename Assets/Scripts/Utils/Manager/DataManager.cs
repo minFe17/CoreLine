@@ -3,12 +3,6 @@ using Utils;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-
-[JsonConverter(typeof(StringEnumConverter))]
-public enum UpgradeType
-{
-    HealthPoint,AttackDamage, AttackRange, AttackSpeed
-}
 public class DataManager : SimpleSingleton<DataManager>
 {
     private List<InventoryData> _inventoryDatas;
@@ -50,6 +44,7 @@ public class DataManager : SimpleSingleton<DataManager>
         }
         return new UpgradeData();
     }
+
     public void SaveData()
     {//데이터 세이브구현
 

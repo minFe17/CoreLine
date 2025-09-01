@@ -25,16 +25,19 @@ public class UIManager : SimpleSingleton<UIManager>
     }
     public void AddPanelStack(PanelStatus status)
     {
-        if(_panelStack.Count!=0)
+        if (_panelStack.Count!=0)
         {
             _panelStack.Peek().SwitchOffPanel();
         }
         _panelStack.Push(_panelDictionary[status]);
         _panelDictionary[status].SwitchOnPanel();
+        if(status != PanelStatus.UpgradePanel)
+            EventManager.Instance.Invoke("Reset");
     }
     public void CloseFrontPanel()
     {
-        EventManager.Instance.Invoke("Reset");
+        if (_panelStack.Peek().Status != PanelStatus.UpgradePanel)
+            EventManager.Instance.Invoke("Reset");
         _panelStack.Pop().SwitchOffPanel();
         if (_panelStack.Count == 0) return;
         _panelStack.Peek().SwitchOnPanel();
