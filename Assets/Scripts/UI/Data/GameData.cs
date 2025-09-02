@@ -7,6 +7,8 @@ public class GameData
     public List<UnlockedUnit> UnlockedUnit;
     public List<string> UnlockedLaboratoryId;
     public int PlayerMoney;
+    public int PlayerGem;
+    public List<ClearStage> ClearStage;
 }
 [System.Serializable]
 public class UnlockedUnit
@@ -16,4 +18,11 @@ public class UnlockedUnit
     public int HealthPointLevel = 1;
     public int AttackRangeLevel = 1;
     public int AttackSpeedLevel = 1;
+}
+[System.Serializable]
+public class ClearStage
+{
+    public int FirstStageNumber;
+    public int LastStageNumber;
+    public int ClearStarNumber;
 }

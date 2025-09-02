@@ -1,18 +1,38 @@
 using UnityEngine;
-using System.Collections.Generic;
 using Utils;
+using System.Collections.Generic;
+using UnityEngine.Rendering;
 
-public class LaboratoryManager : MonoSingleton<LaboratoryManager>
+public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
 {
-    //이거 모노비헤이비어 빼주고 써야될듯.
-    private Dictionary<LaboratoryType, PoolingManager> _nodes = new Dictionary<LaboratoryType, PoolingManager>();
+    private Dictionary<LaboratoryType,List<LaboratoryData>> _data = new Dictionary<LaboratoryType, List<LaboratoryData>>();
 
-    private void Start()
+    public LaboratoryManager()
     {
-        CreateNodes();
+        SettingData();
     }
-    private void CreateNodes()
+    private void SettingData()
     {
-        //_nodes[LaboratoryType.Attack] = new PoolingManager()
+        _data[LaboratoryType.Attack] = new List<LaboratoryData>();
+        _data[LaboratoryType.Defense] = new List<LaboratoryData>();
+        _data[LaboratoryType.Utility] = new List<LaboratoryData>();
+        List<LaboratoryData> data = DataManager.Instance.LaboratoryDatas;
+
+        foreach(LaboratoryData dt in data)
+        {
+            switch(dt.Type)
+            {
+                case LaboratoryType.Attack:
+                    _data[LaboratoryType.Attack].Add(dt);
+                    break;
+                case LaboratoryType.Defense:
+                    _data[LaboratoryType.Defense].Add(dt);
+                    break;
+                case LaboratoryType.Utility:
+                    _data[LaboratoryType.Utility].Add(dt);
+                    break;
+            }
+        }
     }
+
 }

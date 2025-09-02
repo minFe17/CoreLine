@@ -7,17 +7,17 @@ using JetBrains.Annotations;
 [JsonConverter(typeof(StringEnumConverter))]
 public enum LaboratoryType
 {
-    Attack, Defense, Utility
+    None, Attack, Defense, Utility
 }
 [JsonConverter(typeof(StringEnumConverter))]
 public enum ValueType
 {
-    Add, Mul, Sub
+    Add, Mul, Sub, Skill
 }
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TargetType 
 {
-    King, Unit, PlayTime, Money, SpawnMoney
+    King, Unit, PlayTime, Money, IncomeMoney, IncomeSkill, Monster
 }
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TargetStatus
@@ -36,5 +36,5 @@ public struct LaboratoryData
     public ValueType ValueType;
     public TargetType TargetType;
     public TargetStatus TargetStatus;
-    public string Prerequisite;
+    public List<string> ParntsId;
 }

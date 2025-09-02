@@ -10,5 +10,14 @@
         }
     ],
     "UnlockedLaboratoryId" : [],
-    "PlayerMoney":0
+    "PlayerMoney":0,
+    "PlayerGem":0,
+    "ClearStage":
+    [
+        {
+            "FirstStageNumber":1,
+            "LastStageNumber":1,
+            "ClearStarNumber":1
+        }
+    ]
 }

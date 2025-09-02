@@ -9,6 +9,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     private void Awake()
     {
         DataManager.Instance.LoadData();
+        
     }
     private void Start()
     {
@@ -17,6 +18,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         //UIManager.Instance.AddPanelStack(PanelStatus.InventoryPanel);
         //UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
         UIManager.Instance.AddPanelStack(PanelStatus.LaboratoryPanel);
+        //UIManager.Instance.AddPanelStack(PanelStatus.PlayPanel);
     }
 
 }
