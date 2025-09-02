@@ -45,7 +45,7 @@ public class ObjectTile : MonoBehaviour, IPointerClickHandler
         if (PauseControl.IsPaused) return;
 
         // 코스트 지급
-        CostManager.Instance.Add(30);
+        CostManager.Instance.AddUnit(30);
 
         // 논리 점유는 즉시 해제
         if (_registered && _map != null)

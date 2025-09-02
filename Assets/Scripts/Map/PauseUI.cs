@@ -105,7 +105,7 @@ public class PauseUI : MonoBehaviour
         Resume();
         var active = SceneManager.GetActiveScene();
         SceneManager.LoadScene(active.buildIndex);
-        CostManager.Instance.SetValue(0);
+        CostManager.Instance.SetUnitValue(0);
     }
 
     public void GoToLobby()

@@ -11,13 +11,13 @@ public class CostUI : MonoBehaviour
     void OnEnable()
     {
         _cost = CostManager.Instance;                         // 필요 시 자동 생성
-        if (costText) costText.text = _cost.Current.ToString(numberFormat);
-        _cost.OnChanged += OnChanged;
+        if (costText) costText.text = _cost.CurrentUnit.ToString(numberFormat);
+        _cost.OnUnitChanged += OnChanged;
     }
 
     void OnDisable()
     {
-        if (_cost != null) _cost.OnChanged -= OnChanged;
+        if (_cost != null) _cost.OnUnitChanged -= OnChanged;
     }
 
     void OnChanged(int v)

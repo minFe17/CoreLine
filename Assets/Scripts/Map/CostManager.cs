@@ -1,89 +1,222 @@
 using System;
 using UnityEngine;
+using Utils;
 
-public class CostManager : MonoBehaviour
+public class CostManager : MonoSingleton<CostManager>
 {
-    public static CostManager Instance => Utils.MonoSingleton<CostManager>.Instance;
-
-    [Header("Income")]
-    [SerializeField] private bool autoGain = true;
-    [SerializeField] private float gainPerSecond = 2f;   // 1초당 +2
-    [SerializeField] private bool useUnscaledTime = false;
-
-    [Header("Starting Value")]
-    [SerializeField] private int startValue = 0;
-
-    public int Current { get; private set; }
-    public event Action<int> OnChanged;
-
-    float _carry;  // 소수 누적
-
-    void OnEnable()
+    public enum CostType
     {
-        // 첫 생성 시 초기화
-        Current = startValue;
-        OnChanged?.Invoke(Current);
+        Unit,
+        Skill
     }
 
-    void Update()
-    {
-        if (!autoGain || gainPerSecond <= 0f) return;
+    [Header("Unit Placement Budget")]
+    [SerializeField] private bool unitAutoGain = true;
+    [SerializeField] private float unitGainPerSecond = 2f;
+    [SerializeField] private bool unitUseUnscaledTime = false;
+    [SerializeField] private int unitStartValue = 0;
 
-        float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
-        _carry += gainPerSecond * dt;           // 초당 2씩 누적
-        if (_carry >= 1f)
+    [Header("Skill Budget")]
+    [SerializeField] private bool skillAutoGain = true;
+    [SerializeField] private float skillGainPerSecond = 2f;
+    [SerializeField] private bool skillUseUnscaledTime = false;
+    [SerializeField] private int skillStartValue = 0;
+
+    public int CurrentUnit { get; private set; }
+    public int CurrentSkill { get; private set; }
+
+    public event Action<int> OnUnitChanged;
+    public event Action<int> OnSkillChanged;
+
+    private float unitCarry;   // 유닛 지갑 소수 누적
+    private float skillCarry;  // 스킬 지갑 소수 누적
+
+    private void OnEnable()
+    {
+        CurrentUnit = Mathf.Max(0, unitStartValue);
+        CurrentSkill = Mathf.Max(0, skillStartValue);
+        Action<int> unitChanged = OnUnitChanged;
+        if (unitChanged != null) unitChanged.Invoke(CurrentUnit);
+        Action<int> skillChanged = OnSkillChanged;
+        if (skillChanged != null) skillChanged.Invoke(CurrentSkill);
+    }
+
+    private void Update()
+    {
+        float deltaTimeUnit = unitUseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+        float deltaTimeSkill = skillUseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+
+        if (unitAutoGain && unitGainPerSecond > 0f)
         {
-            int inc = Mathf.FloorToInt(_carry); // 정수 부분만 반영
-            _carry -= inc;
-            Add(inc);
+            unitCarry += unitGainPerSecond * deltaTimeUnit;
+            if (unitCarry >= 1f)
+            {
+                int increase = Mathf.FloorToInt(unitCarry);
+                unitCarry -= increase;
+                AddUnit(increase);
+            }
+        }
+
+        if (skillAutoGain && skillGainPerSecond > 0f)
+        {
+            skillCarry += skillGainPerSecond * deltaTimeSkill;
+            if (skillCarry >= 1f)
+            {
+                int increase = Mathf.FloorToInt(skillCarry);
+                skillCarry -= increase;
+                AddSkill(increase);
+            }
         }
     }
 
-    // ───── 외부 API ─────
-    public void Add(int amount)
+    // ─────────────────────────────
+    // 유닛 지갑 API
+    // ─────────────────────────────
+    public void AddUnit(int amount)
     {
         if (amount == 0) return;
-        Current = Mathf.Max(0, Current + amount);
-        OnChanged?.Invoke(Current);
+        CurrentUnit = Mathf.Max(0, CurrentUnit + amount);
+        Action<int> cb = OnUnitChanged;
+        if (cb != null) cb.Invoke(CurrentUnit);
     }
 
-    public void Add(float amount)   // 소수 추가도 지원 (이자/버프 등)
+    // 소수 누적 버전(새 이름)
+    public void AddUnitFraction(float amount)
     {
-        _carry += amount;
-        if (_carry >= 1f)
+        unitCarry += amount;
+        if (unitCarry >= 1f)
         {
-            int inc = Mathf.FloorToInt(_carry);
-            _carry -= inc;
-            Add(inc);
+            int increase = Mathf.FloorToInt(unitCarry);
+            unitCarry -= increase;
+            AddUnit(increase);
         }
     }
-    public void SetValue(int value)
+
+    public void SetUnitValue(int value)
     {
-        Current = Mathf.Max(0, value);
-        OnChanged?.Invoke(Current);
+        CurrentUnit = Mathf.Max(0, value);
+        Action<int> cb = OnUnitChanged;
+        if (cb != null) cb.Invoke(CurrentUnit);
     }
 
-    /// 충분하면 차감하고 true, 부족하면 false
-    public bool TrySpend(int amount)
+    public bool TrySpendUnit(int amount)
     {
         if (amount <= 0) return true;
-        if (Current < amount) return false;
-        Current -= amount;
-        OnChanged?.Invoke(Current);
+        if (CurrentUnit < amount) return false;
+        CurrentUnit -= amount;
+        Action<int> cb = OnUnitChanged;
+        if (cb != null) cb.Invoke(CurrentUnit);
         return true;
     }
 
-    /// 강제 차감(0 미만 방지)
-    public void SpendForce(int amount)
+    public void SpendUnitForce(int amount)
     {
         if (amount <= 0) return;
-        Current = Mathf.Max(0, Current - amount);
-        OnChanged?.Invoke(Current);
+        CurrentUnit = Mathf.Max(0, CurrentUnit - amount);
+        Action<int> cb = OnUnitChanged;
+        if (cb != null) cb.Invoke(CurrentUnit);
     }
 
+    public void SetUnitAutoGain(bool enabled) { unitAutoGain = enabled; }
+    public void SetUnitGainRate(float perSecond) { unitGainPerSecond = Mathf.Max(0f, perSecond); }
 
-    public void SetAutoGain(bool enabled) 
-        => autoGain = enabled;
-    public void SetGainRate(float perSecond) 
-        => gainPerSecond = Mathf.Max(0f, perSecond);
+    // ─────────────────────────────
+    // 스킬 지갑 API
+    // ─────────────────────────────
+    public void AddSkill(int amount)
+    {
+        if (amount == 0) return;
+        CurrentSkill = Mathf.Max(0, CurrentSkill + amount);
+        Action<int> cb = OnSkillChanged;
+        if (cb != null) cb.Invoke(CurrentSkill);
+    }
+
+    // 소수 누적 버전(새 이름)
+    public void AddSkillFraction(float amount)
+    {
+        skillCarry += amount;
+        if (skillCarry >= 1f)
+        {
+            int increase = Mathf.FloorToInt(skillCarry);
+            skillCarry -= increase;
+            AddSkill(increase);
+        }
+    }
+
+    public void SetSkillValue(int value)
+    {
+        CurrentSkill = Mathf.Max(0, value);
+        Action<int> cb = OnSkillChanged;
+        if (cb != null) cb.Invoke(CurrentSkill);
+    }
+
+    public bool TrySpendSkill(int amount)
+    {
+        if (amount <= 0) return true;
+        if (CurrentSkill < amount) return false;
+        CurrentSkill -= amount;
+        Action<int> cb = OnSkillChanged;
+        if (cb != null) cb.Invoke(CurrentSkill);
+        return true;
+    }
+
+    public void SpendSkillForce(int amount)
+    {
+        if (amount <= 0) return;
+        CurrentSkill = Mathf.Max(0, CurrentSkill - amount);
+        Action<int> cb = OnSkillChanged;
+        if (cb != null) cb.Invoke(CurrentSkill);
+    }
+
+    public void SetSkillAutoGain(bool enabled) { skillAutoGain = enabled; }
+    public void SetSkillGainRate(float perSecond) { skillGainPerSecond = Mathf.Max(0f, perSecond); }
+
+    // ─────────────────────────────
+    // 공통(타입 기반) API
+    // ─────────────────────────────
+    public int GetCurrent(CostType type)
+    {
+        return type == CostType.Unit ? CurrentUnit : CurrentSkill;
+    }
+
+    public void Add(CostType type, int amount)
+    {
+        if (type == CostType.Unit) AddUnit(amount);
+        else AddSkill(amount);
+    }
+
+    public void Add(CostType type, float amount)
+    {
+        if (type == CostType.Unit) AddUnitFraction(amount);
+        else AddSkillFraction(amount);
+    }
+
+    public void SetValue(CostType type, int value)
+    {
+        if (type == CostType.Unit) SetUnitValue(value);
+        else SetSkillValue(value);
+    }
+
+    public bool TrySpend(CostType type, int amount)
+    {
+        return type == CostType.Unit ? TrySpendUnit(amount) : TrySpendSkill(amount);
+    }
+
+    public void SpendForce(CostType type, int amount)
+    {
+        if (type == CostType.Unit) SpendUnitForce(amount);
+        else SpendSkillForce(amount);
+    }
+
+    public void SetAutoGain(CostType type, bool enabled)
+    {
+        if (type == CostType.Unit) SetUnitAutoGain(enabled);
+        else SetSkillAutoGain(enabled);
+    }
+
+    public void SetGainRate(CostType type, float perSecond)
+    {
+        if (type == CostType.Unit) SetUnitGainRate(perSecond);
+        else SetSkillGainRate(perSecond);
+    }
 }
