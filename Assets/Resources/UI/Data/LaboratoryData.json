@@ -8,7 +8,9 @@
         "ValueType" : "Mul",
         "TargetType": "Unit",
         "TargetStatus":"AttackSpeed",
-        "Prerequisite": null
+        "ParentsId":
+        [
+        ]
     },
 
     {
@@ -20,7 +22,10 @@
         "ValueType" : "Mul",
         "TargetType": "Unit",
         "TargetStatus":"AttackSpeed",
-        "Prerequisite": "Attack_Num1"
+        "ParentsId":
+        [
+            "Attack_Num1"
+        ]
     },
 
     {
@@ -32,6 +37,8 @@
         "ValueType" : "Add",
         "TargetType": "King",
         "TargetStatus":"Shield",
-        "Prerequisite": null
+        "ParentsId":
+        [
+        ]
     }
-    ]
+]

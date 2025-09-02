@@ -18,7 +18,9 @@ public class PoolingManager
     public PoolingManager(string prefabPath, string parentName, int poolSize = DefaultPoolSize)
     {
         GameObject prefab = Resources.Load<GameObject>(prefabPath);
-        GameObject parent = new GameObject(parentName);
+        GameObject parent = GameObject.Find(parentName);
+        if(parent == null)
+            parent = new GameObject(parentName);
 
 
         _pooledObjects = new List<GameObject>(poolSize);
@@ -32,8 +34,10 @@ public class PoolingManager
     }
 
     public PoolingManager(GameObject prefab, string parentName, int poolSize = DefaultPoolSize)
-    {        
-        GameObject parent = new GameObject(parentName);
+    {
+        GameObject parent = GameObject.Find(parentName);
+        if (parent == null)
+            parent = new GameObject(parentName);
 
 
         _pooledObjects = new List<GameObject>(poolSize);
