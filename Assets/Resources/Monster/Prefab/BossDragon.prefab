@@ -207,5 +207,5 @@ MonoBehaviour:
   _cooldown: 6
   _castTime: 0.6
   _postDelay: 0.2
-  _fx: {fileID: 0}
+  _fxPrefab: {fileID: 3930195990101391151, guid: 1b45098fd21148d4dbffbefff9f947dc, type: 3}
   _sfx: {fileID: 0}
