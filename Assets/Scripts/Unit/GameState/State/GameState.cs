@@ -14,7 +14,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Hunter, EUnitType.Warrior, EUnitType.Gunner, EUnitType.Dwarf, EUnitType.Chef, EUnitType.Pirate };
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Hunter, EUnitType.Priest, EUnitType.Hammer, EUnitType.Dwarf, EUnitType.Assassin, EUnitType.Wizard };
 
     public GameState()
     {
@@ -112,6 +112,9 @@ public class GameState : IState, IMediatorEvent
 
     public void CreateUnit(EUnitType unitType)
     {
+        int cost = SimpleSingleton<UnitDataList>.Instance.GetUnitData(unitType).LevelData[0].Cost;
+        //if (!CostManager.Instance.TrySpend(cost))
+        //    return;
         GameObject unit = MonoSingleton<ObjectPoolManager>.Instance.Pull(unitType);
         HpBar hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar).GetComponent<HpBar>();
         unit.transform.position = _worldPosition;

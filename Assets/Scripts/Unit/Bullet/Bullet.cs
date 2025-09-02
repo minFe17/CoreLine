@@ -19,6 +19,7 @@ public class Bullet : MonoBehaviour
     {
         LookTarget();
         Move();
+        CheckTarget();
     }
 
     void LookTarget()
@@ -39,6 +40,12 @@ public class Bullet : MonoBehaviour
 
         Vector3 direction = (_target.transform.position - transform.position).normalized;
         transform.position += direction * _speed * Time.deltaTime;
+    }
+
+    void CheckTarget()
+    {
+        if(_target.IsDead)
+            MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D collision)

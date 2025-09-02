@@ -15,11 +15,21 @@ MonoBehaviour:
   m_GroupName: Unit
   m_GUID: 1e77385c0ca88dc4c9838b431a496490
   m_SerializeEntries:
+  - m_GUID: 0d7a8c889ebc427478cc71c075def9cf
+    m_Address: ChefBomb
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2013673a214a51c47b668f881f445331
     m_Address: Hammer
     m_ReadOnly: 0
     m_SerializedLabels:
     - Unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3c4d4e15b280fb041b32567ce98afcb0
+    m_Address: Lazer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3fa8f05120a72dd428763126a8fbb9aa
     m_Address: Thor
@@ -38,6 +48,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - Unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5921aca589f47af4386a0de5570d8381
+    m_Address: ChefBombAtlas
+    m_ReadOnly: 0
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 64507206b2622cf48859499c5d10e95f
     m_Address: Assassin
@@ -83,6 +98,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ac9c950328f31fe47a8902375bdcb497
     m_Address: AttackRange
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b037c12300a9ea14c9cc0ac20a4c0f76
+    m_Address: Health_Up
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

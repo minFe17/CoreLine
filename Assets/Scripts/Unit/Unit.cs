@@ -20,11 +20,12 @@ public class Unit : MonoBehaviour
 
     public IReadOnlyList<Monster> TargetList { get => _orderedMonsters; }
     public Animator Animator { get => _animator; }
-    public bool IsDie { get => _isDie; }
     public Vector3Int Cell { get => _cell; set => _cell = value; }
     public UnitState UnitStateData { get => _unitStateData; }
     public HpBar HpBar { get => _hpBar; set => _hpBar = value; }
     public UnitUI UnitUI { get; set; }
+    public bool IsDie { get => _isDie; }
+    public int CurrentHp { get => _currentHp; }
 
     void Start()
     {
@@ -37,6 +38,12 @@ public class Unit : MonoBehaviour
             SimpleSingleton<AttackRangeManager>.Instance.CheckAttackRange(this);
         else
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+    }
+
+    public virtual void Die()
+    {
+        UnregisterCell();
+        MonoSingleton<ObjectPoolManager>.Instance.Push(EUIPrefabType.UnitHpBar, _hpBar.gameObject);
     }
 
     void SetTarget()
@@ -87,6 +94,11 @@ public class Unit : MonoBehaviour
             transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 
+    void RestorationAttackDamage()
+    {
+        _unitStateData.RestorationAttackDamage();
+    }
+
     protected void LookTarget()
     {
         SetTarget();
@@ -121,9 +133,22 @@ public class Unit : MonoBehaviour
         SimpleSingleton<MapUnitManager>.Instance.RemoveUnit(_cell);
     }
 
-    public virtual void Die()
+    public void AddAttackDamage(int damage, float time)
     {
-        UnregisterCell();
-        MonoSingleton<ObjectPoolManager>.Instance.Push(EUIPrefabType.UnitHpBar, _hpBar.gameObject);
+        _unitStateData.AddAttackDamage(damage);
+        Invoke("RestorationAttackDamage", time);
+    }
+
+    public void Heal(int amount)
+    {
+        if (_currentHp >= _unitStateData.HP)
+            return;
+        _currentHp += amount;
+        Debug.Log($"{_currentHp}, {_unitStateData.HP}");
+        if(_currentHp >= _unitStateData.HP)
+            _currentHp = _unitStateData.HP;
+        GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.Health_Up);
+        temp.transform.position = transform.position;
+        _hpBar.ChangeHp((float)_currentHp/_unitStateData.HP);
     }
 }

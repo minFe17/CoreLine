@@ -2,9 +2,8 @@ using UnityEngine;
 
 public abstract class AttackBase : MonoBehaviour
 {
-    float _attackTimer;
-
     protected Unit _unit;
+    protected float _attackTimer;
 
     public abstract void Attack();
 
@@ -21,14 +20,26 @@ public abstract class AttackBase : MonoBehaviour
         AttackTimer();
     }
 
+    protected virtual bool CheckAttack()
+    {
+        if (_unit.TargetList.Count == 0)
+            return false;
+        return true;
+    }
+
+    protected virtual void PlayAttackAnimation()
+    {
+        _unit.Animator.SetTrigger("doAttack");
+    }
+
     void AttackTimer()
     {
-        if(_unit.IsDie)
+        if (_unit.IsDie)
             return;
         _attackTimer += Time.deltaTime;
-        if(_unit.TargetList.Count == 0) 
+        if (!CheckAttack())
             return;
-        if(_unit.UnitStateData.AttackSpeed <= _attackTimer)
+        if (_unit.UnitStateData.AttackSpeed <= _attackTimer)
         {
             _attackTimer = 0;
             PlayAttackAnimation();
@@ -42,10 +53,5 @@ public abstract class AttackBase : MonoBehaviour
             AttackEvent temp = towerUnit.GetCurrentUnit().AddComponent<AttackEvent>();
             temp.Init(this);
         }
-    }
-
-    protected virtual void PlayAttackAnimation()
-    {
-        _unit.Animator.SetTrigger("doAttack");
     }
 }
