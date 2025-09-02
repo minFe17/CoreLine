@@ -17,7 +17,9 @@ public class TestMap : MonoBehaviour
     public event Action<int, int> OnCellChanged;
 
     public Vector2Int SpawnCellRC { get; private set; } = new Vector2Int(-1, -1);
+    public Vector2Int BossSpawnCellRC { get; private set; } = new Vector2Int(-1, -1);
     public bool HasSpawnCell => SpawnCellRC.x >= 0;
+    public bool HasBossSpawnCell => BossSpawnCellRC.x >= 0;
 
     private MapManager _map;
     private Vector3Int _origin;     
@@ -42,7 +44,15 @@ public class TestMap : MonoBehaviour
         if (_map.TryGetSpawnCell(out Vector3Int spawnAbs))
         {
             Vector2Int rc = AbsCellToRC(spawnAbs);
-            if (InBounds(rc.x, rc.y)) SpawnCellRC = rc;
+            if (InBounds(rc.x, rc.y)) 
+                SpawnCellRC = rc;
+        }
+
+        if(_map.TryGetBossSpawnCell(out Vector3Int bossSpawnAbs))
+        {
+            Vector2Int rc = AbsCellToRC(bossSpawnAbs);   
+            if (InBounds(rc.x, rc.y))
+                BossSpawnCellRC = rc;
         }
 
         _map.OnCellChanged += HandleMapCellChanged;
@@ -94,6 +104,13 @@ public class TestMap : MonoBehaviour
     {
         rc = SpawnCellRC; return HasSpawnCell;
     }
+
+    public bool TryGetBossSpawnCell(out Vector2Int rc)
+    {
+        rc = BossSpawnCellRC;
+        return HasBossSpawnCell;
+    }
+
 
     public void SetDestructible(int r, int c, bool on)
     {

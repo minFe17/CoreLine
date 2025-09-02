@@ -9,9 +9,9 @@ public class HitFlashTest : MonoBehaviour
 
     [Header("Flash Settings")]
     [SerializeField] private Color flashColor = Color.white; 
-    [SerializeField] private float flashDuration = 0.1f;
+    [SerializeField] private float flashDuration = 0.5f;
 
-    [SerializeField] private float scaleUpAmount = 0.1f;   
+    [SerializeField] private float scaleUpAmount = 0.2f;   
     [SerializeField] private float scaleReturnSpeed = 10f;
 
     [SerializeField] private Camera clickCamera;    

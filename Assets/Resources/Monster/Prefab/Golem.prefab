@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 3748896504225090762}
   - component: {fileID: 5957591340127595148}
   - component: {fileID: 8923165808409025291}
-  - component: {fileID: 971656304818782371}
   - component: {fileID: 2190581943768980191}
   m_Layer: 3
   m_Name: Golem
@@ -34,7 +33,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.12, y: 2.2, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.87, y: 0.87, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -178,7 +177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 0}
-  _moveSpeed: 2
+  _moveSpeed: 1.5
   _arriveEps: 0.02
   _attackRangeCell: 1
   _useDiag: 0
@@ -197,26 +196,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.5
-  scaleUpAmount: 0.1
+  scaleUpAmount: 0.2
   scaleReturnSpeed: 10
   clickCamera: {fileID: 0}
   interactMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &971656304818782371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8472593775564949861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bd9a400824a5d545bda0ed5754d9187, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  flashDuration: 0.5
-  flashInterval: 0.1
 --- !u!114 &2190581943768980191
 MonoBehaviour:
   m_ObjectHideFlags: 0
