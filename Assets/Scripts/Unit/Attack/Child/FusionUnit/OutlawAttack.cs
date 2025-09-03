@@ -1,10 +1,19 @@
+using UnityEngine;
+
 public class OutlawAttack : AttackBase
 {
     int _attackCount;
     EAttackType _attackType;
 
+    private void Start()
+    {
+        MapManager.Instance.GetNavFrame(out Vector3Int originCell, out Vector3Int sizeCells, out Vector3 cellSize);
+        Debug.Log($"{originCell}, {sizeCells}, {cellSize}");
+    }
+
     protected override void PlayAttackAnimation()
     {
+        
         _attackCount++;
         if(_attackCount >= 10)
         {

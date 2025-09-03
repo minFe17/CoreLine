@@ -36,6 +36,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - Unit
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 26752c9dff02825489fe8d42ceefd492
+    m_Address: ChainThunder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3c4d4e15b280fb041b32567ce98afcb0
     m_Address: Lazer
     m_ReadOnly: 0
