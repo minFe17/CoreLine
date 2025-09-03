@@ -28,12 +28,11 @@ public class TopologicalSorter<T>
         _inDegree[to]++;
     }
 
-    // 위상 정렬 수행
+    // 위상 정렬
     public List<T> Sort()
     {
         var queue = new Queue<T>();
 
-        // 진입 차수가 0인 노드를 큐에 넣기
         foreach (var kvp in _inDegree)
         {
             if (kvp.Value == 0)
@@ -41,7 +40,6 @@ public class TopologicalSorter<T>
         }
 
         var sortedList = new List<T>();
-
         while (queue.Count > 0)
         {
             var node = queue.Dequeue();
@@ -55,11 +53,6 @@ public class TopologicalSorter<T>
                     queue.Enqueue(neighbor);
             }
         }
-
-        // 모든 노드를 방문하지 못했다면 사이클이 있음
-        if (sortedList.Count != _graph.Count)
-            throw new InvalidOperationException("그래프에 사이클이 존재합니다!");
-
         return sortedList;
     }
 }

@@ -118,13 +118,12 @@ public class LaboratoryNodeManager : MonoBehaviour
     private void SettingPosition()
     {
         float xSpacing = 350f;
-        float ySpacing = 350f; // 줄임 (간격을 좁게)
+        float ySpacing = 350f;
 
-        foreach (var kvp in _nodes) // LaboratoryType 별
+        foreach (var kvp in _nodes) 
         {
             List<LaboratoryNode> nodeList = kvp.Value;
 
-            // 레벨 계산
             Dictionary<string, int> levels = CalculateLevels(nodeList);
 
             // 레벨별 노드 그룹화
@@ -141,15 +140,12 @@ public class LaboratoryNodeManager : MonoBehaviour
                 levelGroups[level].Add(node);
                 rects[node.Data.Id] = node.GetComponent<RectTransform>();
             }
-
-            // 레벨 → x 좌표 / 부모 평균 y 기준으로 정렬
             Dictionary<string, Vector2> finalPositions = new();
 
             foreach (var level in levelGroups.Keys.OrderBy(l => l))
             {
                 List<LaboratoryNode> nodesInLevel = levelGroups[level];
 
-                // 부모 평균 y 계산
                 Dictionary<LaboratoryNode, float> preferredY = new();
 
                 foreach (var node in nodesInLevel)
@@ -170,7 +166,6 @@ public class LaboratoryNodeManager : MonoBehaviour
                     preferredY[node] = avgY;
                 }
 
-                // preferredY 기준으로 정렬 (중앙 정렬)
                 var sortedNodes = nodesInLevel.OrderBy(n => preferredY[n]).ToList();
 
                 int mid = sortedNodes.Count / 2;

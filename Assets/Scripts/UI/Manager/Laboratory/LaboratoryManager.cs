@@ -20,14 +20,21 @@ public class UsingLaboratoryData
 public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
 {
     private Dictionary<LaboratoryType,List<LaboratoryData>> _data = new Dictionary<LaboratoryType, List<LaboratoryData>>();
-
+    private Dictionary<string, LaboratoryData> _buyLaboratory = new();
+    private LaboratoryData _choiceLaboratory = new();
     public LaboratoryManager()
     {
         SettingData();
+        EventManager.Instance.Subscribe<LaboratoryData>("ChangeChoiceLaboratory", ChoiceLaboratoryData);
+        EventManager.Instance.Subscribe("BuyLaboratory", BuyLaboratory);
     }
     public List<LaboratoryData> GetData(LaboratoryType type)
     {
         return _data[type];
+    }
+    public LaboratoryData ChoiceLaboratory
+    {
+        get { return _choiceLaboratory; }
     }
     private void SettingData()
     {
@@ -52,5 +59,13 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
             }
         }
     }
-
+    private void ChoiceLaboratoryData(LaboratoryData data)
+    {
+        _choiceLaboratory = data;
+    }
+    private void BuyLaboratory()
+    {
+        if (_buyLaboratory.ContainsKey(_choiceLaboratory.Id)) return; //ÆÐ³Î¶ç¿ì±â
+        _buyLaboratory.Add(_choiceLaboratory.Id, _choiceLaboratory);
+    }
 }

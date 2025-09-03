@@ -29,7 +29,7 @@ public enum TargetStatus
 public struct LaboratoryData
 {
     public string Id;
-    public string Name;
+    public string Info;
     public LaboratoryType LaboratoryType; //enum으로 빼자
     public int Cost; //이거 게임 클리어하면 얻는 재화
     public Effect Effect;

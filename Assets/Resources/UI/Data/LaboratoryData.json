@@ -1,7 +1,7 @@
 [
     {
         "Id" : "Attack_Num1",
-        "Name" : "공격 속도 증가 Lv.1",
+        "Info" : "공격 속도 증가 Lv.1",
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Effect":
@@ -9,7 +9,7 @@
             "Value" : 1.1,
             "ValueType" : "Mul",
             "TargetType": "Unit",
-            "TargetStatus":"AttackSpeed",
+            "TargetStatus":"AttackSpeed"
         },
         "ParentsId":
         [
@@ -18,7 +18,7 @@
 
     {
         "Id" : "Attack_Num2",
-        "Name" : "공격 속도 증가 Lv.2",
+        "Info" : "공격 속도 증가 Lv.2",
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Effect":
@@ -26,7 +26,7 @@
             "Value" : 1.2,
             "ValueType" : "Mul",
             "TargetType": "Unit",
-            "TargetStatus":"AttackSpeed",
+            "TargetStatus":"AttackSpeed"
         },
         "ParentsId":
         [
@@ -36,7 +36,7 @@
        
     {
         "Id" : "Attack_Num3",
-        "Name" : "공격 속도 증가 Lv.3",
+        "Info" : "공격 속도 증가 Lv.3",
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Effect":
@@ -44,7 +44,7 @@
             "Value" : 1.2,
             "ValueType" : "Mul",
             "TargetType": "Unit",
-            "TargetStatus":"AttackSpeed",
+            "TargetStatus":"AttackSpeed"
         },
         "ParentsId":
         [
@@ -54,7 +54,7 @@
            
     {
         "Id" : "Attack_Num4",
-        "Name" : "공격 속도 증가 Lv.4",
+        "Info" : "공격 속도 증가 Lv.4",
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Effect":
@@ -62,7 +62,7 @@
             "Value" : 1.2,
             "ValueType" : "Mul",
             "TargetType": "Unit",
-            "TargetStatus":"AttackSpeed",
+            "TargetStatus":"AttackSpeed"
         },
         "ParentsId":
         [
@@ -71,7 +71,7 @@
     },
     {
         "Id" : "Attack_Num5",
-        "Name" : "공격 속도 증가 Lv.4",
+        "Info" : "공격 속도 증가 Lv.4",
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Effect":
@@ -79,7 +79,7 @@
             "Value" : 1.2,
             "ValueType" : "Mul",
             "TargetType": "Unit",
-            "TargetStatus":"AttackSpeed",
+            "TargetStatus":"AttackSpeed"
         },
         "ParentsId":
         [
@@ -89,7 +89,7 @@
 
     {
         "Id" : "Attack_Num6",
-        "Name" : "공격 속도 증가 Lv.4",
+        "Info" : "공격 속도 증가 Lv.4",
         "LaboratoryType" : "Attack",
         "Cost" : 1000,
         "Effect":
@@ -97,28 +97,11 @@
             "Value" : 1.2,
             "ValueType" : "Mul",
             "TargetType": "Unit",
-            "TargetStatus":"AttackSpeed",
+            "TargetStatus":"AttackSpeed"
         },
         "ParentsId":
         [
             "Attack_Num2", "Attack_Num4"
         ]
-    },
-
-    //{
-    //    "Id" : "Defense_Num1",
-    //    "Name" : "기지 보호막 증가 Lv.1",
-    //    "LaboratoryType" : "Defense",
-    //    "Cost" : 1000,
-    //    "Effect":
-    //    {
-    //        "Value" : 50,
-    //        "ValueType" : "Add",
-    //        "TargetType": "King",
-    //        "TargetStatus":"Shield",
-    //    },
-    //    "ParentsId":
-    //    [
-    //    ]
-    //}
+    }
 ]

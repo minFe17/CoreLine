@@ -41,6 +41,7 @@ public class LaboratoryNode : BaseButton
         }
         _isSelect = true;
         _isUnlocked = true;
+        EventManager.Instance.Invoke<bool>("SettingInformation", _isSelect);
         //패널 켜기
     }
 
