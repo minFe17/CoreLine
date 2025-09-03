@@ -30,11 +30,16 @@ public struct LaboratoryData
 {
     public string Id;
     public string Name;
-    public LaboratoryType Type; //enum으로 빼자
+    public LaboratoryType LaboratoryType; //enum으로 빼자
     public int Cost; //이거 게임 클리어하면 얻는 재화
+    public Effect Effect;
+    public List<string> ParentsId;
+}
+[System.Serializable]
+public struct Effect
+{
     public float Value;
     public ValueType ValueType;
     public TargetType TargetType;
     public TargetStatus TargetStatus;
-    public List<string> ParntsId;
 }
