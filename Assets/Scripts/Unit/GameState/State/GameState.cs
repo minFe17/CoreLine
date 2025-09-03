@@ -14,7 +14,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Hunter, EUnitType.Priest, EUnitType.Hammer, EUnitType.Dwarf, EUnitType.Assassin, EUnitType.Wizard };
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Warrior, EUnitType.Pirate, EUnitType.Hammer, EUnitType.Dwarf, EUnitType.Assassin, EUnitType.Wizard };
 
     public GameState()
     {
@@ -25,6 +25,7 @@ public class GameState : IState, IMediatorEvent
     void HandleMouseClick()
     {
         SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
+        _unitUI.Close();
         Vector3 mouseWorld = SimpleSingleton<UnitPlacementManager>.Instance.GetMouseWorldPosition();
         Vector3Int cell = SimpleSingleton<UnitPlacementManager>.Instance.GetCellFromWorld(mouseWorld);
         Vector3 cellCenter = MapManager.Instance.GetCellCenterWorld(cell);

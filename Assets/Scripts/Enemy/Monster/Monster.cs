@@ -45,6 +45,7 @@ public class Monster : MonoBehaviour
         _isDead = false;
         _attackLocked = false;
         _currentHp = Mathf.Max(1, _maxHp);
+        if (_col) _col.enabled = true;
 
         GameObject hpBarPanel = GameObject.FindGameObjectWithTag("BarPanel");
         GameObject hpBarPrefab = Resources.Load<GameObject>("Monster/Prefab/MonsterHpBar");

@@ -16,13 +16,21 @@ public class GameManager : MonoBehaviour
     [SerializeField] private InvalidPlacementToast invalidPlacementPrefab; // 인스펙터에 연결
     [SerializeField] private GameObject playerBasePrefab;
 
+    [Header("Test Skill Wallet Seed")]
+    [SerializeField] private int startSkillCurrency = 0;   // 스킬 코인 초기값
+
+    [Header("Auto-add a test skill to loadout")]
+    [SerializeField] private bool addRangeHeal = true;       // RangeHeal 자동 추가
+    [SerializeField] private int rangeHealCost = 10;         // 테스트용 비용
+    [SerializeField] private float rangeHealValue = 50f;     // 힐량
+
     private InvalidPlacementToast _invalidToast;
 
     private Camera _cam;
     private BuildUI _buildUI;
     private TwoButtonUI _panel;
 
-    void Awake()
+    private void Awake()
     {
         // 스테이지 로드
         MapManager.Instance.LoadStage(stagePrefab);
@@ -61,7 +69,33 @@ public class GameManager : MonoBehaviour
             _panel.gameObject.SetActive(false);
         }
     }
+    private void Start()
+    {
+        if (CostManager.Instance != null)
+        {
+            CostManager.Instance.SetSkillValue(startSkillCurrency);
+        }
 
+        // 2) 로드아웃 비어있으면 테스트 스킬 강제 추가
+        if (addRangeHeal && SkillManager.Instance != null && SkillManager.Instance._loadout.Count == 0)
+        {
+            LaboratoryData data = new LaboratoryData
+            {
+                Id = "RangeHeal",
+                Name = "광역 힐(테스트)",
+                Type = LaboratoryType.Defense,          // 구조체에 필수라 넣어줌(실사용X)
+                Cost = rangeHealCost,
+                Value = rangeHealValue,
+                ValueType = ValueType.Add,
+                TargetType = TargetType.Unit,           // 유닛(타워) 대상
+                TargetStatus = TargetStatus.HealthPoint,// 구조체에 필수라 넣어줌(실사용X)
+                ParntsId = new List<string>()
+            };
+
+            SkillManager.Instance.AddToLoadout(data);
+            Debug.Log("[GameManagerBoot] Added test skill 'RangeHeal' to loadout (slot 0).");
+        }
+    }
     void Update()
     {
         // 중클릭: 스테이지 리로드

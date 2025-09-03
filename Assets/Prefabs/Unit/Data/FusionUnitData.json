@@ -36,7 +36,7 @@
       "_fusionUnitState": {
         "_hp": 110,
         "_attackDamage": 20,
-        "_attackSpeed": 2.0,
+        "_attackSpeed": 0.7,
         "_attackRange": 3.5
       }
     },
@@ -46,7 +46,7 @@
       "_fusionUnitState": {
         "_hp": 100,
         "_attackDamage": 10,
-        "_attackSpeed": 1.5,
+        "_attackSpeed": 0.5,
         "_attackRange": 3.2
       }
     },

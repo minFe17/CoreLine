@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 2190581943768980191}
   m_Layer: 3
   m_Name: Golem
-  m_TagString: Untagged
+  m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

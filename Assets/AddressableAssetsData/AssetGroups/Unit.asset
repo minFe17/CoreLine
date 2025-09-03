@@ -20,14 +20,34 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1251842e957c30e4c952ecac9e4e4625
+    m_Address: Dagger
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f19fc64f4e26a44da4e69811ea8ad88
+    m_Address: SmallMeteor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2013673a214a51c47b668f881f445331
     m_Address: Hammer
     m_ReadOnly: 0
     m_SerializedLabels:
     - Unit
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 26752c9dff02825489fe8d42ceefd492
+    m_Address: ChainThunder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3c4d4e15b280fb041b32567ce98afcb0
     m_Address: Lazer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3db0a8bc263640b479a251659aa9cd6c
+    m_Address: Meteor
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -72,6 +92,16 @@ MonoBehaviour:
     m_SerializedLabels:
     - Unit
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b24e585d588e5b4b97acbe7f2c52879
+    m_Address: FireBall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f0f68978c0cacc488aaa8b0bad8c7b3
+    m_Address: Cannonball
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 92c46c4e3549f174f9a9e1d47592581f
     m_Address: Ninja
     m_ReadOnly: 0
@@ -101,6 +131,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: afa3b8c68468fb54f816c3e375d720ca
+    m_Address: Shield
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b037c12300a9ea14c9cc0ac20a4c0f76
     m_Address: Health_Up
     m_ReadOnly: 0
@@ -123,6 +158,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - Unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be87296d0a5bcfa41b5f63d92c0c037d
+    m_Address: ThunderSpear
+    m_ReadOnly: 0
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c1544070195ca904a849d1176945cd3e
     m_Address: Arrow
@@ -175,6 +215,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - Unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f196529fcf5a3b6449c427416aa25f39
+    m_Address: ExplosionBullet
+    m_ReadOnly: 0
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f7d5a1a82f203b646aaa550a111f1133
     m_Address: Chef

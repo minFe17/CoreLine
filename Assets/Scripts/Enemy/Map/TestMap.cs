@@ -96,6 +96,28 @@ public class TestMap : MonoBehaviour
         return (f & (CellFlags.Wall | CellFlags.Destructible | CellFlags.Tower)) == 0;
     }
 
+    public bool IsBuildable(int r, int c)
+    {
+        if (!InBounds(r, c)) return false;
+
+        Vector3Int abs = RCToAbsCell(r, c);
+
+        _map.GetCellFlags(abs,
+            out bool buildable, out bool unbuildable,
+            out bool wall, out bool destructible, out bool deco,
+            out bool occupied, out bool objects);
+
+        if (!buildable) return false;
+        if (wall || destructible || objects) return false;
+        if (occupied) return false;
+
+        if (MapManager.Instance != null && MapManager.Instance.TryGetTowerAt(abs, out _))
+            return false;
+
+        return true;
+    }
+
+
     public bool IsWall(int r, int c) => InBounds(r, c) && (cells[r, c] & CellFlags.Wall) != 0;
     public bool IsDestructible(int r, int c) => InBounds(r, c) && (cells[r, c] & CellFlags.Destructible) != 0;
     public bool HasTower(int r, int c) => InBounds(r, c) && (cells[r, c] & CellFlags.Tower) != 0;

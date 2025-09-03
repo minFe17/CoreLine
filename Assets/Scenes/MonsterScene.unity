@@ -716,6 +716,10 @@ MonoBehaviour:
   twoButtonUIPrefab: {fileID: 0}
   invalidPlacementPrefab: {fileID: 0}
   playerBasePrefab: {fileID: 0}
+  startSkillCurrency: 999
+  addRangeHeal: 1
+  rangeHealCost: 10
+  rangeHealValue: 50
 --- !u!4 &515757424
 Transform:
   m_ObjectHideFlags: 0

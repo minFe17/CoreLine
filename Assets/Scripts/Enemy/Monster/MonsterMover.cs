@@ -102,7 +102,6 @@ public class MonsterMover : MonoBehaviour
 
     public void OnOwnerDied()
     {
-        // 이동 중지
         if (_moveCo != null) { StopCoroutine(_moveCo); _moveCo = null; }
         IsFollowingPath = false;
     }
