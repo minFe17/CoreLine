@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4263659828009397814}
   - component: {fileID: 8479632299606697579}
   - component: {fileID: 4865067138427358555}
+  - component: {fileID: 5915600854711595613}
   m_Layer: 3
   m_Name: BossDragon
   m_TagString: Untagged
@@ -190,6 +191,7 @@ MonoBehaviour:
   _thinkInterval: 0.25
   _weightedRandom: 1
   _skills:
+  - {fileID: 5915600854711595613}
   - {fileID: 4865067138427358555}
 --- !u!114 &4865067138427358555
 MonoBehaviour:
@@ -207,5 +209,31 @@ MonoBehaviour:
   _cooldown: 6
   _castTime: 0.6
   _postDelay: 0.2
-  _fxPrefab: {fileID: 3930195990101391151, guid: 1b45098fd21148d4dbffbefff9f947dc, type: 3}
+  _fxPrefab: {fileID: 4877924698052598717, guid: 57dab199213584444b6e19d336a040ec, type: 3}
   _sfx: {fileID: 0}
+--- !u!114 &5915600854711595613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756996183535018546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 944c7d533c5a9bf4ea992999b7b67b13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weight: 1
+  _cooldown: 6
+  _castTime: 0.6
+  _postDelay: 0.2
+  _minionPrefab: {fileID: 3669618446000594986, guid: 6c8f9fcc03242a14ea66ed264500aa97, type: 3}
+  _count: 2
+  _maxTrialsPerSpawn: 40
+  _minDistFromBoss: 1
+  _minDistFromBase: 2
+  _spawnOnBuildableOnly: 1
+  _telegraphPrefab: {fileID: 3436957994112557769, guid: 5bb75f753a71e514b93d5abccc1c06a8, type: 3}
+  _telegraphLifetime: 1.7
+  _telegraphSortingLayer: Effects
+  _telegraphOrderInLayer: 100

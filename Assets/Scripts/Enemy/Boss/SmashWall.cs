@@ -23,7 +23,7 @@ public class SmashWall : BossSkillBase
                     {
                         Vector3 pos = _map.CellToWorld(r, c);
                         pos.z = 0f;
-                        var fx = Object.Instantiate(_fxPrefab, pos, Quaternion.identity);
+                        ParticleSystem fx = Object.Instantiate(_fxPrefab, pos, Quaternion.identity);
                         Object.Destroy(fx.gameObject, 2f); 
                     }
 

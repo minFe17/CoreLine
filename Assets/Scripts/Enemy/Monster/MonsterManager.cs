@@ -26,6 +26,10 @@ public class MonsterManager : MonoBehaviour
     private readonly List<MonsterMover> _monsters = new();
     private readonly Dictionary<string, MonsterMover> _prefabCache = new();
 
+    private readonly Dictionary<MonsterMover, (bool allowWalls, bool allowTowers)> _policy = new();
+    private readonly Dictionary<MonsterMover, Stack<MonsterMover>> _pool = new();
+
+
     private Coroutine _scheduleCo;
 
     [Serializable]
@@ -86,7 +90,8 @@ public class MonsterManager : MonoBehaviour
         {
             if (!m) continue;
             if (!m.gameObject.activeInHierarchy) continue;
-            m.MoveToCell(_route.GoalCell, allowWalls, allowTowers);
+            //m.MoveToCell(_route.GoalCell, allowWalls, allowTowers);
+            SendToGoal(m);
         }
     }
 
@@ -118,10 +123,7 @@ public class MonsterManager : MonoBehaviour
 
             for (int i = 0; i < row.count; i++)
             {
-                MonsterMover m = SpawnOneOf(prefab);
-
-                yield return null;
-                SendToGoal(m);
+                MonsterMover m = SpawnAtRC(prefab, _route.SpawnCell, sendToGoal: true);
 
                 if (row.interval > 0f)
                     yield return new WaitForSeconds(row.interval);
@@ -145,22 +147,6 @@ public class MonsterManager : MonoBehaviour
         
     }
 
-    private MonsterMover SpawnOneOf(MonsterMover prefab)
-    {
-        if (!prefab || !_map || !_route) return null;
-        if (MapManager.Instance != null && !MapManager.Instance.HasPlayerBase) return null;
-
-        Vector2Int rc = _route.SpawnCell;
-        Vector3 pos = _map.CellToWorld(rc.x, rc.y);
-        pos.z = 0f;
-
-        MonsterMover m = Instantiate(prefab, pos, Quaternion.identity);
-        m.Map = _map;
-
-        _monsters.Add(m);
-        return m;
-    }
-
     private void SendToGoal(MonsterMover m)
     {
         if (!m || _route == null) return;
@@ -169,6 +155,13 @@ public class MonsterManager : MonoBehaviour
         bool allowWalls = (allowance == RouteManager.RouteAllowance.WallsOnly
                          || allowance == RouteManager.RouteAllowance.WallsAndTowers);
         bool allowTowers = (allowance == RouteManager.RouteAllowance.WallsAndTowers);
+
+        if (_policy.TryGetValue(m, out var pol))
+        {
+            
+            allowWalls = pol.allowWalls || allowWalls;   
+            allowTowers = pol.allowTowers || allowTowers;
+        }
 
         m.MoveToCell(_route.GoalCell, allowWalls, allowTowers);
     }
@@ -230,6 +223,127 @@ public class MonsterManager : MonoBehaviour
         Instantiate(_bossPrefab, world, Quaternion.identity);
         _bossSpawned = true;
     }
+
+    public GameObject SpawnEnemyAt(
+    GameObject prefab, Vector3 world,
+    bool? allowWallsOverride = null,
+    bool? allowTowersOverride = null,
+    bool sendToGoal = true)
+    {
+        if (!prefab) return null;
+
+        var moverPrefab = prefab.GetComponent<MonsterMover>();
+        if (!moverPrefab) { Instantiate(prefab, world, Quaternion.identity); return null; }
+
+        MonsterMover m;
+        if (allowWallsOverride.HasValue || allowTowersOverride.HasValue)
+        {
+            m = SpawnAtWorld(moverPrefab, world, false);
+            _policy[m] = (allowWallsOverride ?? false, allowTowersOverride ?? false);
+            if (sendToGoal) SendToGoal(m);
+        }
+        else
+        {
+            m = SpawnAtWorld(moverPrefab, world, sendToGoal);
+        }
+        return m ? m.gameObject : null;
+    }
+
+    public void DespawnToPool(MonsterMover m, MonsterMover prefabKey)
+    {
+        if (!m || !prefabKey) return;
+
+        m.OnOwnerDied();
+
+        _monsters.Remove(m);
+        _policy.Remove(m);
+
+        if (!_pool.TryGetValue(prefabKey, out var stack))
+            _pool[prefabKey] = stack = new Stack<MonsterMover>();
+
+        stack.Push(m);
+    }
+
+    public MonsterMover SpawnAtRC(MonsterMover prefab, Vector2Int rc, bool sendToGoal = true)
+    {
+        if (!prefab || _map == null) return null;
+        Vector3 world = _map.CellToWorld(rc.x, rc.y);
+        world.z = 0f;
+        return SpawnAtWorld(prefab, world, sendToGoal);
+    }
+
+    public MonsterMover SpawnAtWorld(MonsterMover prefab, Vector3 world, bool sendToGoal = true)
+    {
+        if (!prefab || _map == null) return null;
+
+        // 풀에서 꺼내기
+        if (!_pool.TryGetValue(prefab, out var stack))
+            _pool[prefab] = stack = new Stack<MonsterMover>();
+
+        MonsterMover m = null;
+        while (stack.Count > 0 && !m) m = stack.Pop(); 
+
+        if (m == null)
+        {
+            // 부족하면 새로 생성
+            m = Instantiate(prefab, world, Quaternion.identity);
+            var pooled = m.gameObject.GetComponent<PooledMonster>();
+            if (!pooled) pooled = m.gameObject.AddComponent<PooledMonster>();
+            pooled.Manager = this;
+            pooled.PrefabKey = prefab;
+        }
+        else
+        {
+            // 재사용 세팅
+            m.transform.SetPositionAndRotation(world, Quaternion.identity);
+        }
+
+        // 맵 연결
+        if (!m.gameObject.activeSelf) m.gameObject.SetActive(true);
+        if (!_map) _map = FindAnyObjectByType<TestMap>();
+        m.Map = _map;
+
+        Vector2Int rc = _map.WorldToCell(world);
+        m.SetCellAndSnap(rc);
+
+        if (!_monsters.Contains(m)) 
+            _monsters.Add(m);
+
+        if (sendToGoal) 
+            SendToGoalRE(m);
+
+        return m;
+    }
+
+    private void SendToGoalRE(MonsterMover m)
+    {
+        if (!m || _route == null) return;
+
+        // 0) 라우트 기본 정책
+        var allowance = _route.Allowance;
+        bool allowWallsBase = (allowance == RouteManager.RouteAllowance.WallsOnly
+                             || allowance == RouteManager.RouteAllowance.WallsAndTowers);
+        bool allowTowersBase = (allowance == RouteManager.RouteAllowance.WallsAndTowers);
+
+        // 1) 우선 정책(_policy)이 있으면 그걸 1차로 시도
+        if (_policy.TryGetValue(m, out var pol))
+        {
+            m.MoveToCell(_route.GoalCell, pol.allowWalls, pol.allowTowers);
+            if (m.IsFollowingPath) return;
+        }
+
+        // 2) 라우트 기본으로 시도
+        m.MoveToCell(_route.GoalCell, allowWallsBase, allowTowersBase);
+        if (m.IsFollowingPath) return;
+
+        // 3) 벽 포함으로 완화
+        m.MoveToCell(_route.GoalCell, true, false);
+        if (m.IsFollowingPath) return;
+
+        // 4) 벽+타워 포함으로 최종 완화
+        m.MoveToCell(_route.GoalCell, true, true);
+    }
+
 
 
     private static int ParseInt(string s, int def)
