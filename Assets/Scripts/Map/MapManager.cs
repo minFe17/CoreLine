@@ -36,6 +36,8 @@ public class MapManager : MonoBehaviour
     public bool HasBossSpawn => _hasBossSpawn;
     public Vector3Int BossSpawnCell => _bossSpawnCell;
     public Vector3 BossSpawnWorld => (IsReady && _hasBossSpawn) ? CellCenterWorld(_bossSpawnCell) : Vector3.zero;
+    public Tilemap BuildableTile { get => _tmBuildable; }
+    public Tilemap UnbuildableTile { get => _tmUnbuildable; }
 
     //맵 로드시 바로 소환하고 싶을 때
     public event Action<Vector3Int> OnBossSpawnFound;

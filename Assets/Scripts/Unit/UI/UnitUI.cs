@@ -117,6 +117,7 @@ public class UnitUI : MonoBehaviour, IMediatorEvent
 
     public void UpgradeOrFusion()
     {
+        SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
         if (_unit is TowerUnit unit)
         {
             if (unit.IsMaxLevel())

@@ -4,12 +4,12 @@ using Utils;
 public class Bullet : MonoBehaviour
 {
     [SerializeField] EBulletType _bulletType;
-    [SerializeField] float _speed;
+    [SerializeField] protected float _speed;
 
-    Monster _target;
-    int _damage;
+    protected Monster _target;
+    protected int _damage;
 
-    public void Init(Monster target, int damage)
+    public virtual void Init(Monster target, int damage)
     {
         _target = target;
         _damage = damage;
@@ -20,6 +20,24 @@ public class Bullet : MonoBehaviour
         LookTarget();
         Move();
         CheckTarget();
+    }
+
+    protected virtual void CheckTrigger(Collider2D collision)
+    {
+        if (collision.gameObject == _target.gameObject)
+        {
+            _target.TakeDamage(_damage);
+            Remove();
+        }
+    }
+
+    protected virtual void Move()
+    {
+        if (_target == null)
+            return;
+
+        Vector3 direction = (_target.transform.position - transform.position).normalized;
+        transform.position += direction * _speed * Time.deltaTime;
     }
 
     void LookTarget()
@@ -33,27 +51,19 @@ public class Bullet : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 
-    void Move()
-    {
-        if (_target == null) 
-            return;
-
-        Vector3 direction = (_target.transform.position - transform.position).normalized;
-        transform.position += direction * _speed * Time.deltaTime;
-    }
-
     void CheckTarget()
     {
-        if(_target.IsDead)
+        if (_target.IsDead)
             MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
+    }
+
+    protected void Remove()
+    {
+        MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject == _target.gameObject)
-        {
-            _target.TakeDamage(_damage);
-            MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
-        }
+        CheckTrigger(collision);
     }
 }

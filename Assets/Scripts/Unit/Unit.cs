@@ -144,7 +144,6 @@ public class Unit : MonoBehaviour
         if (_currentHp >= _unitStateData.HP)
             return;
         _currentHp += amount;
-        Debug.Log($"{_currentHp}, {_unitStateData.HP}");
         if(_currentHp >= _unitStateData.HP)
             _currentHp = _unitStateData.HP;
         GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.Health_Up);

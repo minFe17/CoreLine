@@ -5,5 +5,13 @@ public enum EBulletType
     Lazer,
     Health_Up,
     ChefBomb,
+    FireBall,
+    ThunderSpear,
+    Dagger,
+    Shield,
+    Meteor,
+    SmallMeteor,
+    Cannonball,
+    ExplosionBullet,
     Max
 }
