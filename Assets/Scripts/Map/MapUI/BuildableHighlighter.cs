@@ -14,32 +14,32 @@ using UnityEngine.EventSystems; // UI 위 클릭 무시용
 public class BuildableHighlighter : MonoBehaviour
 {
     [Header("일반 외곽선(전체 표시시)")]
-    [SerializeField] Color baseColor = new Color(0f, 1f, 0.6f, 0.55f);
-    [SerializeField] float baseWidth = 0.03f;
+    [SerializeField] private Color _baseColor = new Color(0f, 1f, 0.6f, 0.55f);
+    [SerializeField] private float _baseWidth = 0.03f;
 
     [Header("강조(선택 셀)")]
-    [SerializeField] Color hoverColor = new Color(0.2f, 1f, 0.9f, 1f);
-    [SerializeField] float hoverWidth = 0.05f;
-    [SerializeField] bool hoverPulse = true;
-    [SerializeField] float pulseSpeed = 2.2f;      // 깜빡임 속도
-    [SerializeField] float pulseWidthAmp = 0.015f; // 두께 펌핑
-    [SerializeField] float pulseAlphaAmp = 0.25f;  // 알파 펌핑(0~1 가중치)
+    [SerializeField] private Color _hoverColor = new Color(0.2f, 1f, 0.9f, 1f);
+    [SerializeField] private float _hoverWidth = 0.05f;
+    [SerializeField] private bool _hoverPulse = true;
+    [SerializeField] private float _pulseSpeed = 2.2f;      // 깜빡임 속도
+    [SerializeField] private float _pulseWidthAmp = 0.015f; // 두께 펌핑
+    [SerializeField] private float _pulseAlphaAmp = 0.25f;  // 알파 펌핑(0~1 가중치)
 
     [Header("킹타일 강조(베이스 미배치 시 항상 표시)")]
-    [SerializeField] bool highlightKingsUntilBasePlaced = true;
-    [SerializeField] Color kingColor = new Color(1f, 0.85f, 0.2f, 0.95f);
-    [SerializeField] float kingWidth = 0.055f;
-    [SerializeField] bool kingPulse = true;            // 펄스 여부
-    [SerializeField] float kingPulseSpeed = 2.0f;      // 펄스 속도
-    [SerializeField] float kingPulseWidthAmp = 0.02f;  // 두께 펌핑
-    [SerializeField] float kingPulseAlphaAmp = 0.2f;   // 알파 펌핑
+    [SerializeField] private bool _highlightKingsUntilBasePlaced = true;
+    [SerializeField] private Color _kingColor = new Color(1f, 0.85f, 0.2f, 0.95f);
+    [SerializeField] private float _kingWidth = 0.055f;
+    [SerializeField] private bool _kingPulse = true;            // 펄스 여부
+    [SerializeField] private float _kingPulseSpeed = 2.0f;      // 펄스 속도
+    [SerializeField] private float _kingPulseWidthAmp = 0.02f;  // 두께 펌핑
+    [SerializeField] private float _kingPulseAlphaAmp = 0.2f;   // 알파 펌핑
 
     [Header("표시/숨김 옵션 (빌드가능 하이라이트에만 적용)")]
-    [SerializeField] float autoHideSec = 1f; // -1이면 자동 숨김 안함
+    [SerializeField] private float _autoHideSec = 1f; // -1이면 자동 숨김 안함
 
     [Header("정렬(2D 기준)")]
-    [SerializeField] string sortingLayerName = "Default";
-    [SerializeField] int sortingOrder = 1000;
+    [SerializeField] private string _sortingLayerName = "Default";
+    [SerializeField] private int _sortingOrder = 1000;
 
     private Material _baseMat;
     private Material _hoverMat;
@@ -70,9 +70,9 @@ public class BuildableHighlighter : MonoBehaviour
         _cam = Camera.main;
 
         var shader = Shader.Find("Sprites/Default");
-        _baseMat = new Material(shader); _baseMat.color = baseColor;
-        _hoverMat = new Material(shader); _hoverMat.color = hoverColor;
-        _kingMat = new Material(shader); _kingMat.color = kingColor;
+        _baseMat = new Material(shader); _baseMat.color = _baseColor;
+        _hoverMat = new Material(shader); _hoverMat.color = _hoverColor;
+        _kingMat = new Material(shader); _kingMat.color = _kingColor;
     }
 
     private void OnEnable()
@@ -135,10 +135,10 @@ public class BuildableHighlighter : MonoBehaviour
             _selectedPlaceable = _map.GetPlaceInfo(_selectedCell).Placeable;
 
             _showAll = true;
-            if (autoHideSec > 0f) _hideAt = Time.unscaledTime + autoHideSec;
+            if (_autoHideSec > 0f) _hideAt = Time.unscaledTime + _autoHideSec;
         }
 
-        if (_showAll && autoHideSec > 0f && Time.unscaledTime >= _hideAt)
+        if (_showAll && _autoHideSec > 0f && Time.unscaledTime >= _hideAt)
         {
             _showAll = false;
             _selectedPlaceable = false;
@@ -194,7 +194,7 @@ public class BuildableHighlighter : MonoBehaviour
 
             Vector3 center = _map.CellCenterWorld(cell);
             LineRenderer lr = GetLR(_poolBuildables, ref _usedBuildables, "BuildableOutline_");
-            SetupLR(lr, _baseMat, baseWidth, sortingOrder);
+            SetupLR(lr, _baseMat, _baseWidth, _sortingOrder);
             SetSquare(lr, center, _cellSize);
             lr.enabled = true;
         }
@@ -213,20 +213,20 @@ public class BuildableHighlighter : MonoBehaviour
             Vector3 center = _map.CellCenterWorld(kings[i]);
             LineRenderer lr = GetLR(_poolKings, ref _usedKings, "KingOutline_");
             // 펄스
-            float width = kingWidth;
+            float width = _kingWidth;
             float alphaMul = 1f;
-            if (kingPulse)
+            if (_kingPulse)
             {
-                float s = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f * kingPulseSpeed);
-                width += (s - 0.5f) * 2f * kingPulseWidthAmp;
-                alphaMul = Mathf.Clamp01(1f - kingPulseAlphaAmp + s * kingPulseAlphaAmp);
+                float s = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f * _kingPulseSpeed);
+                width += (s - 0.5f) * 2f * _kingPulseWidthAmp;
+                alphaMul = Mathf.Clamp01(1f - _kingPulseAlphaAmp + s * _kingPulseAlphaAmp);
             }
-            Color c = kingColor; c.a *= alphaMul;
+            Color c = _kingColor; c.a *= alphaMul;
 
             // 머티리얼 컬러 갱신(독립 인스턴스라 안전)
             _kingMat.color = c;
 
-            SetupLR(lr, _kingMat, width, sortingOrder + 2);
+            SetupLR(lr, _kingMat, width, _sortingOrder + 2);
             SetSquare(lr, center, _cellSize);
             lr.enabled = true;
         }
@@ -242,8 +242,8 @@ public class BuildableHighlighter : MonoBehaviour
         {
             _hoverLR = CreateLR("HoverOutline");
             _hoverLR.material = _hoverMat;
-            _hoverLR.sortingLayerName = sortingLayerName;
-            _hoverLR.sortingOrder = sortingOrder + 1;
+            _hoverLR.sortingLayerName = _sortingLayerName;
+            _hoverLR.sortingOrder = _sortingOrder + 1;
             _hoverLR.enabled = false;
         }
 
@@ -254,16 +254,16 @@ public class BuildableHighlighter : MonoBehaviour
         }
 
         // 펄스(두께 + 알파)
-        float width = hoverWidth;
+        float width = _hoverWidth;
         float alphaMul = 1f;
-        if (hoverPulse)
+        if (_hoverPulse)
         {
-            float s = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f * pulseSpeed);
-            width += (s - 0.5f) * 2f * pulseWidthAmp;
-            alphaMul = Mathf.Clamp01(1f - pulseAlphaAmp + s * pulseAlphaAmp);
+            float s = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Mathf.PI * 2f * _pulseSpeed);
+            width += (s - 0.5f) * 2f * _pulseWidthAmp;
+            alphaMul = Mathf.Clamp01(1f - _pulseAlphaAmp + s * _pulseAlphaAmp);
         }
 
-        Color c = hoverColor; c.a *= alphaMul;
+        Color c = _hoverColor; c.a *= alphaMul;
         _hoverLR.material.color = c;
         _hoverLR.widthMultiplier = width;
 
@@ -298,8 +298,8 @@ public class BuildableHighlighter : MonoBehaviour
         lr.numCapVertices = 0;
         lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         lr.receiveShadows = false;
-        lr.sortingLayerName = sortingLayerName;
-        lr.sortingOrder = sortingOrder;
+        lr.sortingLayerName = _sortingLayerName;
+        lr.sortingOrder = _sortingOrder;
         lr.enabled = false;
         return lr;
     }
@@ -308,7 +308,7 @@ public class BuildableHighlighter : MonoBehaviour
     {
         lr.material = mat;
         lr.widthMultiplier = width;
-        lr.sortingLayerName = sortingLayerName;
+        lr.sortingLayerName = _sortingLayerName;
         lr.sortingOrder = sortOrder;
     }
 

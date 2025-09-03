@@ -7,22 +7,22 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 {
     // ===== 데이터/선택 =====
     [Header("데이터/선택")]
-    [SerializeField] private LaboratoryData database; // 필요 시 사용
-    [SerializeField] private int maxSlots = 3;
-    [SerializeField] public List<SelectedSkill> loadout = new List<SelectedSkill>();
+    [SerializeField] private LaboratoryData _database; // 필요 시 사용
+    [SerializeField] private int _maxSlots = 3;
+    [SerializeField] public List<SelectedSkill> _loadout = new List<SelectedSkill>();
 
     [Header("설정")]
-    [SerializeField] private Transform unitRoot;      // 선택: 유닛 부모(없어도 무방)
-    [SerializeField] private string monsterTag = "Monster";
+    [SerializeField] private Transform _unitRoot;      // 선택: 유닛 부모(없어도 무방)
+    [SerializeField] private string _monsterTag = "Monster";
 
     // 핸들러 레지스트리
-    private Dictionary<string, ITowerSkillHandler> towerHandlers = new Dictionary<string, ITowerSkillHandler>();
-    private Dictionary<string, IMonsterSkillHandler> monsterHandlers = new Dictionary<string, IMonsterSkillHandler>();
-    private Dictionary<TargetType, IIncomeSkillHandler> incomeHandlers = new Dictionary<TargetType, IIncomeSkillHandler>();
-    private Dictionary<string, ISkillTargetingSpecProvider> targetingProviders = new Dictionary<string, ISkillTargetingSpecProvider>();
+    private Dictionary<string, ITowerSkillHandler> _towerHandlers = new Dictionary<string, ITowerSkillHandler>();
+    private Dictionary<string, IMonsterSkillHandler> _monsterHandlers = new Dictionary<string, IMonsterSkillHandler>();
+    private Dictionary<TargetType, IIncomeSkillHandler> _incomeHandlers = new Dictionary<TargetType, IIncomeSkillHandler>();
+    private Dictionary<string, ISkillTargetingSpecProvider> _targetingProviders = new Dictionary<string, ISkillTargetingSpecProvider>();
 
     // 선택: 몬스터 기본 처리자(등록 없음 시)
-    private IMonsterSkillHandler defaultMonsterHandler;
+    private IMonsterSkillHandler _defaultMonsterHandler;
 
     public event Action OnLoadoutChanged;
 
@@ -72,33 +72,33 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     private void RegisterTowerHandler(ITowerSkillHandler handler)
     {
         if (handler == null || string.IsNullOrEmpty(handler.Id)) return;
-        towerHandlers[handler.Id] = handler;
+        _towerHandlers[handler.Id] = handler;
     }
 
     private void RegisterMonsterHandler(IMonsterSkillHandler handler)
     {
         if (handler == null || string.IsNullOrEmpty(handler.Id)) return;
-        monsterHandlers[handler.Id] = handler;
+        _monsterHandlers[handler.Id] = handler;
     }
 
     private void RegisterIncomeHandler(IIncomeSkillHandler handler)
     {
         if (handler == null) return;
-        incomeHandlers[handler.TargetType] = handler;
+        _incomeHandlers[handler.TargetType] = handler;
     }
 
     private void RegisterTargetingProvider(ISkillTargetingSpecProvider provider)
     {
         if (provider == null || string.IsNullOrEmpty(provider.Id)) return;
-        targetingProviders[provider.Id] = provider;
+        _targetingProviders[provider.Id] = provider;
     }
 
     // ===== 외부 API =====
     public bool AddToLoadout(LaboratoryData def)
     {
-        if (loadout.Count >= maxSlots) { Debug.LogWarning("[SkillManager] 로드아웃 가득 참"); return false; }
+        if (_loadout.Count >= _maxSlots) { Debug.LogWarning("[SkillManager] 로드아웃 가득 참"); return false; }
         SelectedSkill picked = new SelectedSkill(def);
-        loadout.Add(picked);
+        _loadout.Add(picked);
         Action ev = OnLoadoutChanged;
         if (ev != null) ev.Invoke();
         return true;
@@ -106,14 +106,14 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
     public SelectedSkill GetSelectedSkillBySlotIndex(int slotIndex)
     {
-        if (slotIndex < 0 || slotIndex >= loadout.Count) throw new IndexOutOfRangeException();
-        return loadout[slotIndex];
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) throw new IndexOutOfRangeException();
+        return _loadout[slotIndex];
     }
 
     public bool TryGetTargetingSpec(SelectedSkill skill, out SkillTargetingSpec spec)
     {
         ISkillTargetingSpecProvider provider;
-        if (targetingProviders.TryGetValue(skill.Id, out provider))
+        if (_targetingProviders.TryGetValue(skill.Id, out provider))
         {
             spec = provider.GetSpec(skill);
             return true;
@@ -132,8 +132,10 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     // ===== 스킬 사용(단일/범위) =====
     public void UseSkill(int slotIndex, GameObject explicitTarget = null)
     {
-        if (slotIndex < 0 || slotIndex >= loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
-        SelectedSkill skill = loadout[slotIndex];
+        if (PauseControl.IsPaused) return;
+
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
+        SelectedSkill skill = _loadout[slotIndex];
 
         // 비용: 스킬 지갑
         if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
@@ -151,8 +153,10 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
     public void UseSkillAreaRectWorld(int slotIndex, Vector3 centerWorld, int halfSizeCells, TargetKind targetKind)
     {
-        if (slotIndex < 0 || slotIndex >= loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
-        SelectedSkill skill = loadout[slotIndex];
+        if (PauseControl.IsPaused) return;
+
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
+        SelectedSkill skill = _loadout[slotIndex];
 
         if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
         {
@@ -169,8 +173,10 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
     public void UseSkillAreaRadiusWorld(int slotIndex, Vector3 centerWorld, float radiusWorld, TargetKind targetKind)
     {
-        if (slotIndex < 0 || slotIndex >= loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
-        SelectedSkill skill = loadout[slotIndex];
+        if (PauseControl.IsPaused) return;
+
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
+        SelectedSkill skill = _loadout[slotIndex];
 
         if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
         {
@@ -195,7 +201,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         MapManager mapManager = MapManager.Instance;
         if (mapManager == null || !mapManager.IsReady) return;
 
-        if (explicitTarget.CompareTag(monsterTag))
+        if (explicitTarget.CompareTag(_monsterTag))
         {
             ApplyToMonsterObject(selectedSkill, explicitTarget);
             return;
@@ -218,7 +224,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
             GameObject targetObject = targetObjects[i];
             if (targetObject == null || !targetObject.activeInHierarchy) continue;
 
-            if (targetObject.CompareTag(monsterTag))
+            if (targetObject.CompareTag(_monsterTag))
             {
                 ApplyToMonsterObject(selectedSkill, targetObject);
             }
@@ -232,7 +238,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     private void ApplyToTowerObject(SelectedSkill selectedSkill, GameObject towerObject)
     {
         ITowerSkillHandler handler;
-        if (towerHandlers.TryGetValue(selectedSkill.Id, out handler))
+        if (_towerHandlers.TryGetValue(selectedSkill.Id, out handler))
         {
             handler.Apply(towerObject, selectedSkill);
         }
@@ -241,22 +247,22 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     private void ApplyToMonsterObject(SelectedSkill selectedSkill, GameObject monsterObject)
     {
         IMonsterSkillHandler handler;
-        if (monsterHandlers.TryGetValue(selectedSkill.Id, out handler))
+        if (_monsterHandlers.TryGetValue(selectedSkill.Id, out handler))
         {
             handler.Apply(monsterObject, selectedSkill);
             return;
         }
 
-        if (defaultMonsterHandler != null)
+        if (_defaultMonsterHandler != null)
         {
-            defaultMonsterHandler.Apply(monsterObject, selectedSkill);
+            _defaultMonsterHandler.Apply(monsterObject, selectedSkill);
         }
     }
 
     private bool TryApplyIncomeReward(SelectedSkill selectedSkill)
     {
         IIncomeSkillHandler handler;
-        if (incomeHandlers.TryGetValue(selectedSkill.TargetType, out handler))
+        if (_incomeHandlers.TryGetValue(selectedSkill.TargetType, out handler))
         {
             handler.Apply(selectedSkill);
             return true;
@@ -315,7 +321,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
         if ((targetKind & TargetKind.Monsters) != 0)
         {
-            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(monsterTag);
+            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(_monsterTag);
             foreach (GameObject monsterObject in monsterObjects)
             {
                 if (monsterObject == null || !monsterObject.activeInHierarchy) continue;
@@ -361,7 +367,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
         if ((targetKind & TargetKind.Monsters) != 0)
         {
-            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(monsterTag);
+            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(_monsterTag);
             for (int i = 0; i < monsterObjects.Length; i++)
             {
                 GameObject monsterObject = monsterObjects[i];

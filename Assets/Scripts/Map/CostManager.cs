@@ -55,10 +55,10 @@ public class CostManager : MonoSingleton<CostManager>
         }
     }
 
-    private Wallet[] wallets;
+    private Wallet[] _wallets;
 
-    public int CurrentUnit { get { return wallets[(int)CostType.Unit].current; } }
-    public int CurrentSkill { get { return wallets[(int)CostType.Skill].current; } }
+    public int CurrentUnit { get { return _wallets[(int)CostType.Unit].current; } }
+    public int CurrentSkill { get { return _wallets[(int)CostType.Skill].current; } }
 
     // 檜漸お
     public event Action<int> OnUnitChanged;
@@ -67,7 +67,7 @@ public class CostManager : MonoSingleton<CostManager>
 
     private void Awake()
     {
-        wallets = new Wallet[]
+        _wallets = new Wallet[]
         {
             new Wallet(unitSettings),
             new Wallet(skillSettings)
@@ -84,10 +84,10 @@ public class CostManager : MonoSingleton<CostManager>
 
     private void Update()
     {
-        for (int i = 0; i < wallets.Length; i++)
+        for (int i = 0; i < _wallets.Length; i++)
         {
             CostType type = (CostType)i;
-            Wallet wallet = wallets[i];
+            Wallet wallet = _wallets[i];
 
             float deltaTime = wallet.settings.useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
             if (wallet.settings.autoGain && wallet.settings.gainPerSecond > 0f && deltaTime > 0f)
@@ -108,50 +108,50 @@ public class CostManager : MonoSingleton<CostManager>
     // 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式
     public int GetCurrent(CostType type)
     {
-        return wallets[(int)type].current;
+        return _wallets[(int)type].current;
     }
 
     public void Add(CostType type, int amount)
     {
         if (amount == 0) return;
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.current = Mathf.Max(0, wallet.current + amount);
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
         EmitChanged(type, wallet.current);
     }
 
     public void Add(CostType type, float amountFraction)
     {
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.carry += amountFraction;
         if (wallet.carry >= 1f)
         {
             int increase = Mathf.FloorToInt(wallet.carry);
             wallet.carry -= increase;
-            wallets[(int)type] = wallet;
+            _wallets[(int)type] = wallet;
             Add(type, increase);
         }
         else
         {
-            wallets[(int)type] = wallet;
+            _wallets[(int)type] = wallet;
         }
     }
 
     public void SetValue(CostType type, int value)
     {
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.current = Mathf.Max(0, value);
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
         EmitChanged(type, wallet.current);
     }
 
     public bool TrySpend(CostType type, int amount)
     {
         if (amount <= 0) return true;
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         if (wallet.current < amount) return false;
         wallet.current -= amount;
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
         EmitChanged(type, wallet.current);
         return true;
     }
@@ -159,31 +159,31 @@ public class CostManager : MonoSingleton<CostManager>
     public void SpendForce(CostType type, int amount)
     {
         if (amount <= 0) return;
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.current = Mathf.Max(0, wallet.current - amount);
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
         EmitChanged(type, wallet.current);
     }
 
     public void SetAutoGain(CostType type, bool enabled)
     {
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.settings.autoGain = enabled;
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
     }
 
     public void SetGainRate(CostType type, float perSecond)
     {
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.settings.gainPerSecond = Mathf.Max(0f, perSecond);
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
     }
 
     public void SetUseUnscaled(CostType type, bool useUnscaled)
     {
-        Wallet wallet = wallets[(int)type];
+        Wallet wallet = _wallets[(int)type];
         wallet.settings.useUnscaledTime = useUnscaled;
-        wallets[(int)type] = wallet;
+        _wallets[(int)type] = wallet;
     }
 
     // 式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式式

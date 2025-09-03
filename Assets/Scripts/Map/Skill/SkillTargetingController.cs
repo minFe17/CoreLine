@@ -3,13 +3,13 @@ using UnityEngine;
 public class SkillTargetingController : MonoBehaviour
 {
     [Header("Optional Preview Prefabs")]
-    [SerializeField] private GameObject rectPreviewPrefab;
-    [SerializeField] private GameObject radiusPreviewPrefab;
+    [SerializeField] private GameObject _rectPreviewPrefab;
+    [SerializeField] private GameObject _radiusPreviewPrefab;
 
     [Header("Line Preview (프리팹 없을 때 자동 생성)")]
-    [SerializeField] private float lineWidth = 0.07f;
-    [SerializeField] private int circleSegments = 48;
-    [SerializeField] private string sortingLayerName = "UI"; // 필요 없으면 빈 문자열
+    [SerializeField] private float _lineWidth = 0.07f;
+    [SerializeField] private int _circleSegments = 48;
+    [SerializeField] private string _sortingLayerName = "UI"; // 필요 없으면 빈 문자열
 
     private int _slotIndex;
     private SkillManager.SelectedSkill _selectedSkill;
@@ -28,6 +28,8 @@ public class SkillTargetingController : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     public void StartTargeting(int skillSlotIndex, in SkillManager.SelectedSkill skill, in SkillTargetingSpec targetingSpec)
     {
+        if (PauseControl.IsPaused) return;
+
         _dragDriven = false;
 
         _slotIndex = skillSlotIndex;
@@ -50,6 +52,8 @@ public class SkillTargetingController : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     public void StartTargetingDrag(int skillSlotIndex, in SkillManager.SelectedSkill skill, in SkillTargetingSpec targetingSpec)
     {
+        if (PauseControl.IsPaused) return;
+
         _dragDriven = true;
 
         _slotIndex = skillSlotIndex;
@@ -68,6 +72,7 @@ public class SkillTargetingController : MonoBehaviour
     // 드래그 중 화면좌표로 프리뷰 위치 갱신 (UI EventSystem에서 호출)
     public void UpdateDragScreenPosition(Vector2 screenPos, Camera eventCamera = null)
     {
+        if (PauseControl.IsPaused) return;
         if (_previewInstance == null) return;
         if (_worldCam == null) _worldCam = Camera.main;
         if (_worldCam == null) return;
@@ -81,6 +86,7 @@ public class SkillTargetingController : MonoBehaviour
     // 드래그 드랍 위치로 시전 (UI EventSystem에서 호출)
     public void CommitFromScreen(Vector2 screenPos)
     {
+        if (PauseControl.IsPaused) return;
         if (_worldCam == null) _worldCam = Camera.main;
         if (_worldCam == null) { CancelFromUI(); return; }
 
@@ -109,7 +115,7 @@ public class SkillTargetingController : MonoBehaviour
     {
         // 드래그-주도 모드에서는 Update 사용하지 않음
         if (_dragDriven) return;
-
+        if (PauseControl.IsPaused) { Cancel(); return; }
         if (_previewInstance == null) return;
 
         if (_worldCam == null)
@@ -157,9 +163,9 @@ public class SkillTargetingController : MonoBehaviour
 
         if (_spec.Mode == TargetingMode.RectCells)
         {
-            if (rectPreviewPrefab != null)
+            if (_rectPreviewPrefab != null)
             {
-                _previewInstance = Instantiate(rectPreviewPrefab);
+                _previewInstance = Instantiate(_rectPreviewPrefab);
                 _tints = _previewInstance.GetComponentsInChildren<SpriteRenderer>(true);
 
                 int cells = _spec.HalfSizeCells * 2 + 1;
@@ -188,9 +194,9 @@ public class SkillTargetingController : MonoBehaviour
         }
         else if (_spec.Mode == TargetingMode.RadiusWorld)
         {
-            if (radiusPreviewPrefab != null)
+            if (_radiusPreviewPrefab != null)
             {
-                _previewInstance = Instantiate(radiusPreviewPrefab);
+                _previewInstance = Instantiate(_radiusPreviewPrefab);
                 float diameter = _spec.RadiusWorld * 2f;
                 _previewInstance.transform.localScale = new Vector3(diameter, diameter, 1f);
                 _tints = _previewInstance.GetComponentsInChildren<SpriteRenderer>(true);
@@ -201,10 +207,10 @@ public class SkillTargetingController : MonoBehaviour
                 _line = _previewInstance.AddComponent<LineRenderer>();
                 SetupLine(_line);
 
-                _line.positionCount = circleSegments + 1;
-                for (int i = 0; i <= circleSegments; i++)
+                _line.positionCount = _circleSegments + 1;
+                for (int i = 0; i <= _circleSegments; i++)
                 {
-                    float t = (float)i / circleSegments * Mathf.PI * 2f;
+                    float t = (float)i / _circleSegments * Mathf.PI * 2f;
                     float x = Mathf.Cos(t) * _spec.RadiusWorld;
                     float y = Mathf.Sin(t) * _spec.RadiusWorld;
                     _line.SetPosition(i, new Vector3(x, y, 0f));
@@ -228,13 +234,13 @@ public class SkillTargetingController : MonoBehaviour
     private void SetupLine(LineRenderer lr)
     {
         lr.useWorldSpace = false;
-        lr.widthMultiplier = lineWidth;
+        lr.widthMultiplier = _lineWidth;
         lr.material = new Material(Shader.Find("Sprites/Default"));
         lr.startColor = new Color(0f, 1f, 0f, 0.9f);
         lr.endColor = lr.startColor;
-        if (!string.IsNullOrEmpty(sortingLayerName))
+        if (!string.IsNullOrEmpty(_sortingLayerName))
         {
-            lr.sortingLayerName = sortingLayerName;
+            lr.sortingLayerName = _sortingLayerName;
             lr.sortingOrder = 1000;
         }
     }
@@ -291,6 +297,7 @@ public class SkillTargetingController : MonoBehaviour
     // ─────────────────────────────────────────────────────────────────────
     private void CommitAtWorld(Vector3 world)
     {
+        if (PauseControl.IsPaused) return;
         if (_spec.Mode == TargetingMode.RectCells)
         {
             SkillManager.Instance.UseSkillAreaRectWorld(_slotIndex, world, _spec.HalfSizeCells, _spec.ValidTargets);

@@ -6,27 +6,27 @@ using UnityEngine.UI;
 public class TimerPanelUI : MonoBehaviour
 {
     [Header("Refs - Timer Bar")]
-    [SerializeField] private RectTransform barBg;   // BarBg (RectTransform)
-    [SerializeField] private Image barFill;         // BarFill (Image, Filled-Horizontal, Origin=Left)
-    [SerializeField] private RectTransform marker;  // (옵션) Marker. 지금은 멈춤에 사용하지 않음
+    [SerializeField] private RectTransform _barBg;   // BarBg (RectTransform)
+    [SerializeField] private Image _barFill;         // BarFill (Image, Filled-Horizontal, Origin=Left)
+    [SerializeField] private RectTransform _marker;  // (옵션) Marker. 지금은 멈춤에 사용하지 않음
 
     [Header("Countdown Label")]
-    [SerializeField] private TextMeshProUGUI countdownText;         // 120,119,... 표시할 Text (BarBg의 자식 추천)
-    [SerializeField] private RectTransform countdownRt;  // 라벨 RectTransform(미지정이면 countdownText의 RT 사용)
-    [SerializeField] private float countdownYOffset = 60f; // 바 위로 띄울 오프셋
-    [SerializeField] private float countdownXPadding = 6f; // 양 끝에서 살짝 안쪽으로 클램프
+    [SerializeField] private TextMeshProUGUI _countdownText;         // 120,119,... 표시할 Text (BarBg의 자식 추천)
+    [SerializeField] private RectTransform _countdownRt;  // 라벨 RectTransform(미지정이면 countdownText의 RT 사용)
+    [SerializeField] private float _countdownYOffset = 60f; // 바 위로 띄울 오프셋
+    [SerializeField] private float _countdownXPadding = 6f; // 양 끝에서 살짝 안쪽으로 클램프
 
     [Header("Refs - Toggle Button")]
-    [SerializeField] private Button toggleButton;   // 초록 버튼
-    [SerializeField] private RectTransform arrow;   // 화살표 이미지 (버튼 하위)
+    [SerializeField] private Button _toggleButton;   // 초록 버튼
+    [SerializeField] private RectTransform _arrow;   // 화살표 이미지 (버튼 하위)
 
     [Header("Progress Settings")]
-    [SerializeField] private float durationSeconds = 120f; // 꽉 차는 데 걸리는 시간(초)
-    [SerializeField] private bool autoStart = true;        // 시작 시 자동 진행
+    [SerializeField] private float _durationSeconds = 120f; // 꽉 차는 데 걸리는 시간(초)
+    [SerializeField] private bool _autoStart = true;        // 시작 시 자동 진행
 
     [Header("Panel Slide")]
-    [SerializeField] private float slideDistance = 200f; // 위/아래로 이동 폭(px)
-    [SerializeField] private float slideDuration = 0.2f; // 슬라이드 시간(초)
+    [SerializeField] private float _slideDistance = 200f; // 위/아래로 이동 폭(px)
+    [SerializeField] private float _slideDuration = 0.2f; // 슬라이드 시간(초)
 
     private RectTransform _panel;       // 이 스크립트가 붙은 패널
     private Vector2 _panelStartPos;     // 시작 anchoredPosition
@@ -37,42 +37,42 @@ public class TimerPanelUI : MonoBehaviour
     private bool _running;              // 진행 중인지
     private float _elapsed;             // 진행 경과 시간(초)
 
-    void Awake()
+    private void Awake()
     {
         _panel = (RectTransform)transform;
         _panelStartPos = _panel.anchoredPosition;
 
-        if (toggleButton)
+        if (_toggleButton)
         {
-            toggleButton.onClick.RemoveAllListeners();
-            toggleButton.onClick.AddListener(OnToggleButton);
+            _toggleButton.onClick.RemoveAllListeners();
+            _toggleButton.onClick.AddListener(OnToggleButton);
         }
 
 
         // 초기화
-        if (barFill) barFill.fillAmount = 0f;
+        if (_barFill) _barFill.fillAmount = 0f;
 
-        SetCountdown(durationSeconds);          // 120부터 시작 보이게
+        SetCountdown(_durationSeconds);          // 120부터 시작 보이게
         PositionCountdownAlongBar(0f);          // 시작 위치로 이동
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         // BarBg가 Auto-Layout이면 크기 변동 가능 → 매 프레임 체크하긴 하지만 최초 보정
         ResetProgress();
-        if (autoStart) _running = true;
+        if (_autoStart) _running = true;
     }
 
-    void Update()
+    private void Update()
     {
-        if (_running && barFill && durationSeconds > 0f)
+        if (_running && _barFill && _durationSeconds > 0f)
         {
             _elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(_elapsed / durationSeconds); // 0→1
-            barFill.fillAmount = t;
+            float t = Mathf.Clamp01(_elapsed / _durationSeconds); // 0→1
+            _barFill.fillAmount = t;
 
             // 남은 시간(초) = 올림(Ceil)로 120,119,...0
-            float remain = Mathf.Max(0f, durationSeconds - _elapsed);
+            float remain = Mathf.Max(0f, _durationSeconds - _elapsed);
             SetCountdown(remain);
 
             // 라벨을 바 진행 위치에 맞춰 이동
@@ -87,17 +87,17 @@ public class TimerPanelUI : MonoBehaviour
         _isHidden = !_isHidden;
 
         // 화살표 위/아래 반전(세로 뒤집기) : scale.y 토글
-        if (arrow)
+        if (_arrow)
         {
-            Vector3 arrowDirection = arrow.localScale;
+            Vector3 arrowDirection = _arrow.localScale;
             arrowDirection.y = _isHidden ? -Mathf.Abs(arrowDirection.y) : Mathf.Abs(arrowDirection.y);
-            arrow.localScale = arrowDirection;
+            _arrow.localScale = arrowDirection;
         }
 
         // 패널 슬라이드
         Vector2 from = _panel.anchoredPosition;
-        Vector2 to = _panelStartPos + new Vector2(0f, _isHidden ? slideDistance : 0f);
-        StartCoroutine(CoSlide(from, to, slideDuration));
+        Vector2 to = _panelStartPos + new Vector2(0f, _isHidden ? _slideDistance : 0f);
+        StartCoroutine(CoSlide(from, to, _slideDuration));
     }
 
     private IEnumerator CoSlide(Vector2 startAnchoredPos, Vector2 targetAnchoredPos, float durationSeconds)
@@ -125,10 +125,10 @@ public class TimerPanelUI : MonoBehaviour
 
     private void SetCountdown(float secondsLeft)
     {
-        if (!countdownText) return;
+        if (!_countdownText) return;
         int sec = Mathf.CeilToInt(secondsLeft);
         if (sec < 0) sec = 0;
-        countdownText.text = sec.ToString();
+        _countdownText.text = sec.ToString();
     }
 
     /// <summary>
@@ -137,26 +137,26 @@ public class TimerPanelUI : MonoBehaviour
     /// </summary>
     private void PositionCountdownAlongBar(float t01)
     {
-        if (!barBg || !countdownRt) return;
+        if (!_barBg || !_countdownRt) return;
 
         // BarBg 좌표계에서 좌/우/윗변 계산
-        Rect r = barBg.rect;
-        float xMin = r.xMin + countdownXPadding;
-        float xMax = r.xMax - countdownXPadding;
+        Rect r = _barBg.rect;
+        float xMin = r.xMin + _countdownXPadding;
+        float xMax = r.xMax - _countdownXPadding;
         float x = Mathf.Lerp(xMin, xMax, Mathf.Clamp01(t01));
 
         // y는 바 윗변 + 오프셋 (바 높이에 상관없이 항상 윗쪽)
-        float y = r.yMax + countdownYOffset;
+        float y = r.yMax + _countdownYOffset;
 
-        countdownRt.anchoredPosition = new Vector2(x, y);
+        _countdownRt.anchoredPosition = new Vector2(x, y);
     }
 
 
     private void ResetProgress()
     {
         _elapsed = 0f;
-        if (barFill) barFill.fillAmount = 0f;
-        SetCountdown(durationSeconds);
+        if (_barFill) _barFill.fillAmount = 0f;
+        SetCountdown(_durationSeconds);
         PositionCountdownAlongBar(0f);
     }
 
@@ -164,7 +164,7 @@ public class TimerPanelUI : MonoBehaviour
     public void RestartProgress(float startSeconds = -1f)
     {
         // startSeconds < 0 이면 0초부터
-        _elapsed = Mathf.Max(0f, (startSeconds < 0f) ? 0f : (durationSeconds - startSeconds));
+        _elapsed = Mathf.Max(0f, (startSeconds < 0f) ? 0f : (_durationSeconds - startSeconds));
         _running = true;
     }
     public void StopProgress() => _running = false;

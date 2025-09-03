@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject playerBasePrefab;
 
     [Header("Test Skill Wallet Seed")]
-    [SerializeField] private int startSkillCurrency = 999;   // 스킬 코인 초기값
+    [SerializeField] private int startSkillCurrency = 0;   // 스킬 코인 초기값
 
     [Header("Auto-add a test skill to loadout")]
     [SerializeField] private bool addRangeHeal = true;       // RangeHeal 자동 추가
@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
         }
 
         // 2) 로드아웃 비어있으면 테스트 스킬 강제 추가
-        if (addRangeHeal && SkillManager.Instance != null && SkillManager.Instance.loadout.Count == 0)
+        if (addRangeHeal && SkillManager.Instance != null && SkillManager.Instance._loadout.Count == 0)
         {
             LaboratoryData data = new LaboratoryData
             {

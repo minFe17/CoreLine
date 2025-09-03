@@ -4,15 +4,15 @@ using UnityEngine.UI;
 
 public class InvalidPlacementToast : MonoBehaviour
 {
-    [SerializeField] float showSec = 0.7f;
-    [SerializeField] float fadeSec = 0.15f;
+    [SerializeField] private float _showSec = 0.7f;
+    [SerializeField] private float _fadeSec = 0.15f;
 
-    Canvas _canvas;
-    RectTransform _root;   // 이 스크립트가 붙은 오브젝트(RT)
-    CanvasGroup _canvasGroup;       // 투명도 제어용
-    Coroutine _coroutine;
+    private Canvas _canvas;
+    private RectTransform _root;   // 이 스크립트가 붙은 오브젝트(RT)
+    private CanvasGroup _canvasGroup;       // 투명도 제어용
+    private Coroutine _coroutine;
 
-    void Awake()
+    private void Awake()
     {
         _canvas = GetComponentInParent<Canvas>(true);
         _root = (RectTransform)transform;
@@ -62,27 +62,27 @@ public class InvalidPlacementToast : MonoBehaviour
     }
 
 
-    IEnumerator PlayOnce()
+    private IEnumerator PlayOnce()
     {
         // 페이드 인
         float timer = 0f;
-        while (timer < fadeSec)
+        while (timer < _fadeSec)
         {
             timer += Time.deltaTime;
-            _canvasGroup.alpha = Mathf.Lerp(0f, 1f, timer / fadeSec);
+            _canvasGroup.alpha = Mathf.Lerp(0f, 1f, timer / _fadeSec);
             yield return null;
         }
         _canvasGroup.alpha = 1f;
 
         // 잠시 유지
-        yield return new WaitForSeconds(showSec);
+        yield return new WaitForSeconds(_showSec);
 
         // 페이드 아웃 (비활성화하지 말고 알파만 0으로!)
         timer = 0f;
-        while (timer < fadeSec)
+        while (timer < _fadeSec)
         {
             timer += Time.deltaTime;
-            _canvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / fadeSec);
+            _canvasGroup.alpha = Mathf.Lerp(1f, 0f, timer / _fadeSec);
             yield return null;
         }
         _canvasGroup.alpha = 0f;

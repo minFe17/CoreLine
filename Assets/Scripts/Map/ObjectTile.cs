@@ -6,9 +6,9 @@ using UnityEngine.EventSystems;
 public class ObjectTile : MonoBehaviour, IPointerClickHandler
 {
     [Header("Fade Out (Natural)")]
-    [SerializeField] private float fadeDuration = 0.45f;   // 총 페이드 시간
-    [SerializeField] private float endScale = 0.94f;       // 살짝 축소
-    [SerializeField] private bool useUnscaledTime = false; // 타임스케일 무시 여부
+    [SerializeField] private float _fadeDuration = 0.45f;   // 총 페이드 시간
+    [SerializeField] private float _endScale = 0.94f;       // 살짝 축소
+    [SerializeField] private bool _useUnscaledTime = false; // 타임스케일 무시 여부
 
     private Vector3Int _cell;
     private bool _registered;
@@ -76,13 +76,13 @@ public class ObjectTile : MonoBehaviour, IPointerClickHandler
 
         // 스케일만 자연스럽게 축소
         Vector3 startSc = transform.localScale;
-        Vector3 endSc = startSc * Mathf.Clamp(endScale, 0.5f, 1f);
+        Vector3 endSc = startSc * Mathf.Clamp(_endScale, 0.5f, 1f);
 
         float t = 0f;
-        while (t < fadeDuration)
+        while (t < _fadeDuration)
         {
-            t += useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
-            float k = Mathf.Clamp01(t / fadeDuration);
+            t += _useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+            float k = Mathf.Clamp01(t / _fadeDuration);
 
             // S-curve로 부드럽게
             float eased = Mathf.SmoothStep(0f, 1f, k);

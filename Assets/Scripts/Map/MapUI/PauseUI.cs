@@ -15,8 +15,8 @@ public class PauseUI : MonoBehaviour
     private const string LOBBY_SCENE_NAME = "Lobby"; // 없으면 빌드 인덱스 0으로 이동
     private const KeyCode TOGGLE_KEY = KeyCode.Escape;
     
-    private GameObject pausePanel;
-    private Button pauseBtn, playBtn, restartBtn, quitBtn;
+    private GameObject _pausePanel;
+    private Button _pauseBtn, _playBtn, _restartBtn, _quitBtn;
 
     public static bool IsPaused { get; private set; }
 
@@ -27,43 +27,43 @@ public class PauseUI : MonoBehaviour
         if (!canvas) canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
         // 이름으로 모두 찾기(비활성 포함)
-        pauseBtn = FindByName<Button>(canvas.transform, NAME_PauseButton);
-        pausePanel = FindByName<Transform>(canvas.transform, NAME_PausePanel)?.gameObject;
-        playBtn = FindByName<Button>(canvas.transform, NAME_PlayButton);
-        restartBtn = FindByName<Button>(canvas.transform, NAME_RestartButton);
-        quitBtn = FindByName<Button>(canvas.transform, NAME_QuitButton);
+        _pauseBtn = FindByName<Button>(canvas.transform, NAME_PauseButton);
+        _pausePanel = FindByName<Transform>(canvas.transform, NAME_PausePanel)?.gameObject;
+        _playBtn = FindByName<Button>(canvas.transform, NAME_PlayButton);
+        _restartBtn = FindByName<Button>(canvas.transform, NAME_RestartButton);
+        _quitBtn = FindByName<Button>(canvas.transform, NAME_QuitButton);
 
         // 초기 상태
-        if (pausePanel) pausePanel.SetActive(false);
+        if (_pausePanel) _pausePanel.SetActive(false);
 
         // 클릭 이벤트 배선
-        if (pauseBtn)
+        if (_pauseBtn)
         {
-            pauseBtn.onClick.RemoveAllListeners();
-            pauseBtn.onClick.AddListener(TogglePause);
+            _pauseBtn.onClick.RemoveAllListeners();
+            _pauseBtn.onClick.AddListener(TogglePause);
         }
-        if (playBtn)
+        if (_playBtn)
         {
-            playBtn.onClick.RemoveAllListeners();
-            playBtn.onClick.AddListener(Resume);
+            _playBtn.onClick.RemoveAllListeners();
+            _playBtn.onClick.AddListener(Resume);
         }
-        if (restartBtn)
+        if (_restartBtn)
         {
-            restartBtn.onClick.RemoveAllListeners();
-            restartBtn.onClick.AddListener(RestartScene);
+            _restartBtn.onClick.RemoveAllListeners();
+            _restartBtn.onClick.AddListener(RestartScene);
         }
-        if (quitBtn)
+        if (_quitBtn)
         {
-            quitBtn.onClick.RemoveAllListeners();
-            quitBtn.onClick.AddListener(GoToLobby);
+            _quitBtn.onClick.RemoveAllListeners();
+            _quitBtn.onClick.AddListener(GoToLobby);
         }
 
         // 누락된 요소가 있으면 경고만 띄움(실행은 계속)
-        if (!pauseBtn) Debug.LogWarning("[PauseUIAuto] PauseButton not found.");
-        if (!pausePanel) Debug.LogWarning("[PauseUIAuto] PausePanel not found.");
-        if (!playBtn) Debug.LogWarning("[PauseUIAuto] PlayButton not found.");
-        if (!restartBtn) Debug.LogWarning("[PauseUIAuto] RestartButton not found.");
-        if (!quitBtn) Debug.LogWarning("[PauseUIAuto] QuitButton not found.");
+        if (!_pauseBtn) Debug.LogWarning("[PauseUIAuto] PauseButton not found.");
+        if (!_pausePanel) Debug.LogWarning("[PauseUIAuto] PausePanel not found.");
+        if (!_playBtn) Debug.LogWarning("[PauseUIAuto] PlayButton not found.");
+        if (!_restartBtn) Debug.LogWarning("[PauseUIAuto] RestartButton not found.");
+        if (!_quitBtn) Debug.LogWarning("[PauseUIAuto] QuitButton not found.");
     }
 
     private void Update()
@@ -84,7 +84,7 @@ public class PauseUI : MonoBehaviour
     {
         if (IsPaused) return;
         IsPaused = true;
-        if (pausePanel) pausePanel.SetActive(true);
+        if (_pausePanel) _pausePanel.SetActive(true);
         Time.timeScale = 0f;
         PauseControl.SetPaused(true);
         //AudioListener.pause = true;
@@ -94,7 +94,7 @@ public class PauseUI : MonoBehaviour
     {
         if (!IsPaused) return;
         IsPaused = false;
-        if (pausePanel) pausePanel.SetActive(false);
+        if (_pausePanel) _pausePanel.SetActive(false);
         Time.timeScale = 1f;
         PauseControl.SetPaused(false);
         //AudioListener.pause = false;
