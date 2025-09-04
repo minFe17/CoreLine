@@ -1,30 +1,38 @@
 [
-     {
-        "Id" : "Stage1-1",
-        "Name" : "스테이지 1-1",
-        "Condition" : 
+    {
+        "Id": "Stage1",
+        "Name": "월드 1",
+        "Stages": 
         [
             {
-                "ClearType" : "MoneySave",
-                "Info" : "200원 남기기",
-                "Value" : 200,
-            },
-            {
-                "ClearType" : "HealthSave",
-                "Info" : "베이스 체력 50%이상 남기기",
-                "Value" : 0.5,
-            },
-            {
-                "ClearType" : "UnitSave",
-                "Info" : "유닛 파괴 횟수 5회 미만",
-                "Value" : 5,
+                "ID" : "Stage1-1",
+                "Name" : "스테이지 1-1",
+                "Gold": 100,
+                "Gem": 50,
+                "Condition" : 
+                [
+                    {
+                        "ClearType" : "MoneySave",
+                        "Info" : "200원 남기기",
+                        "Value" : 200
+                    },
+                    {
+                        "ClearType" : "HealthSave",
+                        "Info" : "베이스 체력 50% 이상",
+                        "Value" : 0.5
+                    },
+                    {
+                        "ClearType" : "UnitSave",
+                        "Info" : "유닛 파괴 5회 미만",
+                        "Value" : 5
+                    }
+                ]
             }
-        ],
-        "ClearGold" : 100,
-        "ClearGem" : 50
-     },
-
-     {
-
-     }
+        ]
+    },
+    {
+        "Id" : "Stage2",
+        "Name" : "월드 2",
+        "Stages":
+    }
 ]
