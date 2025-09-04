@@ -55,9 +55,12 @@ public class LineController : MonoBehaviour
        if (_isChangeColor) return;
        if(_startNode.IsUnlocked&&_endNode.IsUnlocked)
        {
-           _isChangeColor = true;
-           _color.MyColorType = ColorType.Normal;
+           _color.MyColorType = ColorType.Light;
        }
+       else if(_startNode.IsUnlocked)
+       {
+            _color.MyColorType = ColorType.Normal;
+        }
 
     }
 }

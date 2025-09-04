@@ -48,8 +48,11 @@ public class LaboratoryPanelManager : MonoBehaviour
     }
     private void OpenInformation(bool isOpen)
     {
-        if(isOpen)
+        if (isOpen)
+        {
             _information.gameObject.SetActive(true);
+            EventManager.Instance.Invoke("UpdateLaboratoryInfo");
+        }
         else
             _information.gameObject.SetActive(false);
     }

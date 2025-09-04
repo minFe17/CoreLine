@@ -2,11 +2,12 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 public class LaboratoryNode : BaseButton
 {
-    private bool _isSelect = false;
     private bool _isUnlocked = false;
+    private bool _isSelect = false;
     private List<LaboratoryNode> _parents = new List<LaboratoryNode>();
     private Image _icon;
     private LaboratoryData _data;
@@ -31,19 +32,52 @@ public class LaboratoryNode : BaseButton
         base.Awake();
         _icon = transform.Find("Icon").GetComponent<Image>();
     }
+    private void OnEnable()
+    {
+        EventManager.Instance.Subscribe<LaboratoryData>("BuyLaboratory", BuyLaboratory);
+    }
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe("BuyLaboratory", (Action<LaboratoryData>)BuyLaboratory);
+    }
     protected override void OnClick()
     {
-        if(_isSelect)
+        if (!CheckParent())
         {
-            //패널끄기
+            EventManager.Instance.Invoke<LaboratoryData>("ChangeChoiceLaboratory", Data);
+            EventManager.Instance.Invoke<bool>("SettingInformation", false);
+            return;
+        }
+        if (LaboratoryManager.Instance.ChoiceLaboratory.Id == _data.Id && _isSelect == true)
+        {
+            EventManager.Instance.Invoke<bool>("SettingInformation", false);
             _isSelect = false;
             return;
         }
+
+        EventManager.Instance.Invoke<LaboratoryData>("ChangeChoiceLaboratory", Data);
+        EventManager.Instance.Invoke<bool>("SettingInformation", true);
         _isSelect = true;
-        _isUnlocked = true;
-        EventManager.Instance.Invoke<bool>("SettingInformation", _isSelect);
+
         //패널 켜기
     }
 
+    private void BuyLaboratory(LaboratoryData data)
+    {
+        if (data.Id != _data.Id) return;
+        _isUnlocked = true;
+    }
+
+    private bool CheckParent()
+    {
+        foreach(LaboratoryNode node in _parents)
+        {
+            if (node.IsUnlocked) continue;
+            else
+                return false;
+        }
+
+        return true;
+    }
     
 }

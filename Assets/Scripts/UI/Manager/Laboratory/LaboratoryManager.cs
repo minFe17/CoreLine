@@ -3,17 +3,37 @@ using Utils;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
 using System.Runtime.InteropServices;
+using Unity.VisualScripting;
+
+public class LabData { }
+[System.Serializable]
+public class UnitLabData:LabData
+{
+    public Pair<ValueType, float> AttackDamage = new();
+    public Pair<ValueType, float> AttackSpeed = new();
+}
 
 [System.Serializable]
-public class UsingLaboratoryData
+public class KingLabData : LabData
 {
-    public Dictionary<TargetType, int> Shield = new(); //왕, 유닛 적용
-    public int Heal = new(); //왕 적용 유닛 고민
-    public float AttackDamage = new (); //유닛 적용
-    public float AttackSpeed = new(); // 유닛 적용
-    public float GetMoney = new(); //유틸리티 적용
-    public float GetGem = new(); //유틸리티 적용
-    public int SubPlayTime = new(); //유틸리티 적용
+    public Pair<ValueType, int> Heal = new();
+    public Pair<ValueType, int> Shield = new();
+}
+
+[System.Serializable]
+public class UtilityLabData : LabData
+{
+    public Pair<ValueType, float> GetMoney = new();
+    public Pair<ValueType, float> GetGem = new();
+    public Pair<ValueType, int> SubPlayTime = new();
+}
+
+[System.Serializable]
+public class UsingLaboratoryData : LabData
+{
+    public KingLabData King = new();
+    public UnitLabData Unit = new();
+    public UtilityLabData Utility = new();
     public List<string> UnlockedSkill = new();
 }
 
@@ -22,11 +42,13 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
     private Dictionary<LaboratoryType,List<LaboratoryData>> _data = new Dictionary<LaboratoryType, List<LaboratoryData>>();
     private Dictionary<string, LaboratoryData> _buyLaboratory = new();
     private LaboratoryData _choiceLaboratory = new();
+    private UsingLaboratoryData _usingLabData = new UsingLaboratoryData();
+
     public LaboratoryManager()
     {
         SettingData();
         EventManager.Instance.Subscribe<LaboratoryData>("ChangeChoiceLaboratory", ChoiceLaboratoryData);
-        EventManager.Instance.Subscribe("BuyLaboratory", BuyLaboratory);
+        EventManager.Instance.Subscribe<LaboratoryData>("BuyLaboratory", BuyLaboratory);
     }
     public List<LaboratoryData> GetData(LaboratoryType type)
     {
@@ -35,6 +57,10 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
     public LaboratoryData ChoiceLaboratory
     {
         get { return _choiceLaboratory; }
+    }
+    public Dictionary<string,LaboratoryData> BuyLaboratoryData
+    {
+        get { return _buyLaboratory; }
     }
     private void SettingData()
     {
@@ -63,9 +89,39 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
     {
         _choiceLaboratory = data;
     }
-    private void BuyLaboratory()
+    private void BuyLaboratory(LaboratoryData data)
     {
-        if (_buyLaboratory.ContainsKey(_choiceLaboratory.Id)) return; //패널띄우기
-        _buyLaboratory.Add(_choiceLaboratory.Id, _choiceLaboratory);
+        if (_buyLaboratory.ContainsKey(data.Id)) return; //패널띄우기
+        _buyLaboratory.Add(data.Id, data);
+        DataManager.Instance.GameData.UnlockedLaboratoryId.Add(data.Id);
+
+        SettingValue(ref data);
     }
+    private void SettingValue(ref LaboratoryData data)
+    {
+        LabData labData = null;
+        switch (data.Effect.TargetType)
+        {
+            case TargetType.King:
+                labData = new KingLabData();
+                break;
+            case TargetType.Unit: 
+                labData = new UnitLabData();
+                break;
+            case TargetType.Monster:
+                break;
+            default:
+                labData = new UtilityLabData();
+                break;
+        }
+        if (data.Effect.ValueType == ValueType.Skill)
+        {
+            //스킬넣어주기
+            return;
+        }
+
+        //여기짜기
+
+    }
+    
 }

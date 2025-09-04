@@ -15,9 +15,14 @@
     "ClearStage":
     [
         {
-            "FirstStageNumber":1,
-            "LastStageNumber":1,
-            "ClearStarNumber":1
+            "StageId" : "Stage1-1",
+            "MaxStarNum":3,
+            "Star":
+            {
+                "FirstStar":true,
+                "SecondStar":true,
+                "ThirdStar":true,
+            }
         }
     ]
 }

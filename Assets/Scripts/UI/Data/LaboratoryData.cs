@@ -17,8 +17,9 @@ public enum ValueType
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TargetType 
 {
-    King, Unit, PlayTime, Money, IncomeMoney, IncomeSkill, Monster
+    King, Unit, PlayTime, Money, TimeUnitCost, SpawnUnitCost, Monster
 }
+//TimeUnitCost, SpawnUnitCost는 인게임 재화임
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TargetStatus
 {
@@ -31,7 +32,7 @@ public struct LaboratoryData
     public string Id;
     public string Info;
     public LaboratoryType LaboratoryType; //enum으로 빼자
-    public int Cost; //이거 게임 클리어하면 얻는 재화
+    public int Cost; //이거 게임 클리어하면 얻는 재화 = Gem
     public Effect Effect;
     public List<string> ParentsId;
 }

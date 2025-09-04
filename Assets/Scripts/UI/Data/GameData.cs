@@ -22,7 +22,15 @@ public class UnlockedUnit
 [System.Serializable]
 public class ClearStage
 {
-    public int FirstStageNumber;
-    public int LastStageNumber;
-    public int ClearStarNumber;
+    public string StageId;
+    public int MaxStarNum;
+    public Star Star;
+}
+
+[System.Serializable]
+public class Star
+{
+    public bool FirstStar;
+    public bool SecondStar;
+    public bool ThirdStar;
 }
