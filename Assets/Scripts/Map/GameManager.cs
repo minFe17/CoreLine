@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
 [DefaultExecutionOrder(-1000)]
 public class GameManager : MonoBehaviour
@@ -79,17 +80,21 @@ public class GameManager : MonoBehaviour
         // 2) 로드아웃 비어있으면 테스트 스킬 강제 추가
         if (addRangeHeal && SkillManager.Instance != null && SkillManager.Instance._loadout.Count == 0)
         {
+            Effect effect = new Effect
+            {
+                Value = 50,
+                ValueType = ValueType.Add,
+                TargetType = TargetType.Unit,
+                TargetStatus = TargetStatus.HealthPoint,
+            };
             LaboratoryData data = new LaboratoryData
             {
                 Id = "RangeHeal",
-                Name = "광역 힐(테스트)",
-                Type = LaboratoryType.Defense,          // 구조체에 필수라 넣어줌(실사용X)
+                Info = "광역 힐(테스트)",
+                LaboratoryType = LaboratoryType.Defense,          // 구조체에 필수라 넣어줌(실사용X)
                 Cost = rangeHealCost,
-                Value = rangeHealValue,
-                ValueType = ValueType.Add,
-                TargetType = TargetType.Unit,           // 유닛(타워) 대상
-                TargetStatus = TargetStatus.HealthPoint,// 구조체에 필수라 넣어줌(실사용X)
-                ParntsId = new List<string>()
+                Effect = effect,
+                ParentsId = new List<string>()
             };
 
             SkillManager.Instance.AddToLoadout(data);

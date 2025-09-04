@@ -34,14 +34,14 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         public float Value;
         public ValueType ValueType;   // Add¸¸ »ç¿ë
         public TargetType TargetType; // Unit / IncomeMoney / IncomeSkill
-
+       
         public SelectedSkill(LaboratoryData def)
         {
             Id = def.Id;
             Cost = def.Cost;
-            Value = def.Value;
-            ValueType = def.ValueType;
-            TargetType = def.TargetType;
+            Value = def.Effect.Value;
+            ValueType = def.Effect.ValueType;
+            TargetType = def.Effect.TargetType;
         }
     }
 
