@@ -412,24 +412,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b42387d29f0d6049b96b9ae9ea0fd20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseColor: {r: 1, g: 1, b: 1, a: 1}
-  baseWidth: 0.05
-  hoverColor: {r: 0, g: 0.990566, b: 0.9717447, a: 1}
-  hoverWidth: 0.05
-  hoverPulse: 1
-  pulseSpeed: 2
-  pulseWidthAmp: 0.15
-  pulseAlphaAmp: 0.25
-  highlightKingsUntilBasePlaced: 1
-  kingColor: {r: 1, g: 0.85, b: 0.2, a: 0.95}
-  kingWidth: 0.055
-  kingPulse: 1
-  kingPulseSpeed: 2
-  kingPulseWidthAmp: 0.02
-  kingPulseAlphaAmp: 0.2
-  autoHideSec: 2
-  sortingLayerName: Default
-  sortingOrder: 1000
+  _baseColor: {r: 0, g: 1, b: 0.6, a: 0.55}
+  _baseWidth: 0.03
+  _hoverColor: {r: 0.2, g: 1, b: 0.9, a: 1}
+  _hoverWidth: 0.05
+  _hoverPulse: 1
+  _pulseSpeed: 2.2
+  _pulseWidthAmp: 0.015
+  _pulseAlphaAmp: 0.25
+  _highlightKingsUntilBasePlaced: 1
+  _kingColor: {r: 1, g: 0.85, b: 0.2, a: 0.95}
+  _kingWidth: 0.055
+  _kingPulse: 1
+  _kingPulseSpeed: 2
+  _kingPulseWidthAmp: 0.02
+  _kingPulseAlphaAmp: 0.2
+  _autoHideSec: 1
+  _sortingLayerName: Default
+  _sortingOrder: 1000
   buildablesOnlyAfterBasePlaced: 1
 --- !u!4 &374042369
 Transform:
@@ -1588,19 +1588,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9170866886ddd194594e03fae0fa5dd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barBg: {fileID: 145785332}
-  barFill: {fileID: 1874693148}
-  marker: {fileID: 1305637223}
-  countdownText: {fileID: 2018935868}
-  countdownRt: {fileID: 2018935867}
-  countdownYOffset: 60
-  countdownXPadding: 15
-  toggleButton: {fileID: 691653238}
-  arrow: {fileID: 809652720}
-  durationSeconds: 120
-  autoStart: 1
-  slideDistance: 200
-  slideDuration: 0.2
+  _barBg: {fileID: 0}
+  _barFill: {fileID: 0}
+  _marker: {fileID: 0}
+  _countdownText: {fileID: 0}
+  _countdownRt: {fileID: 0}
+  _countdownYOffset: 60
+  _countdownXPadding: 6
+  _toggleButton: {fileID: 0}
+  _arrow: {fileID: 0}
+  _durationSeconds: 120
+  _autoStart: 1
+  _slideDistance: 200
+  _slideDuration: 0.2
 --- !u!114 &1150002062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3459,8 +3459,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b520688481c108c4b957561acc92f29a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  costText: {fileID: 1360596862}
-  numberFormat: 0
+  _unitText: {fileID: 0}
+  _skillText: {fileID: 0}
+  _unitNumberFormat: 0
+  _skillNumberFormat: 0
 --- !u!114 &2083074832
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -321,6 +321,7 @@ public class MonsterMover : MonoBehaviour
             if (_attackTimer <= 0f && _monster != null && _monster.IsAttackReady())
             {
                 _monster?.FireAttackTrigger();
+                AttackUnitBase();
                 _attackTimer = _attackCooldown;
             }
         }
@@ -332,6 +333,31 @@ public class MonsterMover : MonoBehaviour
     {
         Cell = rc;
         transform.position = _map.CellToWorld(rc.x, rc.y);
+    }
+
+    private void AttackUnitBase()
+    {
+        if (_route == null || _map == null) 
+            return;
+
+        if (MapManager.Instance == null || !MapManager.Instance.HasPlayerBase) 
+            return;
+
+        
+        Vector2Int goal = _route.GoalCell;
+        Vector3 world = _map.CellToWorld(goal.x, goal.y);
+        Vector3Int abs = MapManager.Instance.WorldToCell(world);
+
+        GameObject towerGo;
+        if (MapManager.Instance.TryGetTowerAt(abs, out towerGo) && towerGo)
+        {
+            Unit towerUnit = towerGo.GetComponent<Unit>();
+            if (towerUnit != null && !towerUnit.IsDie)
+            {
+                towerUnit.TakeDamage(1);
+                return;
+            }
+        }
     }
 
 }

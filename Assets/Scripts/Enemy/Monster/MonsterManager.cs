@@ -17,10 +17,8 @@ public class MonsterManager : MonoBehaviour
     [SerializeField] private bool _spawnBossOnBase = true;
     private bool _bossSpawned = false;
 
-    [Header("CSV Wave")]
-    [Tooltip("MonsterId,Prefab,Count,Interval,Delay 헤더를 가진 CSV(TextAsset)")]
+    [Header("Wave")]
     [SerializeField] private TextAsset _csvWaveFile;
-    [Tooltip("Start에서 CSV를 자동 실행할지 여부")]
     [SerializeField] private bool _runCsvOnStart = false;
 
     private readonly List<MonsterMover> _monsters = new();
@@ -319,28 +317,22 @@ public class MonsterManager : MonoBehaviour
     {
         if (!m || _route == null) return;
 
-        // 0) 라우트 기본 정책
         var allowance = _route.Allowance;
         bool allowWallsBase = (allowance == RouteManager.RouteAllowance.WallsOnly
                              || allowance == RouteManager.RouteAllowance.WallsAndTowers);
         bool allowTowersBase = (allowance == RouteManager.RouteAllowance.WallsAndTowers);
 
-        // 1) 우선 정책(_policy)이 있으면 그걸 1차로 시도
         if (_policy.TryGetValue(m, out var pol))
         {
             m.MoveToCell(_route.GoalCell, pol.allowWalls, pol.allowTowers);
             if (m.IsFollowingPath) return;
         }
-
-        // 2) 라우트 기본으로 시도
         m.MoveToCell(_route.GoalCell, allowWallsBase, allowTowersBase);
         if (m.IsFollowingPath) return;
 
-        // 3) 벽 포함으로 완화
         m.MoveToCell(_route.GoalCell, true, false);
         if (m.IsFollowingPath) return;
 
-        // 4) 벽+타워 포함으로 최종 완화
         m.MoveToCell(_route.GoalCell, true, true);
     }
 

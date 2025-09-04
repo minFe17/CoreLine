@@ -30,11 +30,7 @@ public class SummonMinions : BossSkillBase
         // 1) 후보 좌표 뽑기 (필요하면 텔레그래프 표시)
         var targets = PickSpawnCells(_count);
 
-        // 텔레그래프가 있으면 캐스팅 시간(CastTime) 동안 먼저 찍어주고,
-        // 실제 소환은 여기 Perform에서 진행되는 구조라면
-        // BossController에서 AttackTrigger를 castTime 전에 쏘도록 했으므로 연출이 자연스럽다.
-
-        // 2) 실제 소환
+        
         foreach (var rc in targets)
         {
             Vector3 world = _map.CellToWorld(rc.x, rc.y);
