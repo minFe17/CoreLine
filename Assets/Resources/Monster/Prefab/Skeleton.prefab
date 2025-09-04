@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 3669618446000594986}
   - component: {fileID: 2186246844432717916}
   - component: {fileID: 7429551002733275520}
+  - component: {fileID: 684053305405381309}
+  - component: {fileID: 2858813604975949605}
   m_Layer: 3
   m_Name: Skeleton
   m_TagString: Monster
@@ -216,3 +218,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _hopFreq: 7
   _hopGain: 0.3
+--- !u!114 &684053305405381309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3199806889760769668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b66af5bbf3592498200ba602b2bb14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHp: 100
+--- !u!114 &2858813604975949605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3199806889760769668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca4a10ad22aa0774c9024920b86e0afb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelTag: BarPanel
+  _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
+  _screenOffset: {x: 0, y: 1.2}
