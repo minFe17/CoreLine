@@ -8,6 +8,7 @@ public class DataManager : SimpleSingleton<DataManager>
     private List<InventoryData> _inventoryDatas;
     private List<LaboratoryData> _laboratoryDatas;
     private List<UpgradeData> _upgradeDatas;
+    private List<NormalStageData> _normalStagesDatas;
     private GameData _gameData;
 
     public List<InventoryData> InventoryDatas
@@ -22,6 +23,10 @@ public class DataManager : SimpleSingleton<DataManager>
     {
         get { return _upgradeDatas; }
     }
+    public List<NormalStageData> NormalStageDatas
+    {
+        get { return _normalStagesDatas; }
+    }
     public GameData GameData
     {
         get { return _gameData; }
@@ -33,7 +38,7 @@ public class DataManager : SimpleSingleton<DataManager>
         LoadLaboratoryDatas();
         LoadUpgradeDatas();
         LoadUpgradeData();
-
+        LoadNormalStageData();
     }
     public UpgradeData GetUpgradeData(UpgradeType type)
     {
@@ -68,5 +73,10 @@ public class DataManager : SimpleSingleton<DataManager>
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/GameData");
         _gameData = JsonConvert.DeserializeObject<GameData>(jsonFile.text);
+    }
+    private void LoadNormalStageData()
+    {
+        TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/NormalStageData");
+        _normalStagesDatas = JsonConvert.DeserializeObject<List<NormalStageData>>(jsonFile.text);
     }
 }
