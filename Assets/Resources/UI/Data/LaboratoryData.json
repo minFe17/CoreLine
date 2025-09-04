@@ -103,5 +103,22 @@
         [
             "Attack_Num2", "Attack_Num4"
         ]
+    },
+    {
+        "Id":"Attack_Skill",
+        "Info" : "몬스터 공격 스킬(테스트)",
+        "LaboratoryType" : "Attack",
+        "Cost" : 1000,
+        "Effect":
+        {
+            "Value" : 100,
+            "ValueType" : "Sub",
+            "TargetType": "Monster",
+            "TargetStatus":"Skill"
+        },
+        "ParentsId":
+        [
+            "Attack_Num5", "Attack_Num3"
+        ]
     }
 ]

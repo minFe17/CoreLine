@@ -7,7 +7,7 @@ public class LaboratoryBuyButton : BaseButton
     {
         //돈있나없나 체크하고깎기
         EventManager.Instance.Invoke<LaboratoryData>("BuyLaboratory",LaboratoryManager.Instance.ChoiceLaboratory);
-
+        gameObject.SetActive(false);
     }
 
 }

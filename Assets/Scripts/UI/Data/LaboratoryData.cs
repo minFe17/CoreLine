@@ -12,7 +12,7 @@ public enum LaboratoryType
 [JsonConverter(typeof(StringEnumConverter))]
 public enum ValueType
 {
-    Add, Mul, Sub, Skill
+    Add, Mul, Sub
 }
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TargetType 
@@ -23,7 +23,8 @@ public enum TargetType
 [JsonConverter(typeof(StringEnumConverter))]
 public enum TargetStatus
 {
-    HealthPoint, Shield, AttackDamage, AttackSpeed, Critical, CriticalProbability
+    HealthPoint, Shield, AttackDamage, AttackSpeed, Critical, CriticalProbability, Heal,
+    SubTime, GetMoney, Skill
 }
 
 [System.Serializable]

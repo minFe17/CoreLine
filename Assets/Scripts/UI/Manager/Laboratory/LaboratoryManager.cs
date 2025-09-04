@@ -1,35 +1,15 @@
-using UnityEngine;
-using Utils;
 using System.Collections.Generic;
-using UnityEngine.Rendering;
 using System.Runtime.InteropServices;
 using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.Rendering;
+using Utils;
+using static UnityEngine.Rendering.DebugUI;
 
-public class LabData { }
-[System.Serializable]
-public class UnitLabData:LabData
-{
-    public Pair<ValueType, float> AttackDamage = new();
-    public Pair<ValueType, float> AttackSpeed = new();
-}
+
 
 [System.Serializable]
-public class KingLabData : LabData
-{
-    public Pair<ValueType, int> Heal = new();
-    public Pair<ValueType, int> Shield = new();
-}
-
-[System.Serializable]
-public class UtilityLabData : LabData
-{
-    public Pair<ValueType, float> GetMoney = new();
-    public Pair<ValueType, float> GetGem = new();
-    public Pair<ValueType, int> SubPlayTime = new();
-}
-
-[System.Serializable]
-public class UsingLaboratoryData : LabData
+public class UsingLaboratoryData
 {
     public KingLabData King = new();
     public UnitLabData Unit = new();
@@ -99,29 +79,23 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
     }
     private void SettingValue(ref LaboratoryData data)
     {
-        LabData labData = null;
+        if (data.Effect.TargetStatus == TargetStatus.Skill)
+        {
+            _usingLabData.UnlockedSkill.Add(data.Id);
+            return;
+        }
         switch (data.Effect.TargetType)
         {
             case TargetType.King:
-                labData = new KingLabData();
+                _usingLabData.King.ApplyEffect(data);
                 break;
-            case TargetType.Unit: 
-                labData = new UnitLabData();
-                break;
-            case TargetType.Monster:
+            case TargetType.Unit:
+                _usingLabData.Unit.ApplyEffect(data);
                 break;
             default:
-                labData = new UtilityLabData();
+                _usingLabData.Utility.ApplyEffect(data);
                 break;
         }
-        if (data.Effect.ValueType == ValueType.Skill)
-        {
-            //스킬넣어주기
-            return;
-        }
-
-        //여기짜기
-
     }
     
 }

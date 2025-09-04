@@ -6,6 +6,7 @@ using NUnit.Framework.Constraints;
 
 public class LaboratoryNodeManager : MonoBehaviour 
 {
+    private bool _isStart = true;
     private Vector3 _startPosition = new Vector3(0, 0,0);
     private Dictionary<LaboratoryType, PoolingManager> _poolingNodes = new Dictionary<LaboratoryType, PoolingManager>();
     private Dictionary<LaboratoryType, PoolingManager> _poolingLines = new Dictionary<LaboratoryType, PoolingManager>();
@@ -13,13 +14,17 @@ public class LaboratoryNodeManager : MonoBehaviour
     private Dictionary<LaboratoryType,TopologicalSorter<LaboratoryNode>> _sorter = new();
     private List<LineController> _lines = new List<LineController>();
 
-    private void Start()
+    private void OnEnable()
     {
+        //이거 왜 Start에서 하면 오류생기는지 모르겠네
+        if (!_isStart) return;
         CreateNodes();
         SpawnNodes();
         SettingPosition();
         UpdateLine();
+        _isStart = false;
     }
+
     private void UpdateLine()
     {
         foreach(var line in _lines)
