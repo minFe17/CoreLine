@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 5957591340127595148}
   - component: {fileID: 8923165808409025291}
   - component: {fileID: 2190581943768980191}
+  - component: {fileID: 5564121920629882269}
+  - component: {fileID: -9096782702035039855}
   m_Layer: 3
   m_Name: Golem
   m_TagString: Monster
@@ -214,3 +216,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2775b95fe0f25a04f847745578427afc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5564121920629882269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8472593775564949861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b66af5bbf3592498200ba602b2bb14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHp: 100
+--- !u!114 &-9096782702035039855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8472593775564949861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca4a10ad22aa0774c9024920b86e0afb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelTag: BarPanel
+  _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
+  _screenOffset: {x: 0, y: 1.2}
