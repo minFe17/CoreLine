@@ -4,12 +4,8 @@ using Utils;
 
 public class Unit : MonoBehaviour
 {
-    private List<Monster> _currentMonsters = new List<Monster>();
-    private List<Monster> _orderedMonsters = new List<Monster>();
-
-    Vector3 _leftDirection = new Vector3(0, 180f, 0f);
-    HpBar _hpBar;
-    int _monsterLayer;
+    List<Monster> _currentMonsters = new List<Monster>();
+    List<Monster> _orderedMonsters = new List<Monster>();
 
     protected UnitState _unitStateData;
     protected Animator _animator;
@@ -17,6 +13,14 @@ public class Unit : MonoBehaviour
 
     protected int _currentHp;
     protected bool _isDie;
+
+
+    Vector3 _leftDirection = new Vector3(0, 180f, 0f);
+    HpBar _hpBar;
+    int _monsterLayer;
+    bool _isStopAttack;
+
+    
 
     public IReadOnlyList<Monster> TargetList { get => _orderedMonsters; }
     public Animator Animator { get => _animator; }
@@ -26,6 +30,7 @@ public class Unit : MonoBehaviour
     public UnitUI UnitUI { get; set; }
     public bool IsDie { get => _isDie; }
     public int CurrentHp { get => _currentHp; }
+    public bool IsStopAttack { get=> _isStopAttack; }
 
     void Start()
     {
@@ -94,6 +99,11 @@ public class Unit : MonoBehaviour
             transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 
+    void ReturnAttack()
+    {
+        _isStopAttack = false;
+    }
+
     void RestorationAttackDamage()
     {
         _unitStateData.RestorationAttackDamage();
@@ -122,9 +132,7 @@ public class Unit : MonoBehaviour
             _animator.SetTrigger("doDie");
         }
         else
-        {
             _animator.SetTrigger("doHit");
-        }
     }
 
     public void UnregisterCell()
@@ -137,6 +145,12 @@ public class Unit : MonoBehaviour
     {
         _unitStateData.AddAttackDamage(damage);
         Invoke("RestorationAttackDamage", time);
+    }
+
+    public void StopAttack(float time)
+    {
+        _isStopAttack = true;
+        Invoke("ReturnAttack", time);
     }
 
     public void Heal(int amount)

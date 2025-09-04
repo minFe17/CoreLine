@@ -6,7 +6,7 @@ public class DwarfAttack : AttackBase
 
     public override void Attack()
     {
-        if (_unit.TargetList[0] == null)
+        if (_unit.TargetList.Count == 0)
             return;
         _unit.TargetList[0].TakeDamage(_unit.UnitStateData.AttackDamage);
         _attackEffect.Play();

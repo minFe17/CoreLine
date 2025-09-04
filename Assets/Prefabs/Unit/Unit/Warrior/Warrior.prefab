@@ -2324,7 +2324,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95a3552b9aa020646927d05a168ee7af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _attackEffectList: {fileID: 7825629314125407196}
+  _attackEffect: {fileID: 7825629314125407196}
 --- !u!70 &4089768927122377062
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

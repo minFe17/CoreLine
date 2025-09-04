@@ -34,6 +34,8 @@ public abstract class AttackBase : MonoBehaviour
 
     void AttackTimer()
     {
+        if (_unit.IsStopAttack)
+            return;
         if (_unit.IsDie)
             return;
         _attackTimer += Time.deltaTime;

@@ -57,7 +57,7 @@ public class Bullet : MonoBehaviour
             MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
     }
 
-    protected void Remove()
+    public void Remove()
     {
         MonoSingleton<ObjectPoolManager>.Instance.Push(_bulletType, gameObject);
     }

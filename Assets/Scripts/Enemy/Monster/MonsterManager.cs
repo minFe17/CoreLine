@@ -27,8 +27,9 @@ public class MonsterManager : MonoBehaviour
     private readonly Dictionary<MonsterMover, (bool allowWalls, bool allowTowers)> _policy = new();
     private readonly Dictionary<MonsterMover, Stack<MonsterMover>> _pool = new();
 
-
     private Coroutine _scheduleCo;
+
+    public List<MonsterMover> Monsters { get => _monsters; }
 
     [Serializable]
     public class CsvSpawnRow
