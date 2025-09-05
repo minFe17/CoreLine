@@ -5,452 +5,64 @@ using Utils;
 
 public partial class SkillManager : MonoSingleton<SkillManager>
 {
-    // 타입 정의
+    // ===== 데이터/선택 =====
+    [Header("데이터/선택")]
+    [SerializeField] private LaboratoryData _database; // 필요 시 사용
+    [SerializeField] private int _maxSlots = 3;
+    [SerializeField] public List<SelectedSkill> _loadout = new List<SelectedSkill>();
+
+    [Header("설정")]
+    [SerializeField] private Transform _unitRoot;      // 선택: 유닛 부모(없어도 무방)
+    [SerializeField] private string _monsterTag = "Monster";
+
+    // 핸들러 레지스트리
+    private Dictionary<string, ITowerSkillHandler> _towerHandlers = new Dictionary<string, ITowerSkillHandler>();
+    private Dictionary<string, IMonsterSkillHandler> _monsterHandlers = new Dictionary<string, IMonsterSkillHandler>();
+    private Dictionary<TargetType, IIncomeSkillHandler> _incomeHandlers = new Dictionary<TargetType, IIncomeSkillHandler>();
+    private Dictionary<string, ISkillTargetingSpecProvider> _targetingProviders = new Dictionary<string, ISkillTargetingSpecProvider>();
+
+    // 선택: 몬스터 기본 처리자(등록 없음 시)
+    private IMonsterSkillHandler _defaultMonsterHandler;
+
+    public event Action OnLoadoutChanged;
+
+    // ===== SelectedSkill (데이터 최소 필드만) =====
     public struct SelectedSkill
     {
         public string Id;
         public int Cost;
-        public Effect Effect;
+        public Effect Effect; // Value, ValueType, TargetType, TargetStatus
 
-        public SelectedSkill(LaboratoryData def)
+        public SelectedSkill(LaboratoryData data)
         {
-            Id = def.Id;
-            Cost = def.Cost;
-            Effect = def.Effect;
+            Id = data.Id;
+            Cost = data.Cost;
+            Effect = data.Effect;
         }
     }
 
-    [Flags]
-    public enum TargetKind
-    {
-        Towers = 1 << 0,
-        Monsters = 1 << 1,
-        Both = Towers | Monsters
-    }
-
-    // 이벤트
-    public event Action OnLoadoutChanged;
-    public event Action<IReadOnlyList<string>> OnLoadoutIdsChanged;
-    public event Action OnDatabaseChanged;
-    public event Action<IReadOnlyList<string>> OnUnlockedSkillIdsChanged;
-
-    // 필드
-    private List<LaboratoryData> _databaseList = new List<LaboratoryData>();
-    private bool _autoLoadFromDataManager = true;
-    private int _maxSlots = 3;
-    private readonly List<SelectedSkill> _loadout = new List<SelectedSkill>();
-
-    private Transform _unitRoot = null;
-    private string _monsterTag = "Monster";
-
-    private readonly Dictionary<string, LaboratoryData> _defsById = new Dictionary<string, LaboratoryData>();
-    private readonly Dictionary<string, ITowerSkillHandler> _towerHandlers = new Dictionary<string, ITowerSkillHandler>();
-    private readonly Dictionary<string, IMonsterSkillHandler> _monsterHandlers = new Dictionary<string, IMonsterSkillHandler>();
-    private readonly Dictionary<TargetType, IIncomeSkillHandler> _incomeHandlers = new Dictionary<TargetType, IIncomeSkillHandler>();
-    private readonly Dictionary<string, ISkillTargetingSpecProvider> _targetingProviders = new Dictionary<string, ISkillTargetingSpecProvider>();
-
-    private IMonsterSkillHandler _defaultMonsterHandler = null;
-
-    private readonly List<string> _loadoutIdsCache = new List<string>();
-    private readonly List<string> _unlockedIdsCache = new List<string>();
-
-    // 공개 프로퍼티
-    public int MaxSlots => _maxSlots;
-    public IReadOnlyList<SelectedSkill> Loadout => _loadout;
-    public IReadOnlyList<LaboratoryData> Database => _databaseList;
-
-    // 공개 설정 API
-    public void Configure(int maxSlots = 3, bool autoLoadFromDataManager = true, string monsterTag = "Monster", Transform unitRoot = null)
-    {
-        _maxSlots = Mathf.Max(1, maxSlots);
-        _autoLoadFromDataManager = autoLoadFromDataManager;
-        _monsterTag = string.IsNullOrEmpty(monsterTag) ? "Monster" : monsterTag;
-        _unitRoot = unitRoot;
-    }
-
-    public void SetDatabase(List<LaboratoryData> newList, bool rebuildIndex = true, bool raiseEvent = true)
-    {
-        _databaseList = FilterUnlocked(newList);
-        if (rebuildIndex)
-        {
-            RebuildDefinitionIndex();
-            RebuildUnlockedIdsCache();
-        }
-        if (raiseEvent)
-        {
-            OnDatabaseChanged?.Invoke();
-            OnUnlockedSkillIdsChanged?.Invoke(_unlockedIdsCache.AsReadOnly());
-        }
-    }
-
-    public IReadOnlyList<LaboratoryData> GetAllSkillDefs()
-    {
-        return _databaseList ?? (IReadOnlyList<LaboratoryData>)Array.Empty<LaboratoryData>();
-    }
-
-    public List<LaboratoryData> GetSkillDefsByType(LaboratoryType type)
-    {
-        List<LaboratoryData> list = new List<LaboratoryData>();
-        if (_databaseList == null) return list;
-        for (int i = 0; i < _databaseList.Count; i++)
-        {
-            LaboratoryData def = _databaseList[i];
-            if (def.LaboratoryType == type) list.Add(def);
-        }
-        return list;
-    }
-
-    public bool TryGetSkillDef(string id, out LaboratoryData def)
-    {
-        return _defsById.TryGetValue(id, out def);
-    }
-
-    // 공개 로드아웃 API (ID 기반)
-    public string[] GetLoadoutIdsSnapshot()
-    {
-        string[] arr = new string[_loadout.Count];
-        for (int i = 0; i < _loadout.Count; i++) arr[i] = _loadout[i].Id;
-        return arr;
-    }
-
-    public void SetLoadoutByIds(IEnumerable<string> ids, bool clearExisting = true, bool enforceUnique = true)
-    {
-        if (ids == null) return;
-        if (clearExisting) _loadout.Clear();
-
-        HashSet<string> seen = enforceUnique ? new HashSet<string>() : null;
-        int added = 0;
-
-        foreach (string id in ids)
-        {
-            if (string.IsNullOrEmpty(id)) continue;
-            if (_loadout.Count >= _maxSlots) break;
-
-            if (enforceUnique)
-            {
-                if (seen.Contains(id)) continue;
-                if (_loadout.Exists(s => s.Id == id)) { seen.Add(id); continue; }
-                seen.Add(id);
-            }
-
-            LaboratoryData def;
-            if (!TryGetSkillDef(id, out def)) continue;
-
-            _loadout.Add(new SelectedSkill(def));
-            added++;
-        }
-
-        if (added > 0) RaiseLoadoutChanged();
-    }
-
-    public bool ContainsInLoadout(string id)
-    {
-        if (string.IsNullOrEmpty(id)) return false;
-        return _loadout.Exists(s => s.Id == id);
-    }
-
-    public bool TryGetLoadoutIdAt(int slotIndex, out string id)
-    {
-        id = null;
-        if (slotIndex < 0 || slotIndex >= _loadout.Count) return false;
-        id = _loadout[slotIndex].Id;
-        return true;
-    }
-
-    public bool AddToLoadout(LaboratoryData def)
-    {
-        if (_loadout.Count >= _maxSlots)
-        {
-            Debug.LogWarning("[SkillManager] Loadout is full");
-            return false;
-        }
-
-        _loadout.Add(new SelectedSkill(def));
-        RaiseLoadoutChanged();
-        return true;
-    }
-
-    public bool AddToLoadoutById(string id)
-    {
-        LaboratoryData def;
-        if (!TryGetSkillDef(id, out def))
-        {
-            Debug.LogWarning($"[SkillManager] AddToLoadoutById failed. Unknown id={id}");
-            return false;
-        }
-        return AddToLoadout(def);
-    }
-
-    public bool RemoveFromLoadoutById(string id, bool removeAll = false)
-    {
-        if (string.IsNullOrEmpty(id) || _loadout.Count == 0) return false;
-
-        int removed = 0;
-        if (removeAll) removed = _loadout.RemoveAll(s => s.Id == id);
-        else
-        {
-            int idx = _loadout.FindIndex(s => s.Id == id);
-            if (idx >= 0) { _loadout.RemoveAt(idx); removed = 1; }
-        }
-
-        if (removed > 0)
-        {
-            RaiseLoadoutChanged();
-            return true;
-        }
-        return false;
-    }
-
-    public bool ToggleLoadout(LaboratoryData def)
-    {
-        int idx = _loadout.FindIndex(s => s.Id == def.Id);
-        if (idx >= 0)
-        {
-            _loadout.RemoveAt(idx);
-            RaiseLoadoutChanged();
-            return true;
-        }
-
-        if (_loadout.Count >= _maxSlots)
-        {
-            Debug.LogWarning("[SkillManager] Loadout is full");
-            return false;
-        }
-
-        _loadout.Add(new SelectedSkill(def));
-        RaiseLoadoutChanged();
-        return true;
-    }
-
-    public SelectedSkill GetSelectedSkillBySlotIndex(int slotIndex)
-    {
-        if (slotIndex < 0 || slotIndex >= _loadout.Count) throw new IndexOutOfRangeException();
-        return _loadout[slotIndex];
-    }
-
-    // 공개 타게팅 스펙
-    public bool TryGetTargetingSpec(SelectedSkill skill, out SkillTargetingSpec spec)
-    {
-        ISkillTargetingSpecProvider provider;
-        if (_targetingProviders.TryGetValue(skill.Id, out provider))
-        {
-            spec = provider.GetSpec(skill);
-            return true;
-        }
-
-        spec = new SkillTargetingSpec
-        {
-            Mode = TargetingMode.Point,
-            HalfSizeCells = 0,
-            RadiusWorld = 0f,
-            ValidTargets = TargetKind.Both
-        };
-        return false;
-    }
-
-    // 공개 스킬 사용 API
-    public void UseSkill(int slotIndex, GameObject explicitTarget = null)
-    {
-        if (PauseControl.IsPaused) return;
-
-        if (slotIndex < 0 || slotIndex >= _loadout.Count)
-        {
-            Debug.LogWarning("[SkillManager] Invalid slot index");
-            return;
-        }
-
-        SelectedSkill skill = _loadout[slotIndex];
-
-        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
-        {
-            Debug.LogWarning("[SkillManager] Not enough skill cost");
-            return;
-        }
-
-        if (TryApplyIncomeReward(skill)) return;
-
-        ApplySkillEffect(skill, explicitTarget);
-    }
-
-    public void UseSkillAreaRectWorld(int slotIndex, Vector3 centerWorld, int halfSizeCells, TargetKind targetKind)
-    {
-        if (PauseControl.IsPaused) return;
-
-        if (slotIndex < 0 || slotIndex >= _loadout.Count)
-        {
-            Debug.LogWarning("[SkillManager] Invalid slot index");
-            return;
-        }
-
-        SelectedSkill skill = _loadout[slotIndex];
-
-        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
-        {
-            Debug.LogWarning("[SkillManager] Not enough skill cost");
-            return;
-        }
-
-        if (TryApplyIncomeReward(skill)) return;
-
-        centerWorld.z = 0f;
-        List<GameObject> targets = AcquireTargetsRectWorld(centerWorld, halfSizeCells, targetKind);
-        ApplyEffectToTargets(skill, targets);
-    }
-
-    public void UseSkillAreaRadiusWorld(int slotIndex, Vector3 centerWorld, float radiusWorld, TargetKind targetKind)
-    {
-        if (PauseControl.IsPaused) return;
-
-        if (slotIndex < 0 || slotIndex >= _loadout.Count)
-        {
-            Debug.LogWarning("[SkillManager] Invalid slot index");
-            return;
-        }
-
-        SelectedSkill skill = _loadout[slotIndex];
-
-        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
-        {
-            Debug.LogWarning("[SkillManager] Not enough skill cost");
-            return;
-        }
-
-        if (TryApplyIncomeReward(skill)) return;
-
-        centerWorld.z = 0f;
-        List<GameObject> targets = AcquireTargetsRadiusWorld(centerWorld, radiusWorld, targetKind);
-        ApplyEffectToTargets(skill, targets);
-    }
-
-    // 공개 해금 API
-    public bool UnlockSkillById(string id, bool raiseEvent = true)
-    {
-        if (string.IsNullOrEmpty(id)) return false;
-
-        try
-        {
-            var gameData = DataManager.Instance != null ? DataManager.Instance.GameData : null;
-            if (gameData == null) return false;
-
-            if (gameData.UnlockedLaboratoryId == null)
-                gameData.UnlockedLaboratoryId = new List<string>();
-
-            if (gameData.UnlockedLaboratoryId.Contains(id))
-                return false;
-
-            gameData.UnlockedLaboratoryId.Add(id);
-        }
-        catch { return false; }
-
-        RefreshUnlockedDatabaseFromDataManager(raiseEvent);
-        return true;
-    }
-
-    public IReadOnlyList<string> GetUnlockedSkillIds()
-    {
-        return _unlockedIdsCache.AsReadOnly();
-    }
-
-    public void RefreshUnlockedDatabaseFromDataManager(bool raiseEvent = true)
-    {
-        List<LaboratoryData> src = null;
-        try { src = DataManager.Instance.LaboratoryDatas; } catch { }
-
-        _databaseList = FilterUnlocked(src);
-        RebuildDefinitionIndex();
-        RebuildUnlockedIdsCache();
-
-        if (raiseEvent)
-        {
-            OnDatabaseChanged?.Invoke();
-            OnUnlockedSkillIdsChanged?.Invoke(_unlockedIdsCache.AsReadOnly());
-        }
-    }
-
-    // Unity 생명주기
+    // ===== 로드/등록 =====
     private void Awake()
     {
-        if (_autoLoadFromDataManager)
-        {
-            List<LaboratoryData> src = null;
-            try { src = DataManager.Instance.LaboratoryDatas; } catch { }
-            _databaseList = FilterUnlocked(src);
-        }
-        else
-        {
-            _databaseList = FilterUnlocked(_databaseList);
-        }
-
-        RebuildDefinitionIndex();
-        RebuildUnlockedIdsCache();
-
-        OnDatabaseChanged?.Invoke();
-        OnUnlockedSkillIdsChanged?.Invoke(_unlockedIdsCache.AsReadOnly());
-
         RegisterBuiltinSkills();
     }
 
-    // 내부 헬퍼
-    private void LoadDatabaseFromDataManager()
-    {
-        try
-        {
-            List<LaboratoryData> src = DataManager.Instance != null ? DataManager.Instance.LaboratoryDatas : null;
-            if (src != null) _databaseList = new List<LaboratoryData>(src);
-        }
-        catch { }
-    }
-
-    private void RebuildDefinitionIndex()
-    {
-        _defsById.Clear();
-        if (_databaseList == null) return;
-
-        for (int i = 0; i < _databaseList.Count; i++)
-        {
-            LaboratoryData def = _databaseList[i];
-            if (string.IsNullOrEmpty(def.Id))
-            {
-                Debug.LogWarning($"[SkillManager] LaboratoryData[{i}] has empty Id. Skipped.");
-                continue;
-            }
-            _defsById[def.Id] = def;
-        }
-    }
-
-    private void RebuildUnlockedIdsCache()
-    {
-        _unlockedIdsCache.Clear();
-        if (_databaseList == null) return;
-        for (int i = 0; i < _databaseList.Count; i++)
-        {
-            string id = _databaseList[i].Id;
-            if (!string.IsNullOrEmpty(id)) _unlockedIdsCache.Add(id);
-        }
-    }
-
-    private void RaiseLoadoutChanged()
-    {
-        OnLoadoutChanged?.Invoke();
-
-        _loadoutIdsCache.Clear();
-        for (int i = 0; i < _loadout.Count; i++)
-            _loadoutIdsCache.Add(_loadout[i].Id);
-
-        OnLoadoutIdsChanged?.Invoke(_loadoutIdsCache.AsReadOnly());
-    }
-
-    // 내부 레지스트리
     private void RegisterBuiltinSkills()
     {
+        // RangeHeal: 효과 + 타게팅 제공을 하나의 인스턴스로
         RangeHealSkill rangeHeal = new RangeHealSkill();
         RegisterTowerHandler(rangeHeal);
         RegisterTargetingProvider(rangeHeal);
 
-        // _defaultMonsterHandler = new DefaultMonsterDamageSkill();
+        // 몬스터용 스킬 (기본 처리자)
+        //defaultMonsterHandler = new DefaultMonsterDamageSkill();
+        // 예: 특수 몬스터 스킬 추가하려면 아래처럼 등록
+        // RegisterMonsterHandler(new RangeNukeSkill());
 
+        // 인컴(보상) 스킬
         RegisterIncomeHandler(new IncomeMoneyHandler());
         RegisterIncomeHandler(new IncomeSkillHandler());
+
     }
 
     private void RegisterTowerHandler(ITowerSkillHandler handler)
@@ -477,25 +89,130 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         _targetingProviders[provider.Id] = provider;
     }
 
-    // 내부 디스패치
-    private bool TryApplyIncomeReward(SelectedSkill selectedSkill)
+    // ===== 외부 API =====
+    public bool AddToLoadout(LaboratoryData def)
     {
-        IIncomeSkillHandler handler;
-        if (_incomeHandlers.TryGetValue(selectedSkill.Effect.TargetType, out handler))
+        if (_loadout.Count >= _maxSlots) { Debug.LogWarning("[SkillManager] 로드아웃 가득 참"); return false; }
+        if (_loadout.Exists(s => s.Id == def.Id))
+            return false;
+
+        _loadout.Add(new SelectedSkill(def));
+        OnLoadoutChanged?.Invoke();
+        return true;
+    }
+    public bool RemoveAtLoadout(LaboratoryData def)
+    {
+        if (_loadout.Count == 0)  return false;
+
+        int removed = _loadout.RemoveAll(s => s.Id == def.Id);
+        if (removed <= 0) return false;
+
+        OnLoadoutChanged?.Invoke();
+        return true;
+    }
+
+    public SelectedSkill GetSelectedSkillBySlotIndex(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) throw new IndexOutOfRangeException();
+        return _loadout[slotIndex];
+    }
+    public string[] GetLoadoutIds()
+    {
+        var arr = new string[_loadout.Count];
+        for (int i = 0; i < _loadout.Count; i++) arr[i] = _loadout[i].Id;
+        return arr;
+    }
+
+    public bool TryGetTargetingSpec(SelectedSkill skill, out SkillTargetingSpec spec)
+    {
+        ISkillTargetingSpecProvider provider;
+        if (_targetingProviders.TryGetValue(skill.Id, out provider))
         {
-            handler.Apply(selectedSkill);
+            spec = provider.GetSpec(skill);
             return true;
         }
+        // 기본값: 포인트 타겟
+        spec = new SkillTargetingSpec
+        {
+            Mode = TargetingMode.Point,
+            HalfSizeCells = 0,
+            RadiusWorld = 0f,
+            ValidTargets = TargetKind.Both
+        };
         return false;
     }
 
+    // ===== 스킬 사용(단일/범위) =====
+    public void UseSkill(int slotIndex, GameObject explicitTarget = null)
+    {
+        if (PauseControl.IsPaused) return;
+
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
+        SelectedSkill skill = _loadout[slotIndex];
+
+        // 비용: 스킬 지갑
+        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
+        {
+            Debug.LogWarning("[SkillManager] 스킬 코스트 부족");
+            return;
+        }
+
+        // 인컴(보상) 타입이면 즉시 지급
+        if (TryApplyIncomeReward(skill)) return;
+
+        // 실제 효과 적용
+        ApplySkillEffect(skill, explicitTarget);
+    }
+
+    public void UseSkillAreaRectWorld(int slotIndex, Vector3 centerWorld, int halfSizeCells, TargetKind targetKind)
+    {
+        if (PauseControl.IsPaused) return;
+
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
+        SelectedSkill skill = _loadout[slotIndex];
+
+        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
+        {
+            Debug.LogWarning("[SkillManager] 스킬 코스트 부족");
+            return;
+        }
+
+        if (TryApplyIncomeReward(skill)) return;
+
+        centerWorld.z = 0f;
+        List<GameObject> targets = AcquireTargetsRectWorld(centerWorld, halfSizeCells, targetKind);
+        ApplyEffectToTargets(skill, targets);
+    }
+
+    public void UseSkillAreaRadiusWorld(int slotIndex, Vector3 centerWorld, float radiusWorld, TargetKind targetKind)
+    {
+        if (PauseControl.IsPaused) return;
+
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] 잘못된 슬롯 인덱스"); return; }
+        SelectedSkill skill = _loadout[slotIndex];
+
+        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
+        {
+            Debug.LogWarning("[SkillManager] 스킬 코스트 부족");
+            return;
+        }
+
+        if (TryApplyIncomeReward(skill)) return;
+
+        centerWorld.z = 0f;
+        List<GameObject> targets = AcquireTargetsRadiusWorld(centerWorld, radiusWorld, targetKind);
+        ApplyEffectToTargets(skill, targets);
+    }
+
+    // ===== 디스패치 =====
     private void ApplySkillEffect(SelectedSkill selectedSkill, GameObject explicitTarget)
     {
         if (selectedSkill.Effect.TargetType != TargetType.Unit) return;
+
         if (explicitTarget == null) return;
 
-        MapManager map = MapManager.Instance;
-        if (map == null || !map.IsReady) return;
+        MapManager mapManager = MapManager.Instance;
+        if (mapManager == null || !mapManager.IsReady) return;
 
         if (explicitTarget.CompareTag(_monsterTag))
         {
@@ -503,9 +220,9 @@ public partial class SkillManager : MonoSingleton<SkillManager>
             return;
         }
 
-        Vector3Int cell = map.WorldToCell(explicitTarget.transform.position);
+        Vector3Int cell = mapManager.WorldToCell(explicitTarget.transform.position);
         GameObject towerAtCell;
-        if (map.TryGetTowerAt(cell, out towerAtCell) && towerAtCell == explicitTarget)
+        if (mapManager.TryGetTowerAt(cell, out towerAtCell) && towerAtCell == explicitTarget)
         {
             ApplyToTowerObject(selectedSkill, explicitTarget);
         }
@@ -517,16 +234,16 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
         for (int i = 0; i < targetObjects.Count; i++)
         {
-            GameObject obj = targetObjects[i];
-            if (obj == null || !obj.activeInHierarchy) continue;
+            GameObject targetObject = targetObjects[i];
+            if (targetObject == null || !targetObject.activeInHierarchy) continue;
 
-            if (obj.CompareTag(_monsterTag))
+            if (targetObject.CompareTag(_monsterTag))
             {
-                ApplyToMonsterObject(selectedSkill, obj);
+                ApplyToMonsterObject(selectedSkill, targetObject);
             }
             else
             {
-                ApplyToTowerObject(selectedSkill, obj);
+                ApplyToTowerObject(selectedSkill, targetObject);
             }
         }
     }
@@ -555,41 +272,61 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         }
     }
 
-    // 내부 타겟 수집
+    private bool TryApplyIncomeReward(SelectedSkill selectedSkill)
+    {
+        IIncomeSkillHandler handler;
+        if (_incomeHandlers.TryGetValue(selectedSkill.Effect.TargetType, out handler))
+        {
+            handler.Apply(selectedSkill);
+            return true;
+        }
+        return false;
+    }
+
+    // ===== 타겟 수집 유틸 (당신 프로젝트의 기존 버전 재사용) =====
+
+    [System.Flags]
+    public enum TargetKind
+    {
+        Towers = 1 << 0,
+        Monsters = 1 << 1,
+        Both = Towers | Monsters
+    }
+
     private List<GameObject> AcquireTargetsRectWorld(Vector3 worldCenter, int halfSizeCells, TargetKind targetKind)
     {
-        MapManager map = MapManager.Instance;
-        if (map == null || !map.IsReady) return new List<GameObject>();
-        worldCenter.z = 0f;
-        Vector3Int centerCell = map.WorldToCell(worldCenter);
+        MapManager mapManager = MapManager.Instance;
+        if (mapManager == null || !mapManager.IsReady) return new List<GameObject>();
+        Vector3 worldCenter2D = worldCenter; worldCenter2D.z = 0f;
+        Vector3Int centerCell = mapManager.WorldToCell(worldCenter2D);
         return AcquireTargetsRectCells(centerCell, halfSizeCells, targetKind);
     }
 
     private List<GameObject> AcquireTargetsRectCells(Vector3Int centerCell, int halfSizeCells, TargetKind targetKind)
     {
-        MapManager map = MapManager.Instance;
-        List<GameObject> results = new List<GameObject>(32);
-        if (map == null || !map.IsReady) return results;
+        MapManager mapManager = MapManager.Instance;
+        List<GameObject> resultObjects = new List<GameObject>(32);
+        if (mapManager == null || !mapManager.IsReady) return resultObjects;
 
-        HashSet<GameObject> uniq = new HashSet<GameObject>();
+        HashSet<GameObject> uniqueObjects = new HashSet<GameObject>();
 
-        BoundsInt b = map.GetNavBounds();
-        int minX = Mathf.Max(b.xMin, centerCell.x - halfSizeCells);
-        int maxX = Mathf.Min(b.xMax - 1, centerCell.x + halfSizeCells);
-        int minY = Mathf.Max(b.yMin, centerCell.y - halfSizeCells);
-        int maxY = Mathf.Min(b.yMax - 1, centerCell.y + halfSizeCells);
+        BoundsInt navigationBounds = mapManager.GetNavBounds();
+        int minCellX = Mathf.Max(navigationBounds.xMin, centerCell.x - halfSizeCells);
+        int maxCellX = Mathf.Min(navigationBounds.xMax - 1, centerCell.x + halfSizeCells);
+        int minCellY = Mathf.Max(navigationBounds.yMin, centerCell.y - halfSizeCells);
+        int maxCellY = Mathf.Min(navigationBounds.yMax - 1, centerCell.y + halfSizeCells);
 
         if ((targetKind & TargetKind.Towers) != 0)
         {
-            for (int y = minY; y <= maxY; y++)
+            for (int cellY = minCellY; cellY <= maxCellY; cellY++)
             {
-                for (int x = minX; x <= maxX; x++)
+                for (int cellX = minCellX; cellX <= maxCellX; cellX++)
                 {
-                    Vector3Int cell = new Vector3Int(x, y, 0);
-                    GameObject tower;
-                    if (map.TryGetTowerAt(cell, out tower) && tower != null && tower.activeInHierarchy)
+                    Vector3Int cell = new Vector3Int(cellX, cellY, 0);
+                    GameObject towerObject;
+                    if (mapManager.TryGetTowerAt(cell, out towerObject) && towerObject != null && towerObject.activeInHierarchy)
                     {
-                        if (uniq.Add(tower)) results.Add(tower);
+                        if (uniqueObjects.Add(towerObject)) resultObjects.Add(towerObject);
                     }
                 }
             }
@@ -597,103 +334,63 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 
         if ((targetKind & TargetKind.Monsters) != 0)
         {
-            GameObject[] monsters = GameObject.FindGameObjectsWithTag(_monsterTag);
-            for (int i = 0; i < monsters.Length; i++)
+            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(_monsterTag);
+            foreach (GameObject monsterObject in monsterObjects)
             {
-                GameObject m = monsters[i];
-                if (m == null || !m.activeInHierarchy) continue;
-                Vector3Int c = map.WorldToCell(m.transform.position);
-                if (c.x < minX || c.x > maxX || c.y < minY || c.y > maxY) continue;
-                if (uniq.Add(m)) results.Add(m);
+                if (monsterObject == null || !monsterObject.activeInHierarchy) continue;
+                Vector3Int monsterCell = mapManager.WorldToCell(monsterObject.transform.position);
+                if (monsterCell.x < minCellX || monsterCell.x > maxCellX || monsterCell.y < minCellY || monsterCell.y > maxCellY) continue;
+                if (uniqueObjects.Add(monsterObject)) resultObjects.Add(monsterObject);
             }
         }
 
-        return results;
+        return resultObjects;
     }
 
     private List<GameObject> AcquireTargetsRadiusWorld(Vector3 worldCenter, float radiusWorld, TargetKind targetKind)
     {
-        MapManager map = MapManager.Instance;
-        List<GameObject> results = new List<GameObject>(32);
-        if (map == null || !map.IsReady) return results;
+        MapManager mapManager = MapManager.Instance;
+        List<GameObject> resultObjects = new List<GameObject>(32);
+        if (mapManager == null || !mapManager.IsReady) return resultObjects;
 
-        worldCenter.z = 0f;
-        float r2 = radiusWorld * radiusWorld;
-        HashSet<GameObject> uniq = new HashSet<GameObject>();
+        Vector3 worldCenter2D = worldCenter; worldCenter2D.z = 0f;
+        float radiusSquared = radiusWorld * radiusWorld;
+        HashSet<GameObject> uniqueObjects = new HashSet<GameObject>();
 
-        Vector3Int originCell, sizeCells;
-        Vector3 cellSize;
-        map.GetNavFrame(out originCell, out sizeCells, out cellSize);
+        Vector3Int originCell; Vector3Int sizeCells; Vector3 cellSize;
+        mapManager.GetNavFrame(out originCell, out sizeCells, out cellSize);
 
         float cellStep = Mathf.Max(Mathf.Abs(cellSize.x), Mathf.Abs(cellSize.y));
-        int half = Mathf.Max(0, Mathf.CeilToInt(radiusWorld / Mathf.Max(cellStep, 0.0001f)));
+        int halfSizeCells = Mathf.Max(0, Mathf.CeilToInt(radiusWorld / Mathf.Max(cellStep, 0.0001f)));
 
-        Vector3Int centerCell = map.WorldToCell(worldCenter);
+        Vector3Int centerCell = mapManager.WorldToCell(worldCenter2D);
 
         if ((targetKind & TargetKind.Towers) != 0)
         {
-            List<GameObject> towerCandidates = AcquireTargetsRectCells(centerCell, half, TargetKind.Towers);
+            List<GameObject> towerCandidates = AcquireTargetsRectCells(centerCell, halfSizeCells, TargetKind.Towers);
             for (int i = 0; i < towerCandidates.Count; i++)
             {
-                GameObject t = towerCandidates[i];
-                if (t == null || !t.activeInHierarchy) continue;
-                if ((t.transform.position - worldCenter).sqrMagnitude <= r2 && uniq.Add(t))
-                    results.Add(t);
+                GameObject towerObject = towerCandidates[i];
+                if (towerObject == null || !towerObject.activeInHierarchy) continue;
+                float distanceSquared = (towerObject.transform.position - worldCenter2D).sqrMagnitude;
+                if (distanceSquared <= radiusSquared && uniqueObjects.Add(towerObject))
+                    resultObjects.Add(towerObject);
             }
         }
 
         if ((targetKind & TargetKind.Monsters) != 0)
         {
-            GameObject[] monsters = GameObject.FindGameObjectsWithTag(_monsterTag);
-            for (int i = 0; i < monsters.Length; i++)
+            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(_monsterTag);
+            for (int i = 0; i < monsterObjects.Length; i++)
             {
-                GameObject m = monsters[i];
-                if (m == null || !m.activeInHierarchy) continue;
-                if ((m.transform.position - worldCenter).sqrMagnitude <= r2 && uniq.Add(m))
-                    results.Add(m);
+                GameObject monsterObject = monsterObjects[i];
+                if (monsterObject == null || !monsterObject.activeInHierarchy) continue;
+                float distanceSquared = (monsterObject.transform.position - worldCenter2D).sqrMagnitude;
+                if (distanceSquared <= radiusSquared && uniqueObjects.Add(monsterObject))
+                    resultObjects.Add(monsterObject);
             }
         }
 
-        return results;
-    }
-
-    // 내부 해금 유틸
-    private static HashSet<string> GetUnlockedIdSet()
-    {
-        HashSet<string> set = new HashSet<string>();
-        try
-        {
-            if (DataManager.Instance != null && DataManager.Instance.GameData != null)
-            {
-                List<string> ids = DataManager.Instance.GameData.UnlockedLaboratoryId;
-                if (ids != null)
-                {
-                    for (int i = 0; i < ids.Count; i++)
-                    {
-                        string id = ids[i];
-                        if (!string.IsNullOrEmpty(id)) set.Add(id);
-                    }
-                }
-            }
-        }
-        catch { }
-        return set;
-    }
-
-    private static List<LaboratoryData> FilterUnlocked(List<LaboratoryData> source)
-    {
-        List<LaboratoryData> result = new List<LaboratoryData>();
-        if (source == null || source.Count == 0) return result;
-
-        HashSet<string> unlocked = GetUnlockedIdSet();
-        if (unlocked.Count == 0) return result;
-
-        for (int i = 0; i < source.Count; i++)
-        {
-            LaboratoryData d = source[i];
-            if (!string.IsNullOrEmpty(d.Id) && unlocked.Contains(d.Id))
-                result.Add(d);
-        }
-        return result;
+        return resultObjects;
     }
 }
