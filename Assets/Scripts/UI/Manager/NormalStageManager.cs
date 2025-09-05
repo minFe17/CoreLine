@@ -5,6 +5,7 @@ using Utils;
 
 public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 {
+    private NormalStageData _selectedStage; //선택된 스테이지 데이터
     // 진행/보상 갱신되면 UI가 이것을 구독해서 갱신하면 편함
     public event Action OnStageProgressChanged;
     public struct LastRun
@@ -16,7 +17,20 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     }
 
     private LastRun? _lastResult;
+
+    public NormalStageManager()
+    {
+        EventManager.Instance.Subscribe<NormalStageData>("SelectStage", SelectStage);
+        //EventManager로 여러 함수 작동
+    }
+
     public LastRun? LastResult => _lastResult;
+
+    //외부에서 접근 가능한 Get
+    public NormalStageData SelectedStage
+    {
+        get { return _selectedStage; }
+    } 
 
     public void SetLastResult(in NormalStageData stage, in StageEndSnapshot snap, int stars, in RewardResult reward)
     {
@@ -37,6 +51,10 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
                 met++;
         }
         return met;
+    }
+    private void SelectStage(NormalStageData data)
+    {
+        _selectedStage = data;
     }
 
     private bool IsConditionMet(in Condition c, in StageEndSnapshot s)
