@@ -71,6 +71,32 @@ public sealed class Monster : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            // 스킬로 이동속도 +2, 3초간
+            _mover.ApplySpeedModifier(MonsterMover.SpeedType.Skill, +2f, 3f);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            // 스킬로 이동속도 -2, 3초간
+            _mover.ApplySpeedModifier(MonsterMover.SpeedType.Skill, -2f, 3f);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            // 타일로 이동속도 -1, 5초간
+            _mover.ApplySpeedModifier(MonsterMover.SpeedType.Tile, -1f, 5f);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            // 보스로 이동속도 +3, 4초간
+            _mover.ApplySpeedModifier(MonsterMover.SpeedType.Boss, +3f, 4f);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            // 전체 속도 버프/디버프 제거
+            _mover.ClearAllSpeedBuff();
+        }
+
         bool isMoving = _mover != null && _mover.IsFollowingPath;
         if (_animator != null)
         {
@@ -80,6 +106,33 @@ public sealed class Monster : MonoBehaviour
             {
                 AnimatorStateInfo st = _animator.GetCurrentAnimatorStateInfo(0);
                 if (!st.IsName(_attackStateName)) { _attackLocked = false; }
+            }
+        }
+
+        if (_animator != null && _mover != null)
+        {
+            bool inAttack = false;
+            if (!_animator.IsInTransition(0))
+            {
+                AnimatorStateInfo stInfo = _animator.GetCurrentAnimatorStateInfo(0);
+                if (stInfo.IsName(_attackStateName))
+                {
+                    inAttack = true;
+                }
+            }
+
+            if (inAttack || !isMoving)
+            {
+                _animator.speed = 1.0f; 
+            }
+            else
+            {
+                float baseSpd = Mathf.Max(0.0001f, _mover.BaseMoveSpeed);
+                float curSpd = Mathf.Max(0.0001f, _mover.CurrentMoveSpeed);
+                float ratio = curSpd / baseSpd;
+
+                float clamped = Mathf.Clamp(ratio, 0.5f, 2.0f);
+                _animator.speed = clamped;
             }
         }
     }

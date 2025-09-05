@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 8479632299606697579}
   - component: {fileID: 4865067138427358555}
   - component: {fileID: 5915600854711595613}
+  - component: {fileID: -4323036268612981715}
   m_Layer: 3
   m_Name: BossDragon
   m_TagString: Untagged
@@ -191,8 +192,9 @@ MonoBehaviour:
   _thinkInterval: 0.25
   _weightedRandom: 1
   _skills:
-  - {fileID: 5915600854711595613}
   - {fileID: 4865067138427358555}
+  - {fileID: -4323036268612981715}
+  - {fileID: 5915600854711595613}
 --- !u!114 &4865067138427358555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,3 +239,28 @@ MonoBehaviour:
   _telegraphLifetime: 1.7
   _telegraphSortingLayer: Effects
   _telegraphOrderInLayer: 100
+--- !u!114 &-4323036268612981715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756996183535018546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e73e2b7217cdaa8499194f8e231ec8c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weight: 1
+  _cooldown: 6
+  _castTime: 0.6
+  _postDelay: 0.2
+  _stunDuration: 3
+  _stunVfxPrefab: {fileID: 570138280303093793, guid: 77db2aa7a4b200645aef2a9d8bdf29b1, type: 3}
+  _worldOffset: {x: 0, y: 0.98, z: 1}
+  _vfxLifetimeOverride: 0
+  _preVfxPrefab: {fileID: 7147989151765441838, guid: b127c4b73844ea7459ff40b751efd12d, type: 3}
+  _preDelay: 0.7
+  _preVfxLifetimeOverride: 0
+  _preWorldOffset: {x: 0, y: 3.35, z: 0}
+  _targetsToStun: 3

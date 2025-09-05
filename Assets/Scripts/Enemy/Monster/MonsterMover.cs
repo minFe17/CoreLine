@@ -32,6 +32,7 @@ public sealed class MonsterMover : MonoBehaviour
     public Vector2Int Cell { get; private set; }
     public bool IsFollowingPath { get; private set; }
     public float CurrentMoveSpeed { get { return _moveSpeed; } }
+    public float BaseMoveSpeed { get { return _baseMoveSpeed; } }
 
     private Vector2Int _dstCell;
     private bool _hasDestination;
@@ -45,11 +46,11 @@ public sealed class MonsterMover : MonoBehaviour
     private bool _allowTowers = false;
 
     
-    public enum SpeedModSource { Skill = 0, Tile = 1, Boss = 2 }
+    public enum SpeedType { Skill = 0, Tile = 1, Boss = 2 }
 
     private struct SpeedModifier
     {
-        public SpeedModSource Source;
+        public SpeedType Source;
         public float Delta;
         public float ExpiresAt;
     }
@@ -380,9 +381,7 @@ public sealed class MonsterMover : MonoBehaviour
         }
     }
 
-   
-    // 소스 3개, 같은 값이면 시간 갱신 / 다른 값이면 스택 추가
-    public void ApplySpeedModifier(SpeedModSource source, float deltaSpeed, float duration)
+    public void ApplySpeedModifier(SpeedType source, float deltaSpeed, float duration)
     {
         float now = Time.time;
         int idx = FindSameDeltaIndex(source, deltaSpeed, 0.0001f);
@@ -408,7 +407,7 @@ public sealed class MonsterMover : MonoBehaviour
         RecomputeMoveSpeed(now);
     }
 
-    public void ClearSpeedModifiersFromSource(SpeedModSource source)
+    public void ClearSpeedBuff(SpeedType source)
     {
         bool removed = false;
         for (int i = _speedMods.Count - 1; i >= 0; i--)
@@ -422,7 +421,7 @@ public sealed class MonsterMover : MonoBehaviour
         if (removed) { RecomputeMoveSpeed(Time.time); }
     }
 
-    public void ClearAllSpeedModifiers()
+    public void ClearAllSpeedBuff()
     {
         _speedMods.Clear();
         _moveSpeed = _baseMoveSpeed;
@@ -430,7 +429,6 @@ public sealed class MonsterMover : MonoBehaviour
 
     private void RecomputeMoveSpeed(float now)
     {
-        // 만료 제거
         for (int i = _speedMods.Count - 1; i >= 0; i--)
         {
             if (_speedMods[i].ExpiresAt <= now)
@@ -439,7 +437,6 @@ public sealed class MonsterMover : MonoBehaviour
             }
         }
 
-        // 합산
         float sum = 0f;
         for (int i = 0; i < _speedMods.Count; i++)
         {
@@ -449,7 +446,7 @@ public sealed class MonsterMover : MonoBehaviour
         _moveSpeed = Mathf.Max(_minMoveSpeed, _baseMoveSpeed + sum);
     }
 
-    private int FindSameDeltaIndex(SpeedModSource source, float delta, float eps)
+    private int FindSameDeltaIndex(SpeedType source, float delta, float eps)
     {
         for (int i = 0; i < _speedMods.Count; i++)
         {

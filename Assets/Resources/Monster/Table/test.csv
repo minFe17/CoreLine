@@ -1,4 +1,4 @@
 ﻿MonsterId,Prefab,Count,Interval,Delay
-Golem,Monster/Prefab/Golem,5,1.5,0
-Skeleton,Monster/Prefab/Skeleton,3,1.25,5
-Slime,Monster/Prefab/Slime,5,1.5,3
+Golem,Monster/Prefab/Golem,2,1.5,0
+Skeleton,Monster/Prefab/Skeleton,2,1.25,5
+Slime,Monster/Prefab/Slime,2,1.5,3
