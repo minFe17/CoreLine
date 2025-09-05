@@ -138,6 +138,51 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         }
         return AddToLoadout(def);
     }
+    public bool RemoveFromLoadoutById(string id, bool removeAll = false)
+    {
+        if (string.IsNullOrEmpty(id) || _loadout.Count == 0) return false;
+
+        int removed = 0;
+        if (removeAll)
+        {
+            removed = _loadout.RemoveAll(s => s.Id == id);
+        }
+        else
+        {
+            int idx = _loadout.FindIndex(s => s.Id == id);
+            if (idx >= 0) { _loadout.RemoveAt(idx); removed = 1; }
+        }
+
+        if (removed > 0)
+        {
+            Action ev = OnLoadoutChanged;
+            if (ev != null) ev.Invoke();
+            return true;
+        }
+        return false;
+    }
+    public bool ToggleLoadout(LaboratoryData def)
+    {
+        // 이미 있으면 해제
+        int idx = _loadout.FindIndex(s => s.Id == def.Id);
+        if (idx >= 0)
+        {
+            _loadout.RemoveAt(idx);
+            OnLoadoutChanged?.Invoke();
+            return true;
+        }
+
+        // 없으면 장착(슬롯 체크)
+        if (_loadout.Count >= _maxSlots)
+        {
+            Debug.LogWarning("[SkillManager] 로드아웃 가득 참");
+            return false;
+        }
+
+        _loadout.Add(new SelectedSkill(def));
+        OnLoadoutChanged?.Invoke();
+        return true;
+    }
     private void RegisterBuiltinSkills()
     {
         // RangeHeal: 효과 + 타게팅 제공을 하나의 인스턴스로
@@ -188,16 +233,6 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         _loadout.Add(picked);
         Action ev = OnLoadoutChanged;
         if (ev != null) ev.Invoke();
-        return true;
-    }
-
-    public bool ReMoveAtLoadOut(LaboratoryData def)
-    {
-        if (_loadout.Count == 0) return false;
-        SelectedSkill picked = new SelectedSkill(def);
-        _loadout.Remove(picked);
-        Action ev = OnLoadoutChanged;
-        if(ev != null) ev.Invoke();
         return true;
     }
     public SelectedSkill GetSelectedSkillBySlotIndex(int slotIndex)
