@@ -5,6 +5,12 @@ public class MapUnitManager : MonoBehaviour
 {
     Dictionary<Vector3Int, Unit> _unitDict = new Dictionary<Vector3Int, Unit>();
 
+    KingUnit _king;
+    int _unitDieCount;
+
+    public KingUnit King { get => _king; set => _king = value; }
+    public int UnitDieCount { get => _unitDieCount; }
+
     public void AddUnit(Vector3Int key, Unit value)
     {
         if(_unitDict.ContainsKey(key))
@@ -22,5 +28,10 @@ public class MapUnitManager : MonoBehaviour
     public void RemoveUnit(Vector3Int key)
     {
         _unitDict.Remove(key);
+    }
+
+    public void AddDieUnit()
+    {
+        _unitDieCount++;
     }
 }

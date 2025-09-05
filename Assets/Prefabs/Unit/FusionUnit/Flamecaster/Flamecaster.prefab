@@ -756,6 +756,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5129648665862652531}
   - component: {fileID: 5000376690281573874}
+  - component: {fileID: 2144912941668257126}
   - component: {fileID: 3890414703752818231}
   - component: {fileID: 6015537658536376475}
   - component: {fileID: 7861528932841520293}
@@ -796,6 +797,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _unitType: 6
+--- !u!114 &2144912941668257126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1960451212801722872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3308ede00ea4a094c95079af846da843, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _meteorPosition: {fileID: 1979174608970651914}
 --- !u!210 &3890414703752818231
 SortingGroup:
   m_ObjectHideFlags: 0

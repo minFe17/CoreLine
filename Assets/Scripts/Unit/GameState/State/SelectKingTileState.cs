@@ -25,10 +25,11 @@ public class SelectKingTileState : IState
         king.transform.position = worldPosition;
         hpBar.SetPosition(king.transform.position);
         king.GetComponent<Unit>().HpBar = hpBar;
-
+        
         MapManager.Instance.ConvertKingToBuildable(cell);
         MapManager.Instance.RegisterTower(cell, king);
         SimpleSingleton<MapUnitManager>.Instance.AddUnit(cell, king.GetComponent<Unit>());
+        SimpleSingleton<MapUnitManager>.Instance.King = king.GetComponent<KingUnit>();
 
         return true;
     }

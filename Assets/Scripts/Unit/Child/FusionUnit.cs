@@ -23,6 +23,7 @@ public class FusionUnit : Unit
     public override void Die()
     {
         base.Die();
+        SimpleSingleton<MapUnitManager>.Instance.AddDieUnit();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
     }
 }

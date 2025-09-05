@@ -7,7 +7,7 @@ public class ArcherAttack : AttackBase
 
     public override void Attack()
     {
-        if (_unit.TargetList[0] == null)
+        if (_unit.TargetList.Count == 0)
             return;
         GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.Arrow);
         temp.transform.position = _arrowPosition.position;

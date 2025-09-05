@@ -63,7 +63,9 @@ public class FusionManager : MonoBehaviour
     void HandleFailedFusion(TowerUnit unit)
     {
         ApplyFusionLayer("Default");
-        FindFusionUnits(unit);
+        NotifyFusion(false);
+        _isFusionMode = false;
+        _baseUnit = null;
     }
 
     FusionUnit CreateFusedUnit(FusionData fusionData, Vector3 position)
@@ -137,6 +139,8 @@ public class FusionManager : MonoBehaviour
         }
 
         if (_baseUnit == unit)
+            return;
+        if (!unit.IsMaxLevel())
             return;
 
         FusionData fusionData = GetFusionData(_baseUnit, unit);

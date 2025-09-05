@@ -52,6 +52,7 @@ public class TowerUnit : Unit
     public override void Die()
     {
         base.Die();
+        SimpleSingleton<MapUnitManager>.Instance.AddDieUnit();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
         if(SimpleSingleton<AttackRangeManager>.Instance.IsSameUnit(this))
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();

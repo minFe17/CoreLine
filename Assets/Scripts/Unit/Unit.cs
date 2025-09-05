@@ -14,13 +14,10 @@ public class Unit : MonoBehaviour
     protected int _currentHp;
     protected bool _isDie;
 
-
     Vector3 _leftDirection = new Vector3(0, 180f, 0f);
     HpBar _hpBar;
     int _monsterLayer;
     bool _isStopAttack;
-
-    
 
     public IReadOnlyList<Monster> TargetList { get => _orderedMonsters; }
     public Animator Animator { get => _animator; }

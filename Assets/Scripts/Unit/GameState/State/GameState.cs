@@ -14,7 +14,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.FireWizard, EUnitType.Archer, EUnitType.Gunner, EUnitType.Dwarf, EUnitType.Assassin, EUnitType.Wizard };
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.ShieldSoldier, EUnitType.Dwarf, EUnitType.Gunner, EUnitType.Archer, EUnitType.Assassin, EUnitType.Wizard };
 
     public GameState()
     {
