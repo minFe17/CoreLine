@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StageButton : MonoBehaviour
+public class StageButton : BaseButton
 {
     private NormalStageData _data;
 
@@ -8,5 +8,10 @@ public class StageButton : MonoBehaviour
     {
         get { return _data; }
         set { _data = value; }
+    }
+
+    protected override void OnClick()
+    {
+        EventManager.Instance.Invoke<NormalStageData>("SelectStage", _data);
     }
 }

@@ -3,13 +3,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
+using System;
 
 public class StageSettingManager : MonoBehaviour
 {
     private PoolingManager _buttons;
     private TextMeshProUGUI _stageId;
     private TextMeshProUGUI _starInfo;
-    private List<Image> _starImages; 
     private NormalStageData _choiceButton;
 
     private void Awake()
@@ -17,15 +17,16 @@ public class StageSettingManager : MonoBehaviour
         CreateButtons();
         _stageId = transform.Find("StageStatus/StageText").GetComponent<TextMeshProUGUI>();
         _starInfo = transform.Find("StarInfo").GetComponent<TextMeshProUGUI>();
-        FindStars();
     }
     private void OnEnable()
     {
         SettingButtons();
+        EventManager.Instance.Subscribe<NormalStageData>("SelectStage", UpdateText);
     }
     private void OnDisable()
     {
         DisableButtons();
+        EventManager.Instance.UnSubscribe("SelectStage", (Action<NormalStageData>)UpdateText);
     }
     private void CreateButtons()
     {
@@ -52,8 +53,16 @@ public class StageSettingManager : MonoBehaviour
             button.gameObject.SetActive(false);
         }
     }
-    private void FindStars()
+
+    private void UpdateText(NormalStageData data)
     {
-        //스타 찾아주기
+        _stageId.text = data.Id;
+        List<Condition> condition = data.Condition;
+        string text="";
+        foreach (var conditionData in condition)
+        {
+            text += conditionData.Info + "\n";
+        }
+        _starInfo.text = text;
     }
 }

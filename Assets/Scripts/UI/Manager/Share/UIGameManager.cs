@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class UIGameManager : MonoSingleton<UIGameManager>
 {
-    private StageType _stageType;
+    private StageType _stageType = StageType.Stage1;
 
     public StageType StageType
     {
@@ -13,7 +13,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         set 
         { 
             _stageType = value;
-            EventManager.Instance.Invoke<StageType>("ChangeStage", _stageType);
+            EventManager.Instance.Invoke<StageType>("ChangeStage", _stageType); //색변경전용
         }
     }
     private void Awake()
@@ -44,11 +44,11 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     private void Start()
     {
         //UIManager.Instance.AddPanelStack(PanelStatus.SettingPanel);
-        //UIManager.Instance.AddPanelStack(PanelStatus.LobyPanel);
+        UIManager.Instance.AddPanelStack(PanelStatus.LobyPanel);
         //UIManager.Instance.AddPanelStack(PanelStatus.InventoryPanel);
         //UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
         //UIManager.Instance.AddPanelStack(PanelStatus.LaboratoryPanel);
-        UIManager.Instance.AddPanelStack(PanelStatus.PlayPanel);
+        //UIManager.Instance.AddPanelStack(PanelStatus.PlayPanel);
     }
 
 }

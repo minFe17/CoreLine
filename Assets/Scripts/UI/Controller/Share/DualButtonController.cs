@@ -8,7 +8,7 @@ public abstract class DualButtonController<T> : MonoBehaviour
 
     protected Button _prevButton;
     protected Button _nextButton;
-    protected List<T> _list;
+    protected List<T> _list = new();
 
 
     public virtual void OnClickPrevButton()
@@ -23,7 +23,7 @@ public abstract class DualButtonController<T> : MonoBehaviour
     }
     protected abstract void SettingList();
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         MatchButtons();
         SettingList();
