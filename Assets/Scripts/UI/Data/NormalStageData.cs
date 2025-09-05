@@ -11,7 +11,7 @@ public enum ClearType
    MoneySave, HealthSave, UnitSave
 }
 [System.Serializable]
-public class WorldStageData
+public struct WorldStageData
 {
     public string Id;                       // 월드/챕터 ID (예: "Stage1")
     public string Name;                     // 월드 표시 이름 (예: "월드 1")
