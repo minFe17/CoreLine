@@ -7,13 +7,16 @@ public partial class SkillManager : MonoSingleton<SkillManager>
 {
     // ===== 데이터/선택 =====
     [Header("데이터/선택")]
-    [SerializeField] private LaboratoryData _database; // 필요 시 사용
+    [SerializeField] private List<LaboratoryData> _databaseList = new List<LaboratoryData>(); // 필요 시 사용
+    [SerializeField] private bool _autoLoadFromDataManager = true;
     [SerializeField] private int _maxSlots = 3;
     [SerializeField] public List<SelectedSkill> _loadout = new List<SelectedSkill>();
 
     [Header("설정")]
     [SerializeField] private Transform _unitRoot;      // 선택: 유닛 부모(없어도 무방)
     [SerializeField] private string _monsterTag = "Monster";
+
+    private readonly Dictionary<string, LaboratoryData> _defsById = new Dictionary<string, LaboratoryData>();
 
     // 핸들러 레지스트리
     private Dictionary<string, ITowerSkillHandler> _towerHandlers = new Dictionary<string, ITowerSkillHandler>();
@@ -25,32 +28,116 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     private IMonsterSkillHandler _defaultMonsterHandler;
 
     public event Action OnLoadoutChanged;
+    public event Action OnDatabaseChanged;
 
     // ===== SelectedSkill (데이터 최소 필드만) =====
     public struct SelectedSkill
     {
         public string Id;
         public int Cost;
-        public float Value;
-        public ValueType ValueType;   // Add만 사용
-        public TargetType TargetType; // Unit / IncomeMoney / IncomeSkill
-       
+        public Effect Effect;   // Value / ValueType / TargetType / TargetStatus 전부 포함
+
         public SelectedSkill(LaboratoryData def)
         {
             Id = def.Id;
             Cost = def.Cost;
-            Value = def.Effect.Value;
-            ValueType = def.Effect.ValueType;
-            TargetType = def.Effect.TargetType;
+            Effect = def.Effect;  // 통째로 복사
         }
     }
+
 
     // ===== 로드/등록 =====
     private void Awake()
     {
+        InitDatabase();
         RegisterBuiltinSkills();
     }
+    // DB 초기화 (DataManager에서 자동 로드  인덱스 구축)
+    private void InitDatabase()
+    {
+        if (_autoLoadFromDataManager && (_databaseList == null || _databaseList.Count == 0))
+        {
+            List<LaboratoryData> src = null;
+            try { src = DataManager.Instance.LaboratoryDatas; } catch { /* 무시 */ }
+            if (src != null) _databaseList = new List<LaboratoryData>(src);
+        }
 
+        RebuildDefinitionIndex();
+
+        Action ev = OnDatabaseChanged;
+        if (ev != null) ev.Invoke();
+    }
+
+    // DB 인덱스 재구축
+    private void RebuildDefinitionIndex()
+    {
+        _defsById.Clear();
+        if (_databaseList == null) return;
+
+        for (int i = 0; i < _databaseList.Count; i++)
+        {
+            LaboratoryData def = _databaseList[i];
+            if (string.IsNullOrEmpty(def.Id))
+            {
+                Debug.LogWarning($"[SkillManager] LaboratoryData[{i}] has empty Id. Skipped.");
+                continue;
+            }
+            _defsById[def.Id] = def;
+        }
+    }
+
+    // ===== 로비 UI/외부에서 쓰는 공개 API =====
+
+    /// DB 전체(읽기전용) 반환  로비 UI에서 그리드 생성에 사용
+    public IReadOnlyList<LaboratoryData> GetAllSkillDefs()
+    {
+        return _databaseList ?? (IReadOnlyList<LaboratoryData>)Array.Empty<LaboratoryData>();
+    }
+
+    /// 타입별 필터 (공격/방어/유틸리티 등 카테고리 탭에 사용)
+    public List<LaboratoryData> GetSkillDefsByType(LaboratoryType type)
+    {
+        List<LaboratoryData> list = new List<LaboratoryData>();
+        if (_databaseList == null) return list;
+
+        for (int i = 0; i < _databaseList.Count; i++)
+        {
+            LaboratoryData def = _databaseList[i];
+
+            // 1) 평평한 구조인 경우: def.Type
+            // if (def.Type == type) list.Add(def);
+
+            // 2) 상위 스키마에서 LaboratoryType 필드명이 다르면 여기에 맞춰 수정
+            if (def.LaboratoryType == type) list.Add(def);
+        }
+        return list;
+    }
+
+    /// Id로 정의 얻기 (버튼 클릭 등에서)
+    public bool TryGetSkillDef(string id, out LaboratoryData def)
+    {
+        return _defsById.TryGetValue(id, out def);
+    }
+
+    /// 외부에서 DB 교체/세팅  로비에서 동적 소팅/필터 결과 반영 등
+    public void SetDatabase(List<LaboratoryData> newList, bool rebuildIndex = true, bool raiseEvent = true)
+    {
+        _databaseList = newList ?? new List<LaboratoryData>();
+        if (rebuildIndex) RebuildDefinitionIndex();
+        if (raiseEvent && OnDatabaseChanged != null) OnDatabaseChanged.Invoke();
+    }
+
+    /// 로드아웃에 Id로 추가 (UI 버튼에서 바로 연결하기 쉬움)
+    public bool AddToLoadoutById(string id)
+    {
+        LaboratoryData def;
+        if (!TryGetSkillDef(id, out def))
+        {
+            Debug.LogWarning($"[SkillManager] AddToLoadoutById failed. Unknown id={id}");
+            return false;
+        }
+        return AddToLoadout(def);
+    }
     private void RegisterBuiltinSkills()
     {
         // RangeHeal: 효과 + 타게팅 제공을 하나의 인스턴스로
@@ -104,6 +191,15 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         return true;
     }
 
+    public bool ReMoveAtLoadOut(LaboratoryData def)
+    {
+        if (_loadout.Count == 0) return false;
+        SelectedSkill picked = new SelectedSkill(def);
+        _loadout.Remove(picked);
+        Action ev = OnLoadoutChanged;
+        if(ev != null) ev.Invoke();
+        return true;
+    }
     public SelectedSkill GetSelectedSkillBySlotIndex(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= _loadout.Count) throw new IndexOutOfRangeException();
@@ -194,7 +290,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     // ===== 디스패치 =====
     private void ApplySkillEffect(SelectedSkill selectedSkill, GameObject explicitTarget)
     {
-        if (selectedSkill.TargetType != TargetType.Unit) return;
+        if (selectedSkill.Effect.TargetType != TargetType.Unit) return;
 
         if (explicitTarget == null) return;
 
@@ -262,7 +358,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     private bool TryApplyIncomeReward(SelectedSkill selectedSkill)
     {
         IIncomeSkillHandler handler;
-        if (_incomeHandlers.TryGetValue(selectedSkill.TargetType, out handler))
+        if (_incomeHandlers.TryGetValue(selectedSkill.Effect.TargetType, out handler))
         {
             handler.Apply(selectedSkill);
             return true;

@@ -8,7 +8,7 @@ public sealed class RangeHealSkill : ITowerSkillHandler, ISkillTargetingSpecProv
     public void Apply(GameObject towerObject, in SkillManager.SelectedSkill skill)
     {
         Debug.Log("Use");
-        int healAmount = Mathf.RoundToInt(skill.Value);
+        int healAmount = Mathf.RoundToInt(skill.Effect.Value);
         if (healAmount <= 0) return;
 
         Unit unit;

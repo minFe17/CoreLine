@@ -5,5 +5,5 @@ using Utils; // SimpleSingleton
 
 public class NormalStageManager : SimpleSingleton<NormalStageManager>
 {
-   
+
 }
