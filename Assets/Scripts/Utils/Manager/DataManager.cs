@@ -8,7 +8,7 @@ public class DataManager : SimpleSingleton<DataManager>
     private List<InventoryData> _inventoryDatas;
     private List<LaboratoryData> _laboratoryDatas;
     private List<UpgradeData> _upgradeDatas;
-    private List<NormalStageData> _normalStagesDatas;
+    private List<WorldStageData> _worldStagesDatas;
     private GameData _gameData;
 
     public List<InventoryData> InventoryDatas
@@ -23,9 +23,9 @@ public class DataManager : SimpleSingleton<DataManager>
     {
         get { return _upgradeDatas; }
     }
-    public List<NormalStageData> NormalStageDatas
+    public List<WorldStageData> WorldStageDatas
     {
-        get { return _normalStagesDatas; }
+        get { return _worldStagesDatas; }
     }
     public GameData GameData
     {
@@ -77,6 +77,6 @@ public class DataManager : SimpleSingleton<DataManager>
     private void LoadNormalStageData()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/NormalStageData");
-        _normalStagesDatas = JsonConvert.DeserializeObject<List<NormalStageData>>(jsonFile.text);
+        _worldStagesDatas = JsonConvert.DeserializeObject<List<WorldStageData>>(jsonFile.text);
     }
 }
