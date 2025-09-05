@@ -30,6 +30,14 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
         EventManager.Instance.Subscribe<LaboratoryData>("ChangeChoiceLaboratory", ChoiceLaboratoryData);
         EventManager.Instance.Subscribe<LaboratoryData>("BuyLaboratory", BuyLaboratory);
     }
+    public UsingLaboratoryData UsingLabData
+    {
+        get { return _usingLabData; }
+    }
+    public List<string> UnlockedSkill
+    {
+        get { return _usingLabData.UnlockedSkill; }
+    }
     public List<LaboratoryData> GetData(LaboratoryType type)
     {
         return _data[type];
@@ -41,6 +49,10 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
     public Dictionary<string,LaboratoryData> BuyLaboratoryData
     {
         get { return _buyLaboratory; }
+    }
+    public LaboratoryData GetBuyLaboratoryData(string id)
+    {
+        return _buyLaboratory[id];
     }
     private void SettingData()
     {
@@ -64,6 +76,20 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
                     break;
             }
         }
+
+        List<string> unlocked = DataManager.Instance.GameData.UnlockedLaboratoryId;
+        foreach (string id in unlocked)
+        {
+            foreach (LaboratoryData dt in DataManager.Instance.LaboratoryDatas)
+            {
+                if (dt.Id == id)
+                {
+                    _buyLaboratory.Add(id, dt);
+                    SettingValue(dt);
+                    break;
+                }
+            }
+        }
     }
     private void ChoiceLaboratoryData(LaboratoryData data)
     {
@@ -73,17 +99,20 @@ public class LaboratoryManager : SimpleSingleton<LaboratoryManager>
     {
         if (_buyLaboratory.ContainsKey(data.Id)) return; //ÆÐ³Î¶ç¿ì±â
         _buyLaboratory.Add(data.Id, data);
+
         DataManager.Instance.GameData.UnlockedLaboratoryId.Add(data.Id);
 
-        SettingValue(ref data);
+        SettingValue(data);
     }
-    private void SettingValue(ref LaboratoryData data)
+    private void SettingValue(LaboratoryData data)
     {
+
         if (data.Effect.TargetStatus == TargetStatus.Skill)
         {
             _usingLabData.UnlockedSkill.Add(data.Id);
             return;
         }
+
         switch (data.Effect.TargetType)
         {
             case TargetType.King:

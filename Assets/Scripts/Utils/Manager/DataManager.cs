@@ -49,6 +49,15 @@ public class DataManager : SimpleSingleton<DataManager>
         }
         return new UpgradeData();
     }
+    public List<NormalStageData> GetStages(StageType type)
+    {
+        foreach(var world in _worldStagesDatas)
+        {
+            if(world.StageType == type)
+                return world.Stages;
+        }
+        return null;
+    }
 
     public void SaveData()
     {//데이터 세이브구현

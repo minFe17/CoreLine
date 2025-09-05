@@ -60,26 +60,27 @@ public class UpgradeButton : BaseButton
     private void ChangeText()
     {
         UnlockedUnit unit = UnitManager.Instance.GetUnlockedUnit(UnitManager.Instance.ChoiceUnit.UnitType);
+        print(_status);
         switch(_status)
         {
             case UpgradeType.HealthPoint:
                 _texts["PriceText"].text = _data.Cost[unit.HealthPointLevel].ToString();
-                _texts["LevelText"].text = unit.HealthPointLevel.ToString();
+                _texts["LevelText"].text = "+" + unit.HealthPointLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
             case UpgradeType.AttackDamage:
                 _texts["PriceText"].text = _data.Cost[unit.AttackDamageLevel].ToString();
-                _texts["LevelText"].text = unit.AttackDamageLevel.ToString();
+                _texts["LevelText"].text = "+" + unit.AttackDamageLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
             case UpgradeType.AttackSpeed:
                 _texts["PriceText"].text = _data.Cost[unit.AttackSpeedLevel].ToString();
-                _texts["LevelText"].text = unit.AttackSpeedLevel.ToString();
+                _texts["LevelText"].text = "+" + unit.AttackSpeedLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
             case UpgradeType.AttackRange:
                 _texts["PriceText"].text = _data.Cost[unit.AttackRangeLevel].ToString();
-                _texts["LevelText"].text = unit.AttackRangeLevel.ToString();
+                _texts["LevelText"].text = "+"+unit.AttackRangeLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
         }

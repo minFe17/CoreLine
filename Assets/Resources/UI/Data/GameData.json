@@ -9,7 +9,7 @@
             "AttackSpeedLevel":1
         }
     ],
-    "UnlockedLaboratoryId" : [],
+    "UnlockedLaboratoryId" : ["Attack_Num1","Defense_Skill"],
     "PlayerMoney":0,
     "PlayerGem":0,
     "ClearStage":

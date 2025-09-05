@@ -120,5 +120,20 @@
         [
             "Attack_Num5", "Attack_Num3"
         ]
+    },
+    {
+        "Id":"Defense_Skill",
+        "Info" : "몬스터 공격 스킬(테스트)",
+        "LaboratoryType" : "Defense",
+        "Cost" : 1000,
+        "Effect":
+        {
+            "Value" : 100,
+            "ValueType" : "Sub",
+            "TargetType": "Monster",
+            "TargetStatus":"Skill"
+        },
+        "ParentsId":
+        []
     }
 ]

@@ -7,11 +7,16 @@ public class SettingPanelManager : MonoBehaviour
     private PoolingManager _selectableUnitButtons;
     private PoolingManager _selectedUnitButtons;
     private List<UnlockedUnit> _selectableUnitDatas;
-    private Dictionary<EUnitType,UnlockedUnit> _selectedUnitDatas;
+    private Dictionary<EUnitType, UnlockedUnit> _selectedUnitDatas;
 
     private GameObject _content;
     private GameObject _seleced;
-    
+
+
+    public void OnClickPlayButton()
+    {
+        UIManager.Instance.AddPanelStack(PanelStatus.PlayPanel);
+    }
     public void OnClickUpgradeButton()
     {
         UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);

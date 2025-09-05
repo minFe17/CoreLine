@@ -2,15 +2,11 @@ using UnityEngine;
 
 public class StageButton : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    private NormalStageData _data;
 
-    // Update is called once per frame
-    void Update()
+    public NormalStageData Data
     {
-        
+        get { return _data; }
+        set { _data = value; }
     }
 }

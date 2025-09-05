@@ -4,6 +4,11 @@ using Newtonsoft.Json;
 using UnityEngine;
 using JetBrains.Annotations;
 
+[JsonConverter(typeof(StringEnumConverter))]
+public enum StageType
+{
+    Infinity, Stage1, Stage2, Stage3
+}//이거 스테이지 나오는거 보고 맞춰야됨
 
 [JsonConverter(typeof(StringEnumConverter))]
 public enum ClearType
@@ -13,7 +18,7 @@ public enum ClearType
 [System.Serializable]
 public struct WorldStageData
 {
-    public string Id;                       // 월드/챕터 ID (예: "Stage1")
+    public StageType StageType;                       // 월드/챕터 ID (예: "Stage1")
     public string Name;                     // 월드 표시 이름 (예: "월드 1")
     public List<NormalStageData> Stages;    // 이 월드에 속한 스테이지들
 }

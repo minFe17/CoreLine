@@ -1,6 +1,6 @@
 [
     {
-        "Id": "Stage1",
+        "StageType": "Stage1",
         "Name": "월드 1",
         "Stages": 
         [
@@ -31,8 +31,9 @@
         ]
     },
     {
-        "Id" : "Stage2",
+        "StageType" : "Stage2",
         "Name" : "월드 2",
         "Stages":
+        []
     }
 ]

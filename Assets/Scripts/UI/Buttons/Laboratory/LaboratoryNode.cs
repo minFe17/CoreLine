@@ -15,7 +15,11 @@ public class LaboratoryNode : BaseButton
     public LaboratoryData Data
     {
         get { return _data; }
-        set { _data = value; }
+        set 
+        { 
+            _data = value;
+            CheckUnlocked();
+        }
     }
     public bool IsUnlocked
     {
@@ -39,6 +43,13 @@ public class LaboratoryNode : BaseButton
     private void OnDisable()
     {
         EventManager.Instance.UnSubscribe("BuyLaboratory", (Action<LaboratoryData>)BuyLaboratory);
+    }
+    private void CheckUnlocked()
+    {
+        List<string> unlocked = DataManager.Instance.GameData.UnlockedLaboratoryId;
+        
+        if(unlocked.Contains(_data.Id))
+            _isUnlocked = true;
     }
     protected override void OnClick()
     {

@@ -1,10 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
-public enum StageType
-{
-    Stage1, Stage2
-}//이거 스테이지 나오는거 보고 맞춰야됨
+
 public enum ColorType
 {
     Dark, Normal, Light
@@ -15,7 +13,7 @@ public class UIColorApplier : MonoBehaviour
     [SerializeField]
     private ColorType _colorType;
 
-    private static StageType _stageType = StageType.Stage1;
+    //private static StageType _stageType = StageType.Infinity;
     private Color _color;
     private Image _image;
 
@@ -36,8 +34,12 @@ public class UIColorApplier : MonoBehaviour
     }
     private void OnEnable()
     {
-        MatchColor();
-        SettingColor();
+        MatchColor(UIGameManager.Instance.StageType);
+        EventManager.Instance.Subscribe<StageType>("ChangeStage", MatchColor);
+    }
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe("ChangeStage", (Action<StageType>)MatchColor);
     }
 
     private void SettingColor()
@@ -56,16 +58,24 @@ public class UIColorApplier : MonoBehaviour
         }
         _image.color = _color;
     }
-    private void MatchColor() //이거 stage변경될때만 실행되게 짜야됨
+    private void MatchColor(StageType type) //이거 stage변경될때만 실행되게 짜야됨
     {
-        switch (_stageType)
+        switch (type)
         {
+            case StageType.Infinity:
+                RGBToHSLUtils.Color = new Color(0.6f, 0.4f, 0.8f);
+                break;
             case StageType.Stage1:
                 RGBToHSLUtils.Color = new Color(1f, 0.95f, 0.4f);
                 break;
             case StageType.Stage2:
                 RGBToHSLUtils.Color = new Color(0.85f, 0.3f, 0.2f);
                 break;
+            case StageType.Stage3:
+                RGBToHSLUtils.Color = new Color(0.2f, 0.6f, 0.6f);
+                break;
         }
+
+        SettingColor();
     }
 }
