@@ -14,6 +14,10 @@ GameObject:
   - component: {fileID: 2002774819831669507}
   - component: {fileID: 8754167448134604521}
   - component: {fileID: 5925282587562097821}
+  - component: {fileID: 5947510840379389310}
+  - component: {fileID: -2200572189153039826}
+  - component: {fileID: 6415795353555034426}
+  - component: {fileID: 1962107508464483119}
   m_Layer: 3
   m_Name: Dragon
   m_TagString: Monster
@@ -31,7 +35,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.12, y: 2.12, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.1, y: 2.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -71,7 +75,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: b804f677e94a4b846a411792eac12fcc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -177,6 +181,67 @@ MonoBehaviour:
   _map: {fileID: 0}
   _moveSpeed: 3
   _arriveEps: 0.02
+  _minMoveSpeed: 0.5
   _attackRangeCell: 2
   _useDiag: 1
   _attackCooldown: 1
+--- !u!114 &5947510840379389310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5481892056894795420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b66af5bbf3592498200ba602b2bb14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHp: 1000
+--- !u!114 &-2200572189153039826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5481892056894795420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5057c0e136fb11428525e6a61d90381, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.5
+  scaleUpAmount: 0.2
+  scaleReturnSpeed: 10
+  clickCamera: {fileID: 0}
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &6415795353555034426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5481892056894795420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2775b95fe0f25a04f847745578427afc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1962107508464483119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5481892056894795420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca4a10ad22aa0774c9024920b86e0afb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelTag: BarPanel
+  _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
+  _screenOffset: {x: 0, y: 1.2}

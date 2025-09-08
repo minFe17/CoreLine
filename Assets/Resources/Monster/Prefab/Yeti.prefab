@@ -14,6 +14,10 @@ GameObject:
   - component: {fileID: 5716679792172270234}
   - component: {fileID: 5047011171676041728}
   - component: {fileID: 8994585806892848607}
+  - component: {fileID: 4574394146711458424}
+  - component: {fileID: 8758892069257157594}
+  - component: {fileID: -5661333595136111862}
+  - component: {fileID: 6223051433971368272}
   m_Layer: 3
   m_Name: Yeti
   m_TagString: Monster
@@ -177,6 +181,67 @@ MonoBehaviour:
   _map: {fileID: 0}
   _moveSpeed: 4
   _arriveEps: 0.02
+  _minMoveSpeed: 0.5
   _attackRangeCell: 1
   _useDiag: 0
   _attackCooldown: 1
+--- !u!114 &4574394146711458424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6956705020803891773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b66af5bbf3592498200ba602b2bb14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHp: 100
+--- !u!114 &8758892069257157594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6956705020803891773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca4a10ad22aa0774c9024920b86e0afb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelTag: BarPanel
+  _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
+  _screenOffset: {x: 0, y: 1.2}
+--- !u!114 &-5661333595136111862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6956705020803891773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2775b95fe0f25a04f847745578427afc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6223051433971368272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6956705020803891773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5057c0e136fb11428525e6a61d90381, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.5
+  scaleUpAmount: 0.2
+  scaleReturnSpeed: 10
+  clickCamera: {fileID: 0}
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 4294967295

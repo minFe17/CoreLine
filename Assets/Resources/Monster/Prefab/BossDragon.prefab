@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 4865067138427358555}
   - component: {fileID: 5915600854711595613}
   - component: {fileID: -4323036268612981715}
+  - component: {fileID: -7034190304420870939}
   m_Layer: 3
   m_Name: BossDragon
   m_TagString: Untagged
@@ -229,8 +230,8 @@ MonoBehaviour:
   _cooldown: 6
   _castTime: 0.6
   _postDelay: 0.2
-  _minionPrefab: {fileID: 3669618446000594986, guid: 6c8f9fcc03242a14ea66ed264500aa97, type: 3}
-  _count: 2
+  _minionPrefab: {fileID: 3766572586392643809, guid: 9533204747915df40bd73e7706fc5165, type: 3}
+  _count: 1
   _maxTrialsPerSpawn: 40
   _minDistFromBoss: 1
   _minDistFromBase: 2
@@ -264,3 +265,30 @@ MonoBehaviour:
   _preVfxLifetimeOverride: 0
   _preWorldOffset: {x: 0, y: 3.35, z: 0}
   _targetsToStun: 3
+--- !u!114 &-7034190304420870939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756996183535018546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d051b0f561aaae64d9b4899c02e49beb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _delaySeconds: 10
+  _controller: {fileID: 0}
+  _map: {fileID: 0}
+  _route: {fileID: 0}
+  _normalMonsterPrefab: {fileID: 5925282587562097821, guid: e6a66e2bbb055884fb9e753ce8225a85, type: 3}
+  _fallbackSpawnCell: {x: 0, y: 0}
+  _copyHpToNew: 1
+  _minHpFallback: 10
+  _despawnVfxPrefab: {fileID: 1812087675113211946, guid: e1777ca15a2f9fb49a84cb7e1bcb330e, type: 3}
+  _despawnVfxOffset: {x: 0, y: -2, z: 0}
+  _despawnVfxLifetime: 3
+  _despawnVfxPrefab2: {fileID: 6421124710609104654, guid: 834485a92b7daee4fa10cbf6427271b6, type: 3}
+  _despawnVfxOffset2: {x: 0, y: 0, z: 0}
+  _despawnVfxLifetime2: 3
+  _despawnVfxAdvance: 3
