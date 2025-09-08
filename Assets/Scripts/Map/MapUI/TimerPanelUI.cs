@@ -56,12 +56,19 @@ public class TimerPanelUI : MonoBehaviour
         PositionCountdownAlongBar(0f);          // 시작 위치로 이동
     }
 
+
     private void OnEnable()
     {
-        // BarBg가 Auto-Layout이면 크기 변동 가능 → 매 프레임 체크하긴 하지만 최초 보정
+        _current = this;
         ResetProgress();
         if (_autoStart) _running = true;
     }
+
+    private void OnDisable()
+    {
+        if (_current == this) _current = null;
+    }
+
 
     private void Update()
     {
@@ -169,4 +176,34 @@ public class TimerPanelUI : MonoBehaviour
     }
     public void StopProgress() => _running = false;
     public void ResumeProgress() => _running = true;
+    public float GetRemainingSeconds()
+    {
+        // 남은 시간(초)
+        return Mathf.Max(0f, _durationSeconds - _elapsed);
+    }
+
+    public bool IsTimeOver()
+    {
+        // 제한 시간 소진 여부
+        return _elapsed >= _durationSeconds;
+    }
+    // ─────────────────────────────────────────────
+    //  - 가장 최근에 Enabled 된 TimerPanelUI를 참조
+    // ─────────────────────────────────────────────
+    private static TimerPanelUI _current;
+
+    // "전역처럼" 쓰는 간단 래퍼들
+    public static bool TryGetRemainingSeconds(out float seconds)
+    {
+        if (_current != null)
+        {
+            seconds = _current.GetRemainingSeconds();
+            return true;
+        }
+        seconds = 0f;
+        return false;
+    }
+    public static float RemainingSecondsOrZero => _current ? _current.GetRemainingSeconds() : 0f;
+
+    public static bool IsTimeOverGlobal => _current ? _current.IsTimeOver() : false;
 }

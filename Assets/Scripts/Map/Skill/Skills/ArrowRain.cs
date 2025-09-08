@@ -1,21 +1,20 @@
 using UnityEngine;
 
-public sealed class RangeHeal : ITowerSkillHandler, ISkillTargetingSpecProvider
+public sealed class ArrowRain : IMonsterSkillHandler, ISkillTargetingSpecProvider
 {
-    public string Id { get { return "RangeHeal"; } }
+    public string Id { get { return "ArrowRain"; } }
 
     // === È¿°ú(Å¸¿ö Èú) ===
     public void Apply(GameObject towerObject, in SkillManager.SelectedSkill skill)
     {
         Debug.Log("Use");
-        int healAmount = Mathf.RoundToInt(skill.Effect.Value);
-        if (healAmount <= 0) return;
+        int damageAmount = Mathf.RoundToInt(skill.Effect.Value);
+        if (damageAmount <= 0) return;
 
-        Unit unit;
-        if (towerObject.TryGetComponent<Unit>(out unit))
+        Monster monster;
+        if (towerObject.TryGetComponent<Monster>(out monster))
         {
-            if (unit.IsDie) return;
-            unit.Heal(healAmount);
+            monster.TakeDamage(damageAmount);
             return;
         }
     }
@@ -27,7 +26,7 @@ public sealed class RangeHeal : ITowerSkillHandler, ISkillTargetingSpecProvider
         spec.Mode = TargetingMode.RectCells;
         spec.HalfSizeCells = 1; // 3x3
         spec.RadiusWorld = 0f;
-        spec.ValidTargets = SkillManager.TargetKind.Towers;
+        spec.ValidTargets = SkillManager.TargetKind.Monsters;
         return spec;
     }
 }

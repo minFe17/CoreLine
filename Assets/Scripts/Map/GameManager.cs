@@ -78,31 +78,58 @@ public class GameManager : MonoBehaviour
         }
 
         // 2) 로드아웃 비어있으면 테스트 스킬 강제 추가
-        if (addRangeHeal && SkillManager.Instance != null && SkillManager.Instance._loadout.Count == 0)
+        SkillManager.Instance.AddToLoadout(new LaboratoryData
         {
-            Effect effect = new Effect
+            Id = "RangeHeal",
+            Info = "광역 힐(테스트)",
+            LaboratoryType = LaboratoryType.Defense,
+            Cost = rangeHealCost,
+            Effect = new Effect
             {
                 Value = 50,
                 ValueType = ValueType.Add,
-                TargetType = TargetType.Unit,
-                TargetStatus = TargetStatus.HealthPoint,
-            };
-            LaboratoryData data = new LaboratoryData
+                TargetType = TargetType.Unit,                 // 타워/유닛 대상
+                TargetStatus = TargetStatus.HealthPoint
+            },
+            ParentsId = new List<string>()
+        });
+        SkillManager.Instance.AddToLoadout(new LaboratoryData
+        {
+            Id = "ArrowRain",
+            Info = "광역 뎀(테스트)",
+            LaboratoryType = LaboratoryType.Attack,
+            Cost = 10,
+            Effect = new Effect
             {
-                Id = "RangeHeal",
-                Info = "광역 힐(테스트)",
-                LaboratoryType = LaboratoryType.Defense,          // 구조체에 필수라 넣어줌(실사용X)
-                Cost = rangeHealCost,
-                Effect = effect,
-                ParentsId = new List<string>()
-            };
-
-            SkillManager.Instance.AddToLoadout(data);
-            Debug.Log("[GameManagerBoot] Added test skill 'RangeHeal' to loadout (slot 0).");
-        }
+                Value = 50,
+                ValueType = ValueType.Add,
+                TargetType = TargetType.Monster,                 // 타워/유닛 대상
+                TargetStatus = TargetStatus.HealthPoint
+            },
+            ParentsId = new List<string>()
+        });
+        SkillManager.Instance.AddToLoadout(new LaboratoryData
+        {
+            Id = "MonsterSlow",
+            Info = "광역 슬로우(테스트)",
+            LaboratoryType = LaboratoryType.Defense,
+            Cost = rangeHealCost,
+            Effect = new Effect
+            {
+                Value = 50,
+                ValueType = ValueType.Add,
+                TargetType = TargetType.Monster,                 // 타워/유닛 대상
+                TargetStatus = TargetStatus.HealthPoint
+            },
+            ParentsId = new List<string>()
+        });
+        Debug.Log("[GameManagerBoot] Added test skill 'RangeHeal' to loadout (slot 0).");
+        
     }
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) { ShowClearPanelTest(); return; }
+
         // 중클릭: 스테이지 리로드
         if (Input.GetMouseButtonDown(2))
         {
@@ -283,5 +310,81 @@ public class GameManager : MonoBehaviour
         }
 
         _invalidToast.ShowAtCell(cell);
+    }
+    private void ShowClearPanelTest()
+    {
+        // 1) 패널 찾기
+        ClearPanelControl panel = FindFirstObjectByType<ClearPanelControl>(FindObjectsInactive.Include);
+        if (panel == null)
+        {
+            Debug.LogWarning("[GameManager] ClearPanelControl 을 찾을 수 없습니다.");
+            return;
+        }
+
+        // 2) 스테이지/스냅샷 준비 (선택된 스테이지가 없으면 더미 생성)
+        NormalStageData stage = default(NormalStageData);
+        NormalStageManager mgr = NormalStageManager.Instance;
+
+        if (mgr != null && !string.IsNullOrEmpty(mgr.SelectedStage.Id))
+        {
+            stage = mgr.SelectedStage;
+        }
+        else
+        {
+            stage = new NormalStageData
+            {
+                Id = "Stage1-1",
+                Gold = 100,
+                Gem = 50,
+                Condition = new List<Condition>
+            {
+                new Condition { ClearType = ClearType.MoneySave,  Info = "200원 남기기",       Value = 200 },
+                new Condition { ClearType = ClearType.HealthSave, Info = "베이스 HP 50% 이상", Value = 0.5f },
+                new Condition { ClearType = ClearType.UnitSave,   Info = "유닛 파괴 5 미만",  Value = 5 }
+            }
+            };
+        }
+
+        NormalStageManager.StageEndSnapshot snap = new NormalStageManager.StageEndSnapshot
+        {
+            moneyLeft = 210,
+            baseHpRatio = 0.62f,
+            unitDestroyedCount = 3
+        };
+
+        // 3) 패널 표시 (스테이지ID, 별 채우기)
+        panel.gameObject.SetActive(true);
+        panel.SetStageId(stage.Id);
+        panel.ShowStars(stage, snap);
+
+        // 4) 보상 생성 (아이콘은 매니저에서 ID로 찾음)
+        List<(string id, int value)> rewards = new List<(string id, int value)>();
+        if (mgr != null)
+        {
+            rewards = mgr.GetRewardsForStage(stage.Id);
+            if (rewards == null || rewards.Count == 0)
+            {
+                rewards = new List<(string id, int value)> { ("Gold", stage.Gold), ("Gem", stage.Gem) };
+            }
+        }
+        else
+        {
+            rewards = new List<(string id, int value)> { ("Gold", stage.Gold), ("Gem", stage.Gem) };
+        }
+
+        // Reward 프리팹 확보(우선 Resources → 없으면 씬 내 템플릿 복제)
+        RewardItemUI rewardPrefab = Resources.Load<RewardItemUI>("Reward/Reward");
+        if (rewardPrefab == null) rewardPrefab = Resources.Load<RewardItemUI>("Reward");
+        if (rewardPrefab == null)
+        {
+            rewardPrefab = panel.GetComponentInChildren<RewardItemUI>(true);
+            if (rewardPrefab == null)
+            {
+                Debug.LogWarning("[GameManager] RewardItemUI 프리팹을 찾을 수 없어 보상 표시는 생략합니다. (Resources/UI/RewardItem 권장)");
+                return;
+            }
+        }
+
+        panel.BuildRewardsByIds(rewardPrefab, rewards);
     }
 }

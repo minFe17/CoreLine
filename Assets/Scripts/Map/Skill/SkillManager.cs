@@ -50,12 +50,17 @@ public partial class SkillManager : MonoSingleton<SkillManager>
     private void RegisterBuiltinSkills()
     {
         // RangeHeal: 효과 + 타게팅 제공을 하나의 인스턴스로
-        RangeHealSkill rangeHeal = new RangeHealSkill();
+        RangeHeal rangeHeal = new RangeHeal();
         RegisterTowerHandler(rangeHeal);
         RegisterTargetingProvider(rangeHeal);
 
         // 몬스터용 스킬 (기본 처리자)
-        //defaultMonsterHandler = new DefaultMonsterDamageSkill();
+        ArrowRain arrowRain = new ArrowRain();
+        RegisterMonsterHandler(arrowRain);
+        RegisterTargetingProvider(arrowRain);
+        MonsterSlow monsterSlow = new MonsterSlow();
+        RegisterMonsterHandler(monsterSlow);
+        RegisterTargetingProvider(monsterSlow);
         // 예: 특수 몬스터 스킬 추가하려면 아래처럼 등록
         // RegisterMonsterHandler(new RangeNukeSkill());
 

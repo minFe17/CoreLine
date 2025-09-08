@@ -5,11 +5,11 @@ using Utils;
 
 public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 {
-    private NormalStageData _selectedStage; //¼±ÅÃµÈ ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ
+    private NormalStageData _selectedStage;                 // ¼±ÅÃµÈ ½ºÅ×ÀÌÁö µ¥ÀÌÅÍ
     private StageType _stageType = StageType.Stage1;
 
-    // ÁøÇà/º¸»ó °»½ÅµÇ¸é UI°¡ ÀÌ°ÍÀ» ±¸µ¶ÇØ¼­ °»½ÅÇÏ¸é ÆíÇÔ
     public event Action OnStageProgressChanged;
+
     public struct LastRun
     {
         public NormalStageData Stage;
@@ -24,45 +24,54 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         set
         {
             _stageType = value;
-            EventManager.Instance.Invoke<StageType>("ChangeStage", _stageType); //»öº¯°æÀü¿ë
+            EventManager.Instance.Invoke<StageType>("ChangeStage", _stageType); // »ö º¯°æ Àü¿ë
         }
     }
-    private LastRun? _lastResult;
 
+    private LastRun? _lastResult;
+    public LastRun? LastResult { get { return _lastResult; } }
+
+    public NormalStageData SelectedStage { get { return _selectedStage; } }
+
+    // ¢º Resources/RewardIcon/{ID}.png ·Îµå (Æú´õ/ÀÌ¸§ ¹Ýµå½Ã ÀÏÄ¡)
+    private const string _rewardIconResourcesPath = "Reward";
+    private readonly Dictionary<string, Sprite> _rewardIconMap =
+        new Dictionary<string, Sprite>(StringComparer.OrdinalIgnoreCase);
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // »ý¼º/ÃÊ±âÈ­
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     public NormalStageManager()
     {
+        // ÀÌº¥Æ® ±¸µ¶
         EventManager.Instance.Subscribe<NormalStageData>("SelectStage", SelectStage);
-        //EventManager·Î ¿©·¯ ÇÔ¼ö ÀÛµ¿
+
+        // ¾ÆÀÌÄÜ Ä³½Ã ¹Ì¸® ÀûÀç(¼±ÅÃ »çÇ×ÀÌÁö¸¸ ±ÇÀå)
+        PrimeRewardIconCache();
     }
 
-    public LastRun? LastResult => _lastResult;
-
-    //¿ÜºÎ¿¡¼­ Á¢±Ù °¡´ÉÇÑ Get
-    public NormalStageData SelectedStage
-    {
-        get { return _selectedStage; }
-    } 
-
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // °á°ú/Á¶°Ç Æò°¡
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     public void SetLastResult(in NormalStageData stage, in StageEndSnapshot snap, int stars, in RewardResult reward)
     {
         _lastResult = new LastRun { Stage = stage, Snapshot = snap, Stars = stars, Reward = reward };
     }
-    /// <summary>
-    /// ½ºÅ×ÀÌÁö Á¶°ÇÀ» Æò°¡ÇØ¼­ È¹µæ º°(0~3)À» ¹ÝÈ¯.
-    /// </summary>
+
+    /// <summary>½ºÅ×ÀÌÁö Á¶°ÇÀ» Æò°¡ÇØ¼­ È¹µæ º°(0~3)À» ¹ÝÈ¯.</summary>
     public int EvaluateStars(in NormalStageData stage, in StageEndSnapshot snap)
     {
         if (stage.Condition == null || stage.Condition.Count == 0) return 0;
 
+        int maxStars = Mathf.Min(3, stage.Condition.Count);
         int met = 0;
-        int maxStars = Mathf.Min(3, stage.Condition.Count); // ¼¼ÀÌºê ±¸Á¶°¡ 3¼º °íÁ¤ÀÌ¹Ç·Î 3À¸·Î Ä¸
         for (int i = 0; i < maxStars; i++)
         {
-            if (IsConditionMet(stage.Condition[i], snap))
-                met++;
+            if (IsConditionMet(stage.Condition[i], snap)) met++;
         }
         return met;
     }
+
     private void SelectStage(NormalStageData data)
     {
         _selectedStage = data;
@@ -79,14 +88,14 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         }
     }
 
-    /// <summary>
-    /// ½ºÅ×ÀÌÁö Å¬¸®¾î Ã³¸®: º° °»½Å, º¸»ó Áö±Þ(ÁªÀº 3¼º ÃÖÃÊ 1È¸), ÀúÀå±îÁö ¼öÇà.
-    /// </summary>
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // Å¬¸®¾î/º¸»ó Ã³¸®
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    /// <summary>½ºÅ×ÀÌÁö Å¬¸®¾î Ã³¸®: º° °»½Å, º¸»ó Áö±Þ(ÁªÀº 3¼º ÃÖÃÊ 1È¸), ÀúÀå±îÁö ¼öÇà.</summary>
     public RewardResult ApplyClearAndSave(in NormalStageData stage, int starsEarned, bool giveGoldEveryClear = true)
     {
         RewardResult rewardResult = new RewardResult();
 
-        // ¾ÈÀü º¸Á¤
         int maxPossible = stage.Condition != null ? stage.Condition.Count : 0;
         if (maxPossible > 3) maxPossible = 3;
         if (starsEarned < 0) starsEarned = 0;
@@ -100,61 +109,47 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         }
 
         // ClearStage Ã£±â(¾øÀ¸¸é »ý¼º)
+        if (gd.ClearStage == null) gd.ClearStage = new List<ClearStage>();
         ClearStage cs = null;
         int idx = -1;
-        if (gd.ClearStage == null) gd.ClearStage = new List<ClearStage>();
         for (int i = 0; i < gd.ClearStage.Count; i++)
         {
-            if (gd.ClearStage[i].StageId == stage.Id)
-            {
-                cs = gd.ClearStage[i];
-                idx = i;
-                break;
-            }
+            if (gd.ClearStage[i].StageId == stage.Id) { cs = gd.ClearStage[i]; idx = i; break; }
         }
         if (cs == null)
         {
-            cs = new ClearStage
-            {
-                StageId = stage.Id,
-                MaxStarNum = 0,
-                Star = new Star()
-            };
+            cs = new ClearStage { StageId = stage.Id, MaxStarNum = 0, Star = new Star() };
             gd.ClearStage.Add(cs);
             idx = gd.ClearStage.Count - 1;
         }
 
-        // ÀÌÀü/ÀÌÈÄ ÃÖ°í º°
         int prevBest = cs.MaxStarNum;
         int newBest = Mathf.Max(prevBest, starsEarned);
 
-        // º° ÇÃ·¡±× °»½Å(ÃÖ°í ±â·Ï ±âÁØ)
         cs.MaxStarNum = newBest;
         cs.Star.FirstStar = newBest >= 1;
         cs.Star.SecondStar = newBest >= 2;
         cs.Star.ThirdStar = newBest >= 3;
 
-        // °ñµå Áö±Þ: ¸Å¹ø(¿øÇÏ¸é Ã¹ Å¬¸®¾î¸¸ Áö±ÞÀ¸·Î ¹Ù²ãµµ µÊ)
-        if (giveGoldEveryClear)
+        // °ñµå: ±âº» ¸Å Å¬¸®¾î Áö±Þ
+        if (giveGoldEveryClear && stage.Gold > 0)
         {
             gd.PlayerMoney += stage.Gold;
             rewardResult.GoldGained = stage.Gold;
         }
 
-        // Áª Áö±Þ: 3¼º 'ÃÖÃÊ' ´Þ¼º½Ã¿¡¸¸ 1È¸
+        // Áª: 3¼º ÃÖÃÊ ´Þ¼º 1È¸¸¸
         bool justHitThree = (prevBest < 3) && (newBest >= 3);
-        if (justHitThree)
+        if (justHitThree && stage.Gem > 0)
         {
             gd.PlayerGem += stage.Gem;
             rewardResult.GemGained = stage.Gem;
             rewardResult.FirstTimeThreeStar = true;
         }
 
-        // ¹Ý¿µ/ÀúÀå
         gd.ClearStage[idx] = cs;
         DataManager.Instance.SaveData();
 
-        // ÀÌº¥Æ® ÅëÁö
         Action ev = OnStageProgressChanged;
         if (ev != null) ev.Invoke();
 
@@ -162,7 +157,10 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         return rewardResult;
     }
 
-    /// <summary>½ºÅ×ÀÌÁö ¼¼ÀÌºê Á¶È¸. ¾øÀ¸¸é null ¹ÝÈ¯.</summary>
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // Á¶È¸/°Ë»ö
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    /// <summary>½ºÅ×ÀÌÁö ¼¼ÀÌºê Á¶È¸. ¾øÀ¸¸é null.</summary>
     public ClearStage GetClearStageOrNull(string stageId)
     {
         GameData gd = DataManager.Instance.GameData;
@@ -171,15 +169,15 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         for (int i = 0; i < gd.ClearStage.Count; i++)
             if (gd.ClearStage[i].StageId == stageId)
                 return gd.ClearStage[i];
-
         return null;
     }
 
-    /// <summary>½ºÅ×ÀÌÁö µ¥ÀÌÅÍ °Ë»ö(¿ùµåµé ¾È¿¡¼­ id·Î). Ã£À¸¸é true.</summary>
+    /// <summary>¿ùµåµé¿¡¼­ id·Î ½ºÅ×ÀÌÁö °Ë»ö.</summary>
     public bool TryFindStageById(string stageId, out NormalStageData stage, out WorldStageData world)
     {
         stage = default;
         world = default;
+
         List<WorldStageData> worlds = DataManager.Instance.WorldStageDatas;
         if (worlds == null) return false;
 
@@ -201,23 +199,93 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         }
         return false;
     }
-}
 
-/// <summary>
-/// ¿£µù¾À¿¡¼­ ÆÇÁ¤¿¡ ÇÊ¿äÇÑ °ªµé ¹­À½(³× °ÔÀÓ ÂÊ °ªÀ¸·Î Ã¤¿ö¼­ ³Ñ°ÜÁà)
-/// </summary>
-public struct StageEndSnapshot
-{
-    public int moneyLeft;           // ³²Àº µ·
-    public float baseHpRatio;       // º£ÀÌ½º ³²Àº Ã¼·Â ºñÀ²(0~1)
-    public int unitDestroyedCount;  // ÆÄ±«µÈ À¯´Ö ¼ö
-}
+    /// <summary>
+    /// id·Î ½ºÅ×ÀÌÁö Á¶È¸. ¾øÀ¸¸é default ¹ÝÈ¯(SelectedStage°¡ µ¿ÀÏ idÀÌ¸é ±×°É ¹ÝÈ¯).
+    /// </summary>
+    public NormalStageData GetStageOrDefault(string stageId)
+    {
+        NormalStageData found;
+        WorldStageData dummyWorld;
+        if (TryFindStageById(stageId, out found, out dummyWorld)) return found;
 
-/// <summary>º¸»ó/ÁøÃ´ °á°ú</summary>
-public struct RewardResult
-{
-    public int GoldGained;
-    public int GemGained;
-    public int NewBestStars;
-    public bool FirstTimeThreeStar;
+        if (!string.IsNullOrEmpty(_selectedStage.Id) && _selectedStage.Id == stageId)
+            return _selectedStage;
+
+        return default;
+    }
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¸®¿öµå ¾ÆÀÌÄÜ
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    private void PrimeRewardIconCache()
+    {
+        Sprite[] all = Resources.LoadAll<Sprite>(_rewardIconResourcesPath);
+        for (int i = 0; i < all.Length; i++)
+        {
+            Sprite s = all[i];
+            if (s != null && !_rewardIconMap.ContainsKey(s.name))
+                _rewardIconMap.Add(s.name, s);
+        }
+    }
+
+    public void RegisterRewardIcon(string id, Sprite sprite)
+    {
+        if (string.IsNullOrEmpty(id) || sprite == null) return;
+        _rewardIconMap[id] = sprite;
+    }
+
+    public Sprite GetRewardIcon(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+
+        Sprite s;
+        if (_rewardIconMap.TryGetValue(id, out s)) return s;
+
+        s = Resources.Load<Sprite>(_rewardIconResourcesPath + "/" + id);
+        if (s != null) _rewardIconMap[id] = s;
+        return s;
+    }
+
+    /// <summary>
+    /// ½ºÅ×ÀÌÁö º¸»ó ¸ñ·ÏÀ» (id, value) ¸®½ºÆ®·Î ¹ÝÈ¯.
+    /// stageId¸¦ ¸ø Ã£À¸¸é SelectedStage ±âÁØÀ¸·Î ¹é¾÷.
+    /// </summary>
+    public List<(string id, int value)> GetRewardsForStage(string stageId)
+    {
+        List<(string id, int value)> list = new List<(string id, int value)>();
+
+        NormalStageData s = GetStageOrDefault(stageId);
+        if (string.IsNullOrEmpty(s.Id))
+        {
+            // fallback: ¼±ÅÃµÈ ½ºÅ×ÀÌÁö »ç¿ë
+            s = _selectedStage;
+        }
+
+        if (!string.IsNullOrEmpty(s.Id))
+        {
+            if (s.Gold > 0) list.Add(("Gold", s.Gold));
+            if (s.Gem > 0) list.Add(("Gem", s.Gem));
+            // TODO: µ¿Àû º¸»ó Å×ÀÌºí Ãß°¡ ½Ã ¿©±â¼­ º´ÇÕ
+        }
+        return list;
+    }
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¿£µù¾À ½º³À¼¦/º¸»ó °á°ú
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    public struct StageEndSnapshot
+    {
+        public int moneyLeft;          // ³²Àº µ·
+        public float baseHpRatio;        // º£ÀÌ½º ³²Àº Ã¼·Â ºñÀ²(0~1)
+        public int unitDestroyedCount; // ÆÄ±«µÈ À¯´Ö ¼ö
+    }
+
+    public struct RewardResult
+    {
+        public int GoldGained;
+        public int GemGained;
+        public int NewBestStars;
+        public bool FirstTimeThreeStar;
+    }
 }
