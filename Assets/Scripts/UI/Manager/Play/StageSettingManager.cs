@@ -20,6 +20,7 @@ public class StageSettingManager : MonoBehaviour
     }
     private void OnEnable()
     {
+        DataManager.Instance.LoadData();
         SettingButtons();
         EventManager.Instance.Subscribe<NormalStageData>("SelectStage", UpdateText);
     }
@@ -36,7 +37,7 @@ public class StageSettingManager : MonoBehaviour
     }
     private void SettingButtons()
     {
-        StageType stage = UIGameManager.Instance.StageType;
+        StageType stage = NormalStageManager.Instance.StageType;
         List<NormalStageData> stages = DataManager.Instance.GetStages(stage);
 
         foreach (var stageData in stages)
@@ -56,7 +57,7 @@ public class StageSettingManager : MonoBehaviour
 
     private void UpdateText(NormalStageData data)
     {
-        _stageId.text = data.Id;
+        _stageId.text = data.Name;
         List<Condition> condition = data.Condition;
         string text="";
         foreach (var conditionData in condition)

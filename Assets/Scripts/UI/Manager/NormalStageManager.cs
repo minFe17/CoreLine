@@ -6,6 +6,8 @@ using Utils;
 public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 {
     private NormalStageData _selectedStage; //선택된 스테이지 데이터
+    private StageType _stageType = StageType.Stage1;
+
     // 진행/보상 갱신되면 UI가 이것을 구독해서 갱신하면 편함
     public event Action OnStageProgressChanged;
     public struct LastRun
@@ -16,6 +18,15 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         public RewardResult Reward;
     }
 
+    public StageType StageType
+    {
+        get { return _stageType; }
+        set
+        {
+            _stageType = value;
+            EventManager.Instance.Invoke<StageType>("ChangeStage", _stageType); //색변경전용
+        }
+    }
     private LastRun? _lastResult;
 
     public NormalStageManager()

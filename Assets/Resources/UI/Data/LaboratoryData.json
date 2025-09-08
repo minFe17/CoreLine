@@ -169,7 +169,7 @@
     {
         "Id":"MonsterSlow",
         "Info" : "몬스터 이동속도 감소(범위형)",
-        "LaboratoryType" : "Utillity",
+        "LaboratoryType" : "Utility",
         "Cost" : 1000,
         "Effect":
         {

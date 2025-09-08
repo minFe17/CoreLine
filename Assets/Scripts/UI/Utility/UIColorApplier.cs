@@ -34,7 +34,7 @@ public class UIColorApplier : MonoBehaviour
     }
     private void OnEnable()
     {
-        MatchColor(UIGameManager.Instance.StageType);
+        MatchColor(NormalStageManager.Instance.StageType);
         EventManager.Instance.Subscribe<StageType>("ChangeStage", MatchColor);
     }
     private void OnDisable()

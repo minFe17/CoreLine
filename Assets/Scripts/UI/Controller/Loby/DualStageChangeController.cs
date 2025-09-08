@@ -16,12 +16,12 @@ public class DualStageChangeController : DualButtonController<StageType>
     public override void OnClickNextButton()
     {
         base.OnClickNextButton();
-        UIGameManager.Instance.StageType = _list[_index];
+        NormalStageManager.Instance.StageType = _list[_index];
     }
     public override void OnClickPrevButton()
     {
         base.OnClickPrevButton();
-        UIGameManager.Instance.StageType = _list[_index];
+        NormalStageManager.Instance.StageType = _list[_index];
     }
     protected override void Awake()
     {
@@ -41,7 +41,7 @@ public class DualStageChangeController : DualButtonController<StageType>
     {
         for (int i = 0; i < _list.Count; i++)
         {
-            if (_list[i] == UIGameManager.Instance.StageType)
+            if (_list[i] == NormalStageManager.Instance.StageType)
             {
                 _index = i;
                 return;
