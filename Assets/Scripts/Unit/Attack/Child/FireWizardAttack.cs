@@ -7,7 +7,7 @@ public class FireWizardAttack : AttackBase
 
     public override void Attack()
     {
-        if (_unit.TargetList[0] == null)
+        if (_unit.TargetList.Count == 0)
             return;
         GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.FireBall);
         temp.transform.position = _fireBallPosition.position;

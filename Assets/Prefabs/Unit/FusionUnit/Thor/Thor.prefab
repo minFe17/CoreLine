@@ -12578,9 +12578,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5034132725274311511}
+  - component: {fileID: 3254352209049111529}
   - component: {fileID: 5034132725274311510}
   - component: {fileID: 5034132725274311505}
   - component: {fileID: 7291750192132977815}
+  - component: {fileID: 3442607129587883793}
+  - component: {fileID: 5267749826327883845}
   m_Layer: 0
   m_Name: ThorEffect
   m_TagString: Untagged
@@ -12605,6 +12608,19 @@ Transform:
   - {fileID: 4501094649506768338}
   m_Father: {fileID: 2671421253352513051}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!114 &3254352209049111529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5034132725274311504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83220ff851ef19d4e9d08842155e5f21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _parent: {fileID: 7260849399971823089}
 --- !u!198 &5034132725274311510
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -17593,6 +17609,69 @@ MonoBehaviour:
     perlinColor: 0
     perlinColorSpeed: 1
   fadeOutReference: {fileID: 5034132725274311510}
+--- !u!58 &3442607129587883793
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5034132725274311504}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 2.7
+--- !u!50 &5267749826327883845
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5034132725274311504}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &5154685594728285178
 GameObject:
   m_ObjectHideFlags: 0

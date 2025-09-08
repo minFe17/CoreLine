@@ -5,7 +5,6 @@ using Utils;
 public class GameStateManager : MonoBehaviour
 {
     // ╫л╠шео
-
     Dictionary<EGameStateType, IState> _gameStateDict;
 
     IState _currentState;

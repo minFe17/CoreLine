@@ -20,7 +20,7 @@ public class OutlawAttack : AttackBase
 
     void Fire()
     {
-        if (_unit.TargetList[0] == null)
+        if (_unit.TargetList.Count == 0)
             return;
         GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.Bullet);
         temp.transform.position = _bulletPosition.position;

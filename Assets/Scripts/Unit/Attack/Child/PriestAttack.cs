@@ -21,7 +21,6 @@ public class PriestAttack : AttackBase
             targetUnit.Heal(_unit.UnitStateData.AttackDamage);
     }
 
-
     protected override bool CheckAttack()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, _unit.UnitStateData.AttackRange);

@@ -76,12 +76,11 @@ public class UnitUI : MonoBehaviour, IMediatorEvent
             if (unit.IsMaxLevel())
             {
                 _buttonPosition[0].GetComponent<Image>().sprite = _atlas.GetSprite(EUnitUIIconType.Fusion.ToString());
-                _upgradeCostText.gameObject.SetActive(false);
+                _upgradeCostText.text = SimpleSingleton<FusionManager>.Instance.Cost.ToString();
             }
             else
             {
                 _buttonPosition[0].GetComponent<Image>().sprite = _atlas.GetSprite(EUnitUIIconType.Upgrade.ToString());
-                _upgradeCostText.gameObject.SetActive(true);
                 _upgradeCostText.text = SimpleSingleton<UnitDataList>.Instance.GetUnitData(unit.UnitType).LevelData[unit.Level + 1].Cost.ToString();
             }
         }
@@ -121,7 +120,10 @@ public class UnitUI : MonoBehaviour, IMediatorEvent
         if (_unit is TowerUnit unit)
         {
             if (unit.IsMaxLevel())
-                unit.Fusion();
+            {
+                if (CostManager.Instance.TrySpend(CostManager.CostType.Unit, SimpleSingleton<FusionManager>.Instance.Cost))
+                    unit.Fusion();
+            }
             else
                 unit.Upgrade();
             Close();
@@ -131,7 +133,15 @@ public class UnitUI : MonoBehaviour, IMediatorEvent
     public void Sell()
     {
         SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
-        _unit.Die();
+
+        int value = 0;
+        if (_unit is TowerUnit unit)
+            value = unit.UnitTotalCost / 2;
+        else if (_unit is FusionUnit fusionUnit)
+            value = SimpleSingleton<FusionManager>.Instance.Cost / 5;
+
+        CostManager.Instance.Add(CostManager.CostType.Unit, value);
+        _unit.Remove();
         Close();
     }
     #endregion

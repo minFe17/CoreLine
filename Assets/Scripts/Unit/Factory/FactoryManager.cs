@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Utils;
 
-public class FactoryManager : MonoBehaviour
+public class FactoryManager
 {
     // ╫л╠шео
     List<IFactory> _factories = new List<IFactory>();

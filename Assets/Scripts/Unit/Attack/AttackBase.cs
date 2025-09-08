@@ -7,6 +7,8 @@ public abstract class AttackBase : MonoBehaviour
 
     public abstract void Attack();
 
+    public Unit Unit { get => _unit; }
+
     void Start()
     {
         _unit = GetComponent<Unit>();

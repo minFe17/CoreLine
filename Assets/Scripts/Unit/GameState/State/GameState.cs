@@ -14,7 +14,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.ShieldSoldier, EUnitType.Dwarf, EUnitType.Gunner, EUnitType.Archer, EUnitType.Assassin, EUnitType.Wizard };
+    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Hammer, EUnitType.ThunderWizard, EUnitType.Gunner, EUnitType.Archer, EUnitType.Assassin, EUnitType.Wizard };
 
     public GameState()
     {
@@ -97,13 +97,14 @@ public class GameState : IState, IMediatorEvent
         for (int i = 0; i < hits.Length; i++)
         {
             Collider2D h = hits[i];
-            if (h && h.TryGetComponent<ObjectTile>(out ObjectTile objectTile))
+            if (h && h.TryGetComponent(out ObjectTile objectTile))
             {
                 _isSelectTile = true;
                 _unitUI.Close();
                 _twoButtonUI.OpenAtObject(objectTile, "¹ßµ¿", (id, payload) =>
                 {
-                    if (payload is ObjectTile objectTile) objectTile.Activate();
+                    if (payload is ObjectTile objectTile) 
+                        objectTile.Activate();
                 });
                 return true;
             }
@@ -114,14 +115,13 @@ public class GameState : IState, IMediatorEvent
     public void CreateUnit(EUnitType unitType)
     {
         int cost = SimpleSingleton<UnitDataList>.Instance.GetUnitData(unitType).LevelData[0].Cost;
-        //if (!CostManager.Instance.TrySpend(cost))
-        //    return;
+        if (!CostManager.Instance.TrySpend(CostManager.CostType.Unit, cost))
+            return;
         GameObject unit = MonoSingleton<ObjectPoolManager>.Instance.Pull(unitType);
         HpBar hpBar = MonoSingleton<ObjectPoolManager>.Instance.Pull(EUIPrefabType.UnitHpBar).GetComponent<HpBar>();
         unit.transform.position = _worldPosition;
         hpBar.SetPosition(unit.transform.position);
         unit.GetComponent<Unit>().HpBar = hpBar;
-
 
         MapManager.Instance.RegisterTower(_cell, unit);
         SimpleSingleton<MapUnitManager>.Instance.AddUnit(_cell, unit.GetComponent<Unit>());

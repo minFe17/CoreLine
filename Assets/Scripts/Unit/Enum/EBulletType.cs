@@ -13,5 +13,6 @@ public enum EBulletType
     SmallMeteor,
     Cannonball,
     ExplosionBullet,
+    ChainThunder,
     Max
 }

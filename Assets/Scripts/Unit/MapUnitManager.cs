@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapUnitManager : MonoBehaviour
+public class MapUnitManager
 {
     Dictionary<Vector3Int, Unit> _unitDict = new Dictionary<Vector3Int, Unit>();
 

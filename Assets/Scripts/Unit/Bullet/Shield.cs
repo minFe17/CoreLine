@@ -5,6 +5,7 @@ public class Shield : Bullet
 {
     List<Monster> _monsterList = new List<Monster>();
     int _count;
+    float _hitDistance = 0.5f;
 
     public void Init(List<Monster> monsterList, int damage)
     {
@@ -15,8 +16,6 @@ public class Shield : Bullet
 
     void NextTarget()
     {
-        Debug.Log($"count : {_count}");
-
         _count++;
         if (_count >= _monsterList.Count-1)
         {
@@ -34,19 +33,21 @@ public class Shield : Bullet
             }
             _count++;
         }
-
         Remove();
     }
 
-    // 트리거 체크 X 
-    // 트리거 체크는 데미지만 주던가 하지말고
-    // 거리 가까운지 체크?
-    protected override void CheckTrigger(Collider2D collision)
+    protected override void Move()
     {
-        if (collision.gameObject == _target.gameObject)
+        base.Move();
+
+        if (_target != null)
         {
-            _target.TakeDamage(_damage);
-            NextTarget();
+            float distance = Vector3.Distance(transform.position, _target.transform.position);
+            if (distance <= _hitDistance)
+            {
+                _target.TakeDamage(_damage);
+                NextTarget();
+            }
         }
     }
 }

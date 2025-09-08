@@ -9,7 +9,7 @@ public class GunnerAttack : AttackBase
 
     public override void Attack()
     {
-        if (_unit.TargetList[0] == null)
+        if (_unit.TargetList.Count == 0)
             return;
 
         if(_unit is TowerUnit unit)

@@ -14,17 +14,20 @@ public sealed class Monster : MonoBehaviour
     private Collider2D _col;
     private HitFlashTest _hitFlash;
     private HealthComponent _health;
+    private ThorEffect _thorEffect;
 
     private float _dieDeactivateDelay = 1.8f;
-
+    private float _thorTimer = 0f;
     
     private string _moveBool = "isMoving";
     private string _attackTrigger = "Attack";
     private string _dieTrigger = "Die";
     private string _attackStateName = "Attack";
     private bool _attackLocked = false;
+    private bool _inThorEffect = false;
 
- 
+
+
     private bool _deathStarted = false;
 
     public bool IsDead
@@ -135,6 +138,7 @@ public sealed class Monster : MonoBehaviour
                 _animator.speed = clamped;
             }
         }
+        CheckThorEffect();
     }
 
     public void SetFlip(Vector3 delta)
@@ -191,6 +195,34 @@ public sealed class Monster : MonoBehaviour
     {
         if (_deathStarted) { return; }
         StartCoroutine(DieSequence());
+    }
+
+    private void CheckThorEffect()
+    {
+        if (_inThorEffect && _thorEffect != null)
+        {
+            _thorTimer += Time.deltaTime;
+
+            if (_thorTimer >= _thorEffect.DamageInterval)
+            {
+                TakeDamage(_thorEffect.Damage);
+                _thorTimer = 0f;
+            }
+        }
+    }
+
+    public void EnterThorEffect(ThorEffect effect)
+    {
+        _thorEffect = effect;
+        _inThorEffect = true;
+        _thorTimer = 0f;
+        TakeDamage(effect.Damage); 
+    }
+
+    public void ExitThorEffect()
+    {
+        _inThorEffect = false;
+        _thorEffect = null;
     }
 
     private IEnumerator DieSequence()

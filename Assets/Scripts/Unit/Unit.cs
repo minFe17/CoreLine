@@ -44,6 +44,11 @@ public class Unit : MonoBehaviour
 
     public virtual void Die()
     {
+        Remove();
+    }
+
+    public virtual void Remove()
+    {
         UnregisterCell();
         MonoSingleton<ObjectPoolManager>.Instance.Push(EUIPrefabType.UnitHpBar, _hpBar.gameObject);
     }

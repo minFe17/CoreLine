@@ -24,6 +24,11 @@ public class FusionUnit : Unit
     {
         base.Die();
         SimpleSingleton<MapUnitManager>.Instance.AddDieUnit();
+    }
+
+    public override void Remove()
+    {
+        base.Remove();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
     }
 }

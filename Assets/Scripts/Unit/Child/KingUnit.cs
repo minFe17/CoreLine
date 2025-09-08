@@ -27,6 +27,6 @@ public class KingUnit : Unit
     {
         base.Die();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
-        //GAmeOver
+        // 게임오버
     }
 }

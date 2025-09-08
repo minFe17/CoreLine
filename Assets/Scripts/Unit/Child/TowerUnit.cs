@@ -12,11 +12,13 @@ public class TowerUnit : Unit
 
     int _level;
     int _originalLayer;
+    int _unitTotalCost;
 
     public event Action OnUpgrade;
 
     public EUnitType UnitType { get => _unitType; }
     public int Level { get => _level; }
+    public int UnitTotalCost { get => _unitTotalCost; }
 
     public bool IsMaxLevel() => _level >= _levelUnit.Count - 1;
 
@@ -28,14 +30,12 @@ public class TowerUnit : Unit
         _unitStateData = _data.UnitState;
         _currentHp = _unitStateData.HP;
         _isDie = false;
+        _unitTotalCost = _data.Cost;
     }
 
-    // Test
     void Update()
     {
         LookTarget();
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-            TakeDamage(30);
     }
 
     public override void ClickUnit()
@@ -53,8 +53,13 @@ public class TowerUnit : Unit
     {
         base.Die();
         SimpleSingleton<MapUnitManager>.Instance.AddDieUnit();
+    }
+
+    public override void Remove()
+    {
+        base.Remove();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
-        if(SimpleSingleton<AttackRangeManager>.Instance.IsSameUnit(this))
+        if (SimpleSingleton<AttackRangeManager>.Instance.IsSameUnit(this))
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
         if (UnitUI.Unit == this)
             UnitUI.Close();
@@ -74,6 +79,7 @@ public class TowerUnit : Unit
     void UpgradeCharacter()
     {
         _data = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level];
+        _unitTotalCost += _data.Cost;
         _unitStateData = _data.UnitState;
         _animator = _levelUnit[_level].GetComponent<Animator>();
 
@@ -113,6 +119,10 @@ public class TowerUnit : Unit
 
     public void Upgrade()
     {
+        int cost = SimpleSingleton<UnitDataList>.Instance.GetUnitData(_unitType).LevelData[_level+1].Cost;
+        if (!CostManager.Instance.TrySpend(CostManager.CostType.Unit, cost))
+            return;
+
         if (IsMaxLevel())
             return;
 

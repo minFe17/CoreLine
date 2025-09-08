@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
-public class PrefabManager : MonoBehaviour
+public class PrefabManager
 {
     Dictionary<EPrefabType, PrefabLoadBase> _prefabDict;
 

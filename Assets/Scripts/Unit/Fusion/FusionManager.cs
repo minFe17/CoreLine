@@ -3,16 +3,20 @@ using System.Linq;
 using UnityEngine;
 using Utils;
 
-public class FusionManager : MonoBehaviour
+public class FusionManager
 {
     // ╫л╠шео
     Dictionary<EUnitType, List<TowerUnit>> _fusionableUnit = new Dictionary<EUnitType, List<TowerUnit>>();
     List<EUnitType> _targetTypeList = new List<EUnitType>();
 
     TowerUnit _baseUnit;
+
+    int _cost = 100;
+    int _costIncrease = 50;
     bool _isFusionMode;
 
     public TowerUnit BaseUnit { get => _baseUnit; }
+    public int Cost { get => _cost; }
     public bool IsFusionMode { get => _isFusionMode; }
 
     bool TryGetFusionableTargetTypes(EUnitType selectedType, out List<EUnitType> targetTypes)
@@ -161,5 +165,6 @@ public class FusionManager : MonoBehaviour
 
         NotifyFusion(false);
         _isFusionMode = false;
+        _cost += _costIncrease;
     }
 }

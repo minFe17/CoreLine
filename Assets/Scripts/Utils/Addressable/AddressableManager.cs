@@ -1,12 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Utils
 {
-    public class AddressableManager : MonoBehaviour
+    public class AddressableManager
     {
         void LoadAsset<T>(string address, Action<T> callback)
         {
