@@ -135,5 +135,50 @@
         },
         "ParentsId":
         []
+    },
+    {
+        "Id":"RangeHeal",
+        "Info" : "타워 체력 회복(범위형)",
+        "LaboratoryType" : "Defense",
+        "Cost" : 1000,
+        "Effect":
+        {
+            "Value" : 50,
+            "ValueType" : "Sub",
+            "TargetType": "Unit",
+            "TargetStatus":"Skill"
+        },
+        "ParentsId":
+        []
+    },
+    {
+        "Id":"ArrowRain",
+        "Info" : "몬스터한테 데미지(범위형)",
+        "LaboratoryType" : "Attack",
+        "Cost" : 1000,
+        "Effect":
+        {
+            "Value" : 50,
+            "ValueType" : "Sub",
+            "TargetType": "Monster",
+            "TargetStatus":"Skill"
+        },
+        "ParentsId":
+        []
+    },
+    {
+        "Id":"MonsterSlow",
+        "Info" : "몬스터 이동속도 감소(범위형)",
+        "LaboratoryType" : "Utillity",
+        "Cost" : 1000,
+        "Effect":
+        {
+            "Value" : 3,
+            "ValueType" : "Sub",
+            "TargetType": "Monster",
+            "TargetStatus":"Skill"
+        },
+        "ParentsId":
+        []
     }
 ]
