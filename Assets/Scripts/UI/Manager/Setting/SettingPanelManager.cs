@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SettingPanelManager : MonoBehaviour
 {
     private PoolingManager _selectableUnitButtons;
     private PoolingManager _selectedUnitButtons;
     private List<UnlockedUnit> _selectableUnitDatas;
-    private Dictionary<EUnitType, UnlockedUnit> _selectedUnitDatas;
+    private List<UnlockedUnit> _selectedUnitDatas = new();
 
     private GameObject _content;
     private GameObject _seleced;
@@ -33,13 +34,14 @@ public class SettingPanelManager : MonoBehaviour
     private void OnEnable()
     {
         UpdateSelectableButtons();
-        EventManager.Instance.Subscribe("AddSelectedUnit", UpdateSelectedButtons);
-        EventManager.Instance.Subscribe("DeleteSelectedUnit", UpdateSelectedButtons);
+
+        EventManager.Instance.Subscribe("AddSelectedUnit", AddSelected);
+        EventManager.Instance.Subscribe("DeleteSelectedUnit", RemoveSelected);
     }
     private void OnDisable()
     {
-        EventManager.Instance.UnSubscribe("AddSelectedUnit", (Action)UpdateSelectedButtons);
-        EventManager.Instance.UnSubscribe("DeleteSelectedUnit", (Action)UpdateSelectedButtons);
+        EventManager.Instance.UnSubscribe("AddSelectedUnit", (Action)AddSelected);
+        EventManager.Instance.UnSubscribe("DeleteSelectedUnit", (Action)RemoveSelected);
     }
     private void CreateSelectableButtons()
     {
@@ -55,12 +57,15 @@ public class SettingPanelManager : MonoBehaviour
     }
     private void CreateSelectedButtons()
     {
-        _selectedUnitDatas = UnitManager.Instance.SettingUnits;
+        foreach(var unit in UnitManager.Instance.SettingUnits)
+        {
+            _selectedUnitDatas.Add(unit.Value);
+        }
         _selectedUnitButtons = new PoolingManager("UI/Prefabs/Button/Setting/SelectedUnitButton", _seleced, 10);
         foreach (var key in _selectedUnitDatas)
         {
             SelectUnitButton btn = _selectedUnitButtons.Pop().GetComponent<SelectUnitButton>();
-            btn.Data = UnitManager.Instance.GetInventoryData(key.Key);
+            btn.Data = UnitManager.Instance.GetInventoryData(key.UnitType);
         }
     }
     private void UpdateSelectableButtons()
@@ -78,18 +83,36 @@ public class SettingPanelManager : MonoBehaviour
             btn.Data = UnitManager.Instance.GetInventoryData(_selectableUnitDatas[i].UnitType);
         }
     }
-    private void UpdateSelectedButtons() //이거 정렬해주자 (레벨별로? 아니면 선택가능하게?)
+    private void UpdateSelectedButtons() 
     {
-        //아니면 해제하는애 빼주고, 추가해주고 이벤트로 등록해버릴까??
         foreach (GameObject obj in _selectedUnitButtons.GetAllToActiveTrue())
         {
             SelectUnitButton btn = obj.GetComponent<SelectUnitButton>();
             btn.gameObject.SetActive(false);
-        }
-        foreach (var key in _selectedUnitDatas)
+        }//전부 꺼버리고 리스트대로 다시 켜주기
+
+        for(int i=0;i< _selectedUnitDatas.Count;i++)
         {
             SelectUnitButton btn = _selectedUnitButtons.Pop().GetComponent<SelectUnitButton>();
-            btn.Data = UnitManager.Instance.GetInventoryData(key.Key);
+            btn.Data = UnitManager.Instance.GetInventoryData(_selectedUnitDatas[i].UnitType);
+            btn.transform.SetSiblingIndex(i);
         }
+
+    }
+    private void AddSelected()
+    {
+        _selectedUnitDatas.Add(UnitManager.Instance.GetUnlockedUnit(UnitManager.Instance.ChoiceUnit.UnitType));
+        UpdateSelectedButtons();
+    }
+    private void RemoveSelected()
+    {
+        for (int i = 0; i < _selectedUnitDatas.Count; i++)
+        {
+            if (_selectedUnitDatas[i].UnitType == UnitManager.Instance.ChoiceUnit.UnitType)
+            {
+                _selectedUnitDatas.RemoveAt(i);
+            }
+        }
+        UpdateSelectedButtons();
     }
 }

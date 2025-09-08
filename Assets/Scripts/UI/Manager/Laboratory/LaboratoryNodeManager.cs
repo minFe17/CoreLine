@@ -125,7 +125,7 @@ public class LaboratoryNodeManager : MonoBehaviour
         float xSpacing = 350f;
         float ySpacing = 350f;
 
-        foreach (var kvp in _nodes) 
+        foreach (var kvp in _nodes)
         {
             List<LaboratoryNode> nodeList = kvp.Value;
 
@@ -145,50 +145,31 @@ public class LaboratoryNodeManager : MonoBehaviour
                 levelGroups[level].Add(node);
                 rects[node.Data.Id] = node.GetComponent<RectTransform>();
             }
+
             Dictionary<string, Vector2> finalPositions = new();
 
+            // 레벨 순서대로 배치
             foreach (var level in levelGroups.Keys.OrderBy(l => l))
             {
                 List<LaboratoryNode> nodesInLevel = levelGroups[level];
 
-                Dictionary<LaboratoryNode, float> preferredY = new();
-
-                foreach (var node in nodesInLevel)
+                // Y 정렬 안 하고 그냥 위에서 아래로만 고정 배치
+                for (int i = 0; i < nodesInLevel.Count; i++)
                 {
-                    float totalY = 0f;
-                    int count = 0;
-
-                    foreach (var parentId in node.Data.ParentsId)
-                    {
-                        if (finalPositions.TryGetValue(parentId, out Vector2 parentPos))
-                        {
-                            totalY += parentPos.y;
-                            count++;
-                        }
-                    }
-
-                    float avgY = count > 0 ? totalY / count : 0f;
-                    preferredY[node] = avgY;
-                }
-
-                var sortedNodes = nodesInLevel.OrderBy(n => preferredY[n]).ToList();
-
-                int mid = sortedNodes.Count / 2;
-                for (int i = 0; i < sortedNodes.Count; i++)
-                {
-                    int offsetIndex = i - mid;
-                    if (sortedNodes.Count % 2 == 0 && i >= mid) offsetIndex += 1; // 짝수일 때 균형 맞추기
+                    LaboratoryNode node = nodesInLevel[i];
 
                     float x = _startPosition.x + level * xSpacing;
-                    float y = _startPosition.y + -offsetIndex * ySpacing;
+                    float y = _startPosition.y - i * ySpacing;
 
-                    RectTransform rt = rects[sortedNodes[i].Data.Id];
+                    RectTransform rt = rects[node.Data.Id];
                     rt.anchoredPosition = new Vector2(x, y);
-                    finalPositions[sortedNodes[i].Data.Id] = new Vector2(x, y);
+
+                    finalPositions[node.Data.Id] = new Vector2(x, y);
                 }
             }
         }
     }
+
 
     private Dictionary<string, int> CalculateLevels(List<LaboratoryNode> sorted)
     {
