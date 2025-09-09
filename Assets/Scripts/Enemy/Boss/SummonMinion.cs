@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 
 public class SummonMinions : BossSkillBase
 {
@@ -25,20 +23,21 @@ public class SummonMinions : BossSkillBase
     // Perform()만 구현하면 된다.
     protected override void Perform(BossController controller)
     {
-        if (_map == null || _minionPrefab == null) return;
+        if (_map == null || _minionPrefab == null) { return; }
 
-        // 1) 후보 좌표 뽑기 (필요하면 텔레그래프 표시)
-        var targets = PickSpawnCells(_count);
+        List<Vector2Int> targets = PickSpawnCells(_count);
+        if (targets == null || targets.Count == 0) { return; }
 
-        
-        foreach (var rc in targets)
+        MarkCastSuccess();
+
+        foreach (Vector2Int rc in targets)
         {
             Vector3 world = _map.CellToWorld(rc.x, rc.y);
             world.z = 0f;
 
-            if (_telegraphPrefab)
+            if (_telegraphPrefab != null)
             {
-                var g = Object.Instantiate(_telegraphPrefab, world, Quaternion.identity);
+                GameObject g = Object.Instantiate(_telegraphPrefab, world, Quaternion.identity);
                 SetupSortingLayer(g, _telegraphSortingLayer, _telegraphOrderInLayer);
                 Object.Destroy(g, _telegraphLifetime);
             }
@@ -49,6 +48,7 @@ public class SummonMinions : BossSkillBase
             }
         }
     }
+
 
     private List<Vector2Int> PickSpawnCells(int want)
     {
@@ -100,4 +100,15 @@ public class SummonMinions : BossSkillBase
         var canvas = go.GetComponentInChildren<Canvas>(true);
         if (canvas) { canvas.sortingLayerName = layer; canvas.sortingOrder = order; }
     }
+
+    public override bool CanCast(BossController controller)
+    {
+        if (_map == null) { return false; }
+        if (_minionPrefab == null) { return false; }
+
+        // 최소 1곳이라도 조건을 만족하는 셀 있으면 허용
+        List<Vector2Int> one = PickSpawnCells(1);
+        return one.Count > 0;
+    }
+
 }

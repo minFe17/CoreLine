@@ -21,21 +21,25 @@ public sealed class StunUnit : BossSkillBase
 
     protected override void Perform(BossController controller)
     {
-        if (_map == null) return;
+        if (_map == null) { return; }
 
         List<Candidate> candidates = CollectAliveTowers();
-        if (candidates.Count == 0) return;
+        if (candidates.Count == 0) { return; }
 
         int k = Mathf.Clamp(_targetsToStun, 0, candidates.Count);
-        if (k == 0) return;
+        if (k == 0) { return; }
 
         SelectKDistinctInPlace(candidates, k);
+
+
+        MarkCastSuccess();
 
         for (int i = 0; i < k; i++)
         {
             StartCoroutine(DoStunSequence(candidates[i], controller));
         }
     }
+
 
     private static void SelectKDistinctInPlace<T>(List<T> list, int k)
     {
@@ -76,7 +80,7 @@ public sealed class StunUnit : BossSkillBase
             float preLife = (_preVfxLifetimeOverride > 0f) ? _preVfxLifetimeOverride : Mathf.Max(0.01f, _preDelay);
             preGo = SpawnVfxAtRaw(
                 _preVfxPrefab,
-                pick.WorldPos + _preWorldOffset,  
+                pick.WorldPos + _preWorldOffset,
                 preLife,
                 layerId,
                 order + 9
@@ -95,7 +99,7 @@ public sealed class StunUnit : BossSkillBase
             float life = (_vfxLifetimeOverride > 0f) ? _vfxLifetimeOverride : _stunDuration;
             SpawnVfxAtRaw(
                 _stunVfxPrefab,
-                pick.WorldPos + _worldOffset,     
+                pick.WorldPos + _worldOffset,
                 life,
                 layerId,
                 order + 10
@@ -164,5 +168,13 @@ public sealed class StunUnit : BossSkillBase
             prs[i].sortingLayerID = sortingLayerId;
             prs[i].sortingOrder = sortingOrder;
         }
+    }
+
+    public override bool CanCast(BossController controller)
+    {
+        if (_map == null) { return false; }
+        // 대상(살아있는 타워) 1개 이상 있으면 가능
+        List<Candidate> list = CollectAliveTowers();
+        return list.Count > 0;
     }
 }
