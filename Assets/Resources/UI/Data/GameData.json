@@ -10,8 +10,9 @@
         }
     ],
     "UnlockedLaboratoryId" : ["Attack_Num1","Defense_Skill"],
-    "PlayerMoney":0,
+    "PlayerMoney":10000,
     "PlayerGem":0,
+    "PlayerInfinityKey":0,
     "ClearStage":
     [
         {

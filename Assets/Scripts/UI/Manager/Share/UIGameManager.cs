@@ -18,7 +18,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         //UIManager.Instance.AddPanelStack(PanelStatus.InventoryPanel);
         //UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
         //UIManager.Instance.AddPanelStack(PanelStatus.LaboratoryPanel);
-        //UIManager.Instance.AddPanelStack(PanelStatus.PlayPanel);
+        //UIManager.Instance.AddPanelStack(PanelStatus.StorePanel);
     }
 
 }

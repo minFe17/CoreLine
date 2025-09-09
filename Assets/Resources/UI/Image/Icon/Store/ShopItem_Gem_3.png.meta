@@ -1,12 +1,5 @@
 fileFormatVersion: 2
-guid: 95d4f6b25ee3342ef8d91ad93e1248d6
-AssetOrigin:
-  serializedVersion: 1
-  productId: 318658
-  packageName: GUI Pro - Fantasy Hero
-  packageVersion: 1.0.2
-  assetPath: Assets/Layer Lab/GUI Pro-FantasyHero/ResourcesData/Sptites/Components/Icon_ItemIcons/Original/ItemIcon_Skill_DamageEnemy.png
-  uploadId: 755147
+guid: a3de4703b7ea6af49adbfc7cd9f96950
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}

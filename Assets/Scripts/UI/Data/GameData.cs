@@ -8,6 +8,7 @@ public class GameData
     public List<string> UnlockedLaboratoryId;
     public int PlayerMoney;
     public int PlayerGem;
+    public int PlayerInfinityKey;
     public List<ClearStage> ClearStage;
 }
 [System.Serializable]
