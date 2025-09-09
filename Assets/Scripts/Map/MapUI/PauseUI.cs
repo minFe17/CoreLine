@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using Utils;
 
 [DefaultExecutionOrder(-10)]
 public class PauseUI : MonoBehaviour
@@ -103,6 +104,8 @@ public class PauseUI : MonoBehaviour
     public void RestartScene()
     {
         Resume();
+        SimpleSingleton<MapUnitManager>.Instance.RestartGame();
+        SimpleSingleton<MediatorManager>.Instance.ClearAll();
         var active = SceneManager.GetActiveScene();
         SceneManager.LoadScene(active.buildIndex);
         CostManager.Instance.SetUnitValue(0);

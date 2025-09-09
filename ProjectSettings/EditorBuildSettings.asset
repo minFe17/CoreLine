@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 0
+    path: Assets/Scenes/MonsterScene.unity
+    guid: e176a63cc3e35524da0b26e43a3e1849
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 66fe8d5825b2ac842ab3a1f6c91d3abf, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

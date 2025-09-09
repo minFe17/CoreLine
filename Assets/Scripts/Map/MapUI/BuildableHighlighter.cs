@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems; // UI 위 클릭 무시용
 
@@ -64,10 +63,11 @@ public class BuildableHighlighter : MonoBehaviour
     private float _hideAt = -1f;
     [SerializeField] bool buildablesOnlyAfterBasePlaced = true; // 베이스 전: 비활성, 후: 활성
 
+    public void SetCamera(Camera cam) => _cam = cam;
+
     private void Awake()
     {
         _map = MapManager.Instance;
-        _cam = Camera.main;
 
         var shader = Shader.Find("Sprites/Default");
         _baseMat = new Material(shader); _baseMat.color = _baseColor;

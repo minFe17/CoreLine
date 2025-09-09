@@ -14,7 +14,7 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _test = new List<EUnitType>() { EUnitType.Hammer, EUnitType.ThunderWizard, EUnitType.Gunner, EUnitType.Archer, EUnitType.Assassin, EUnitType.Wizard };
+    List<EUnitType> _unitList = new List<EUnitType>() { EUnitType.Hammer, EUnitType.ThunderWizard, EUnitType.Gunner, EUnitType.Archer, EUnitType.Assassin, EUnitType.Wizard };
 
     public GameState()
     {
@@ -68,7 +68,7 @@ public class GameState : IState, IMediatorEvent
             CreateUI();
         _isSelectTile = true;
         _unitUI.Close();
-        _buildUI.OpenAtCell(_cell, _test);
+        _buildUI.OpenAtCell(_cell, _unitList);
     }
 
     void ShowMapInteractUI()
@@ -132,7 +132,6 @@ public class GameState : IState, IMediatorEvent
     #region Interface
     void IState.Loop()
     {
-
         if (Input.GetMouseButtonDown(0))
         {
             if (_isSelectTile)

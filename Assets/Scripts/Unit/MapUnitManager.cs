@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MapUnitManager
 {
+    // ╫л╠шео
     Dictionary<Vector3Int, Unit> _unitDict = new Dictionary<Vector3Int, Unit>();
 
     KingUnit _king;
@@ -33,5 +35,19 @@ public class MapUnitManager
     public void AddDieUnit()
     {
         _unitDieCount++;
+    }
+
+    public void RestartGame()
+    {
+        _unitDieCount = 0;
+
+        foreach (Unit unit in _unitDict.Values.ToList())
+            unit.Remove();
+        _unitDict.Clear();
+
+        if (_king == null)
+            return;
+        _king.Remove();
+        _king = null;
     }
 }

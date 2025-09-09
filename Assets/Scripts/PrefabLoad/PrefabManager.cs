@@ -15,6 +15,8 @@ public class PrefabManager
             {EPrefabType.UI, new UIPrefabLoad()},
             {EPrefabType.SpriteAtlas, new SpriteAtlasPrefabLoad() },
             {EPrefabType.Bullet, new BulletPrefabLoad() },
+            {EPrefabType.Camera, new CameraPrefabLoad() },
+            {EPrefabType.Data, new DataPrefabLoad()},
         };
     }
 

@@ -26,7 +26,12 @@ public class KingUnit : Unit
     public override void Die()
     {
         base.Die();
-        MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
         // 게임오버
+    }
+
+    public override void Remove()
+    {
+        base.Remove();
+        MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
     }
 }

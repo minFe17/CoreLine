@@ -6,5 +6,7 @@ public enum EPrefabType
     UI,
     SpriteAtlas,
     Bullet,
+    Camera,
+    Data,
     Max,
 }
