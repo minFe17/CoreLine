@@ -17,9 +17,15 @@ public sealed class MonsterManager : MonoBehaviour
     [SerializeField] private bool _spawnBossOnBase = true;
     private bool _bossSpawned = false;
 
-    [Header("Wave")]
+    [Header("Wave (Manual / Auto)")]
+    [Tooltip("수동 CSV 지정(우선 적용). 비어 있으면 Stage Id로 자동 로드")]
     [SerializeField] private TextAsset _csvWaveFile;
     [SerializeField] private bool _runCsvOnStart = false;
+
+    [Tooltip("SelectedStage.Id로 Resources/<root>/<Id>.csv 자동 로드")]
+    [SerializeField] private bool _autoLoadStageCsv = true;
+    [Tooltip("CSV 루트(Resources 하위). 예: Monster/Table → Resources/Monster/Table/<Id>.csv")]
+    [SerializeField] private string _csvResourcesRoot = "Monster/Table";
 
     [Header("Pooling / Prewarm")]
     [Tooltip("게임 시작 시 CSV를 기준으로 미리 생성할지 여부")]
@@ -73,20 +79,32 @@ public sealed class MonsterManager : MonoBehaviour
         if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
         if (_route == null) { _route = FindAnyObjectByType<RouteManager>(); }
 
-        if (_csvWaveFile != null && _prewarmOnStart)
+        // 1) CSV 결정: 수동 지정 우선, 없으면 자동 로드
+        TextAsset csv = _csvWaveFile;
+        if (csv == null && _autoLoadStageCsv)
         {
-            StartPrewarmFromCsv(_csvWaveFile, _defaultPrewarmCount);
+            csv = ResolveStageCsvFromSelected();
         }
 
-        if (_runCsvOnStart && _csvWaveFile != null)
+        // 2) 프리웜
+        if (_prewarmOnStart && csv != null)
         {
-            StartScheduleFromCsv(_csvWaveFile);
+            StartPrewarmFromCsv(csv, _defaultPrewarmCount);
+        }
+
+        // 3) 웨이브 실행
+        if (_runCsvOnStart && csv != null)
+        {
+            StartScheduleFromCsv(csv);
+        }
+        else if (_runCsvOnStart && csv == null)
+        {
+            Debug.LogWarning("[MonsterManager] 시작 시 로드할 CSV를 찾지 못했습니다. (_csvWaveFile 비었고, Stage Id 기반 자동 로드 실패)");
         }
     }
 
     private void LateUpdate()
     {
-        // OnDisable에서 들어온 반환 요청을 "다음 프레임"에 안전하게 처리
         while (_pendingReturn.Count > 0)
         {
             PooledMonster pm = _pendingReturn.Dequeue();
@@ -95,13 +113,42 @@ public sealed class MonsterManager : MonoBehaviour
             MonsterMover m = pm.GetComponent<MonsterMover>();
             if (m == null || pm.PrefabKey == null) { continue; }
 
-            InternalReturn(m, pm.PrefabKey, true); // 이미 비활성화 상태
+            InternalReturn(m, pm.PrefabKey, true);
         }
     }
 
     /* =========================
-     *  스케줄 / 웨이브
+     *  CSV 자동 로드 (Resources/Monster/Table/<StageId>.csv)
      * ========================= */
+    private TextAsset ResolveStageCsvFromSelected()
+    {
+        NormalStageManager nsm = null;
+        try { nsm = NormalStageManager.Instance; } catch { }
+
+        if (nsm == null)
+        {
+            Debug.LogWarning("[MonsterManager] NormalStageManager 인스턴스를 찾을 수 없습니다.");
+            return null;
+        }
+
+        NormalStageData stage = nsm.SelectedStage;
+        if (string.IsNullOrEmpty(stage.Id))
+        {
+            Debug.LogWarning("[MonsterManager] SelectedStage.Id 가 비어있습니다. SelectStage 이벤트로 스테이지를 먼저 선택하세요.");
+            return null;
+        }
+
+        string root = _csvResourcesRoot != null ? _csvResourcesRoot.Trim().TrimEnd('/', '\\') : string.Empty;
+        string path = string.IsNullOrEmpty(root) ? stage.Id : (root + "/" + stage.Id);
+
+        TextAsset csv = Resources.Load<TextAsset>(path);
+        if (csv == null)
+        {
+            Debug.LogWarning("[MonsterManager] CSV 로드 실패: Resources/" + path + ".csv 가 존재해야 합니다.");
+            return null;
+        }
+        return csv;
+    }
 
     public void StartScheduleFromCsv(TextAsset csvFile)
     {
@@ -288,7 +335,7 @@ public sealed class MonsterManager : MonoBehaviour
                     stack.Push(created);
                 }
                 need -= batch;
-                yield return null; // 프레임 분할 생성(스파이크 방지)
+                yield return null;
             }
         }
         _prewarmCo = null;
@@ -296,7 +343,7 @@ public sealed class MonsterManager : MonoBehaviour
 
     private MonsterMover CreateOneForPool(MonsterMover prefab)
     {
-        Vector3 off = new Vector3(10000f, 10000f, 0f); // 화면 밖
+        Vector3 off = new Vector3(10000f, 10000f, 0f);
         MonsterMover m = Instantiate(prefab, off, Quaternion.identity);
 
         PooledMonster pooled = m.gameObject.GetComponent<PooledMonster>();
@@ -304,14 +351,12 @@ public sealed class MonsterManager : MonoBehaviour
         pooled.Manager = this;
         pooled.PrefabKey = prefab;
 
-        // 애니/파티클 워밍업(첫 사용 시 끊김 완화)
         Animator animator = m.GetComponentInChildren<Animator>(true);
         if (animator != null) { animator.Rebind(); animator.Update(0f); }
 
         ParticleSystem ps = m.GetComponentInChildren<ParticleSystem>(true);
         if (ps != null) { ps.Simulate(0f, true, true); ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); }
 
-        // OnDisable 재진입 방지(프리웜용 비활성화는 콜백 무시)
         pooled.SuppressReturnOnce();
         m.gameObject.SetActive(false);
         m.transform.SetParent(_poolContainer, false);
@@ -341,7 +386,7 @@ public sealed class MonsterManager : MonoBehaviour
         if (!alreadyInactive && m.gameObject.activeSelf)
         {
             PooledMonster pooled = m.GetComponent<PooledMonster>();
-            if (pooled != null) { pooled.SuppressReturnOnce(); } // OnDisable에서 다시 반환되지 않게
+            if (pooled != null) { pooled.SuppressReturnOnce(); }
             m.gameObject.SetActive(false);
         }
 

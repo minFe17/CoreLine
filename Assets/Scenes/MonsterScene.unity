@@ -1220,9 +1220,12 @@ MonoBehaviour:
   invalidPlacementPrefab: {fileID: 0}
   playerBasePrefab: {fileID: 0}
   startSkillCurrency: 999
-  addRangeHeal: 1
+  addTestSkills: 1
   rangeHealCost: 10
   rangeHealValue: 50
+  clearPanel: {fileID: 0}
+  rewardItemPrefab: {fileID: 0}
+  lobbySceneName: LobyScene
 --- !u!4 &515757424
 Transform:
   m_ObjectHideFlags: 0
@@ -2847,6 +2850,8 @@ MonoBehaviour:
   _spawnBossOnBase: 1
   _csvWaveFile: {fileID: 4900000, guid: 86b5c54b7b385fd4f98847ed43bda59b, type: 3}
   _runCsvOnStart: 1
+  _autoLoadStageCsv: 1
+  _csvResourcesRoot: Monster/Table
   _prewarmOnStart: 1
   _defaultPrewarmCount: 8
   _prewarmPerFrame: 8
