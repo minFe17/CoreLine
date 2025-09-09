@@ -1,21 +1,40 @@
 using UnityEngine;
 
-public class PooledMonster : MonoBehaviour
+[DisallowMultipleComponent]
+public sealed class PooledMonster : MonoBehaviour
 {
-    [HideInInspector] public MonsterManager Manager;
-    [HideInInspector] public MonsterMover PrefabKey; 
+    public MonsterManager Manager { get; set; }
+    public MonsterMover PrefabKey { get; set; }
 
-    private Monster _owner;
+    private bool _suppressNextDisable = false;
+    private bool _isQuitting = false;
 
-    private void Awake() => _owner = GetComponent<Monster>();
+    public void SuppressReturnOnce()
+    {
+        _suppressNextDisable = true;
+    }
+
+    private void OnApplicationQuit()
+    {
+        _isQuitting = true;
+    }
 
     private void OnDisable()
     {
-        // 죽음/수동 비활성 모두 여기로 들어옴
-        if (Manager && PrefabKey)
+        if (_isQuitting) { return; }
+
+        // 프리웜/수동 디스폰에서 호출되는 OnDisable 재진입 차단
+        if (_suppressNextDisable)
         {
-            var mover = GetComponent<MonsterMover>();
-            if (mover) Manager.DespawnToPool(mover, PrefabKey);
+            _suppressNextDisable = false; // 1회성 억제
+            return;
+        }
+
+        if (Manager != null && PrefabKey != null)
+        {
+            // 비활성화 "중"에는 SetParent/SetActive 등을 만지지 않고,
+            // 다음 프레임에 MonsterManager가 안전하게 반환 처리하도록 위임
+            Manager.EnqueueReturn(this);
         }
     }
 }

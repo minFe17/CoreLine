@@ -120,7 +120,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 8
   m_Sprite: {fileID: 874130036, guid: d48fda0fd5f3eeb468f6d27f248fc6a1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -181,6 +181,7 @@ MonoBehaviour:
   _map: {fileID: 0}
   _moveSpeed: 1.5
   _arriveEps: 0.02
+  _minMoveSpeed: 0.5
   _attackRangeCell: 1
   _useDiag: 0
   _attackCooldown: 1

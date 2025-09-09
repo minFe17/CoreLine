@@ -1,0 +1,10 @@
+﻿MonsterId,Prefab,Count,Interval,Delay
+Golem,Monster/Prefab/Golem,1,0,10
+Block,Monster/Prefab/Block,1,0,10
+Slime,Monster/Prefab/Slime,1,0,10
+Ghost,Monster/Prefab/Ghost,1,0,10
+Planet,Monster/Prefab/Planet,1,0,10
+Tree,Monster/Prefab/Tree,1,0,10
+Wolf,Monster/Prefab/Wolf,1,0,10
+Yeti,Monster/Prefab/Yeti,1,0,10
+Skeleton,Monster/Prefab/Skeleton,1,0,10

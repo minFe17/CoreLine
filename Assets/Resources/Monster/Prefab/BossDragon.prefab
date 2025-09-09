@@ -24,7 +24,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &9011721191909806158
 Transform:
   m_ObjectHideFlags: 0
@@ -196,6 +196,8 @@ MonoBehaviour:
   - {fileID: 4865067138427358555}
   - {fileID: -4323036268612981715}
   - {fileID: 5915600854711595613}
+  _lockWhileCasting: 1
+  _globalNoCastSeconds: 5
 --- !u!114 &4865067138427358555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,6 +215,9 @@ MonoBehaviour:
   _castTime: 0.6
   _postDelay: 0.2
   _fxPrefab: {fileID: 4877924698052598717, guid: 57dab199213584444b6e19d336a040ec, type: 3}
+  _fxLifetimeOverride: 2
+  _fxSortingLayer: Effects
+  _fxSortingOrder: 120
   _sfx: {fileID: 0}
 --- !u!114 &5915600854711595613
 MonoBehaviour:
@@ -277,7 +282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d051b0f561aaae64d9b4899c02e49beb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _delaySeconds: 10
+  _delaySeconds: 60
   _controller: {fileID: 0}
   _map: {fileID: 0}
   _route: {fileID: 0}
