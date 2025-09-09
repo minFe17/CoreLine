@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class ClearPanelControl : MonoBehaviour
     private float _starSpacing = 200f;                 // -200 / 0 / +200
     private float _starYBetweenCenterAndTop = 0.72f;   // 0.5=중앙, 1.0=최상단
     private bool _autoRepositionOnResize = true;
-    private float _rewardSpacing = 200f;                // 보상 간격(작게)
+    private float _rewardSpacing = 200f;               // 보상 간격
 
     // Resources 경로
     private const string _starPrefabPath = "Reward/ClearStar"; // Resources/Reward/ClearStar.prefab
@@ -25,6 +26,22 @@ public class ClearPanelControl : MonoBehaviour
     private ContentSizeFitter _rewardCSF;
     private RectTransform _rewardsRoot;
 
+    // StarCondition: 텍스트/아이콘
+    private Transform _condRoot;
+    private TMP_Text _firstCondText, _secondCondText, _thirdCondText;
+    private GameObject _firstCondIcon, _secondCondIcon, _thirdCondIcon;
+
+    // Buttons
+    private Button _nextButton;         // ClearPanel/NextStageButton
+    private Button _lobbyButton;        // ClearPanel/ClearLobbyButton
+
+    // 이벤트(외부에서 구독)
+    public event Action NextStageRequested;
+    public event Action LobbyRequested;
+
+    // 현재 패널이 표시 중인 스테이지ID 저장
+    private string _currentStageId;
+
     // 수집된 StarUI
     private readonly List<StarUI> _stars = new List<StarUI>(4);
     private float _starStepWait = 0.55f;
@@ -36,6 +53,7 @@ public class ClearPanelControl : MonoBehaviour
         EnsureStars();      // 없으면 3개 생성
         RefreshStars();     // StarPos 밑 StarUI 자동 수집
         CenterRewards(_rewardSpacing); // 보상 줄 가운데+간격 세팅
+        gameObject.SetActive(false);   // 기본은 숨김
     }
 
     private void OnEnable()
@@ -43,17 +61,17 @@ public class ClearPanelControl : MonoBehaviour
         if (_autoRepositionOnResize) RepositionStars();
         StartCoroutine(CoRepositionAfterLayout());
     }
+
     private System.Collections.IEnumerator CoRepositionAfterLayout()
     {
-        // 레이아웃 강제 적용 후 한 프레임 대기 → 사이즈 확정
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRoot);
         LayoutRebuilder.ForceRebuildLayoutImmediate(_starGroup);
-        yield return null; // 다음 프레임
-
+        yield return null;
         Canvas.ForceUpdateCanvases();
         RepositionStars();
     }
+
     private void OnRectTransformDimensionsChange()
     {
         if (_autoRepositionOnResize && isActiveAndEnabled) RepositionStars();
@@ -87,7 +105,7 @@ public class ClearPanelControl : MonoBehaviour
             _rewardsRoot.pivot = new Vector2(0.5f, 0.5f);
             _rewardsRoot.anchoredPosition = Vector2.zero;
 
-            // RewardBack에 붙어 있던 레이아웃 컴포넌트는 제거(줄어드는 원인)
+            // RewardBack에 붙어 있던 레이아웃 제거(늘어남/줄어듦 방지)
             DestroyImmediate(_rewardBack.GetComponent<HorizontalLayoutGroup>());
             DestroyImmediate(_rewardBack.GetComponent<ContentSizeFitter>());
 
@@ -95,7 +113,7 @@ public class ClearPanelControl : MonoBehaviour
             _rewardHLG = _rewardsRoot.GetComponent<HorizontalLayoutGroup>();
             if (_rewardHLG == null) _rewardHLG = _rewardsRoot.gameObject.AddComponent<HorizontalLayoutGroup>();
             _rewardHLG.childAlignment = TextAnchor.MiddleCenter;
-            _rewardHLG.spacing = _rewardSpacing;      // 16~24 추천
+            _rewardHLG.spacing = _rewardSpacing;
             _rewardHLG.childControlWidth = true;
             _rewardHLG.childControlHeight = true;
             _rewardHLG.childForceExpandWidth = false;
@@ -110,15 +128,44 @@ public class ClearPanelControl : MonoBehaviour
             Transform tOutline = transform.Find("RewardBack/RewardOutLine");
             if (tOutline != null)
             {
-                LayoutElement le = tOutline.GetComponent<LayoutElement>();
-                if (le == null) le = tOutline.gameObject.AddComponent<LayoutElement>();
+                var le = tOutline.GetComponent<LayoutElement>() ?? tOutline.gameObject.AddComponent<LayoutElement>();
                 le.ignoreLayout = true;
-                // 데코가 뒤에 그려지도록 형제 순서 맨 앞(필요 시)
                 tOutline.SetSiblingIndex(0);
             }
         }
-    }
 
+        // StarCondition
+        Transform tCond = transform.Find("StarCondition");
+        if (tCond != null)
+        {
+            _condRoot = tCond;
+
+            Transform t = tCond.Find("FirstStarText"); if (t) _firstCondText = t.GetComponent<TMP_Text>();
+            t = tCond.Find("SecondStarText"); if (t) _secondCondText = t.GetComponent<TMP_Text>();
+            t = tCond.Find("ThirdStarText"); if (t) _thirdCondText = t.GetComponent<TMP_Text>();
+
+            t = tCond.Find("FirstStar"); if (t) _firstCondIcon = t.gameObject;
+            t = tCond.Find("SecondStar"); if (t) _secondCondIcon = t.gameObject;
+            t = tCond.Find("ThirdStar"); if (t) _thirdCondIcon = t.gameObject;
+        }
+
+        // Buttons
+        var tNext = transform.Find("NextStageButton");
+        var tLobby = transform.Find("ClearLobbyButton");
+        if (tNext) _nextButton = tNext.GetComponent<Button>();
+        if (tLobby) _lobbyButton = tLobby.GetComponent<Button>();
+
+        if (_nextButton != null)
+        {
+            _nextButton.onClick.RemoveAllListeners();
+            _nextButton.onClick.AddListener(OnClickNext);
+        }
+        if (_lobbyButton != null)
+        {
+            _lobbyButton.onClick.RemoveAllListeners();
+            _lobbyButton.onClick.AddListener(OnClickLobby);
+        }
+    }
 
     // ───────── Star: 프리팹 자동 생성 ─────────
     private void EnsureStars()
@@ -138,16 +185,14 @@ public class ClearPanelControl : MonoBehaviour
         int need = 3 - _stars.Count;
         for (int i = 0; i < need; i++)
         {
-            GameObject go = Object.Instantiate(prefab, _starGroup);
+            GameObject go = Instantiate(prefab, _starGroup);
             go.name = "Star" + (_starGroup.childCount);
-            RectTransform rt = go.transform as RectTransform;
+            var rt = go.transform as RectTransform;
             if (rt != null)
             {
                 rt.localScale = Vector3.one;
-                rt.anchorMin = new Vector2(0.5f, 0.5f);
-                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
                 rt.pivot = new Vector2(0.5f, 0.5f);
-                // 크기 필요하면: rt.sizeDelta = new Vector2(200f, 200f);
             }
         }
         RefreshStars();
@@ -171,8 +216,7 @@ public class ClearPanelControl : MonoBehaviour
     {
         if (_panelRoot == null || _starGroup == null) return;
 
-        _starGroup.anchorMin = new Vector2(0.5f, 0.5f);
-        _starGroup.anchorMax = new Vector2(0.5f, 0.5f);
+        _starGroup.anchorMin = _starGroup.anchorMax = new Vector2(0.5f, 0.5f);
         _starGroup.pivot = new Vector2(0.5f, 0.5f);
 
         float parentH = _panelRoot.rect.height;
@@ -183,12 +227,11 @@ public class ClearPanelControl : MonoBehaviour
         int uiCount = Mathf.Min(_stars.Count, 3);
         for (int i = 0; i < uiCount; i++)
         {
-            RectTransform rt = _stars[i].transform as RectTransform;
+            var rt = _stars[i].transform as RectTransform;
             if (rt == null) continue;
 
             float x = (i - (3 - 1) * 0.5f) * _starSpacing; // -spacing, 0, +spacing
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = new Vector2(x, 0f);
             rt.gameObject.SetActive(true);
@@ -196,8 +239,18 @@ public class ClearPanelControl : MonoBehaviour
     }
 
     // ───────── 공개 API ─────────
+    public void Show(string stageId, NormalStageData stage, NormalStageManager.StageEndSnapshot snapshot)
+    {
+        SetStageId(stageId);
+        ShowStars(stage, snapshot);
+        gameObject.SetActive(true);
+    }
+
+    public void Hide() => gameObject.SetActive(false);
+
     public void SetStageId(string stageId)
     {
+        _currentStageId = stageId;
         if (_stageNameText != null) _stageNameText.text = stageId;
     }
 
@@ -221,11 +274,11 @@ public class ClearPanelControl : MonoBehaviour
         }
 
         StopAllCoroutines();
-        StartCoroutine(CoPlayStarsSequential(useCount, met)); // ← 네가 적용한 순차 채우기 코루틴
+        StartCoroutine(CoPlayStarsSequential(useCount, met));
 
-        // 순차 재생과 별개로, 바로 한 번 위치 재계산(레이아웃 변했을 수도 있으니)
         Canvas.ForceUpdateCanvases();
         RepositionStars();
+        ApplyConditionTexts(stage);
     }
 
     private System.Collections.IEnumerator CoPlayStarsSequential(int useCount, int met)
@@ -237,14 +290,13 @@ public class ClearPanelControl : MonoBehaviour
         {
             bool success = i < met;
             if (_stars[i] != null)
-                _stars[i].PlayCondition(success);   // 이 한 칸 재생
+                _stars[i].PlayCondition(success);
 
-            // 이 칸이 끝날 때까지 잠시 대기 후 다음 칸
             yield return new WaitForSecondsRealtime(_starStepWait);
         }
-
         _starSeqPlaying = false;
     }
+
     // 보상: (id,value) → 아이콘은 매니저에서 조회
     public void BuildRewardsByIds(RewardItemUI rewardItemPrefab, IList<(string id, int value)> rewards)
     {
@@ -267,8 +319,6 @@ public class ClearPanelControl : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(_rewardBack);
     }
 
-
-    // 보상 줄 가운데 정렬 + 간격 세팅(작게)
     public void CenterRewards(float spacing)
     {
         if (_rewardHLG == null) return;
@@ -277,4 +327,43 @@ public class ClearPanelControl : MonoBehaviour
         _rewardHLG.childForceExpandWidth = false;
         _rewardHLG.childForceExpandHeight = false;
     }
+
+    public void ApplyConditionTexts(NormalStageData stage)
+    {
+        if (_condRoot == null) return;
+        SetCondRow(_firstCondText, _firstCondIcon, GetCondInfo(stage, 0));
+        SetCondRow(_secondCondText, _secondCondIcon, GetCondInfo(stage, 1));
+        SetCondRow(_thirdCondText, _thirdCondIcon, GetCondInfo(stage, 2));
+    }
+
+    private static string GetCondInfo(NormalStageData stage, int index)
+    {
+        if (stage.Condition == null || index < 0 || index >= stage.Condition.Count) return string.Empty;
+        return stage.Condition[index].Info ?? string.Empty;
+    }
+
+    private static void SetCondRow(TMP_Text text, GameObject icon, string info)
+    {
+        bool has = !string.IsNullOrEmpty(info);
+        if (text != null)
+        {
+            text.gameObject.SetActive(has);
+            if (has) text.text = info;
+        }
+        if (icon != null) icon.SetActive(has);
+    }
+
+    // ───────── 버튼 핸들러 ─────────
+    private void OnClickNext()
+    {
+        NextStageRequested?.Invoke();
+    }
+
+    private void OnClickLobby()
+    {
+        LobbyRequested?.Invoke();
+    }
+
+    // 외부에서 현재 표시 중 스테이지ID를 가져가고 싶을 때
+    public string GetCurrentStageId() => _currentStageId;
 }

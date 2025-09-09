@@ -1,8 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 
 [DefaultExecutionOrder(-1000)]
 public class GameManager : MonoBehaviour
@@ -11,30 +12,75 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject stagePrefab;
 
     [Header("UI 프리팹")]
-    [SerializeField] private BuildUI buildUIPrefab;   // 빌드 선택 링 등
-    [SerializeField] private TwoButtonUI twoButtonUIPrefab; // 공용 2버튼 패널(취소/파괴 or 취소/발동)
+    [SerializeField] private BuildUI buildUIPrefab;            // 빌드 선택 링 등
+    [SerializeField] private TwoButtonUI twoButtonUIPrefab;    // 공용 2버튼 패널(취소/파괴 or 취소/발동)
 
     [SerializeField] private InvalidPlacementToast invalidPlacementPrefab; // 인스펙터에 연결
     [SerializeField] private GameObject playerBasePrefab;
 
     [Header("Test Skill Wallet Seed")]
-    [SerializeField] private int startSkillCurrency = 0;   // 스킬 코인 초기값
+    [SerializeField] private int startSkillCurrency = 0;       // 스킬 코인 초기값
 
-    [Header("Auto-add a test skill to loadout")]
-    [SerializeField] private bool addRangeHeal = true;       // RangeHeal 자동 추가
-    [SerializeField] private int rangeHealCost = 10;         // 테스트용 비용
-    [SerializeField] private float rangeHealValue = 50f;     // 힐량
+    [Header("Auto-add test skills to loadout")]
+    [SerializeField] private bool addTestSkills = true;
+    [SerializeField] private int rangeHealCost = 10;
+    [SerializeField] private float rangeHealValue = 50f;
+
+    [Header("Clear Panel")]
+    [SerializeField] private ClearPanelControl clearPanel;     // 인스펙터 배선
+    [SerializeField] private RewardItemUI rewardItemPrefab;    // 인스펙터 배선(아이콘+수량 프리팹)
+    [SerializeField] private string lobbySceneName = "LobyScene";
 
     private InvalidPlacementToast _invalidToast;
 
     private Camera _cam;
     private BuildUI _buildUI;
     private TwoButtonUI _panel;
+    private Unit _unit;
+    private UnitState _unitState;
+
+    // ─────────────────────────────────────────────────────────────
+
+    private void OnEnable()
+    {
+        if (NormalStageManager.Instance != null)
+            NormalStageManager.Instance.StageCleared += OnStageCleared;
+
+        // 패널 이벤트 구독
+        if (clearPanel != null)
+        {
+            clearPanel.NextStageRequested += OnClickNextStage;
+            clearPanel.LobbyRequested += OnClickLobbyFromClear;
+        }
+
+        StartCoroutine(CoWatchTimeout());
+    }
+
+    private void OnDisable()
+    {
+        if (NormalStageManager.Instance != null)
+            NormalStageManager.Instance.StageCleared -= OnStageCleared;
+
+        if (clearPanel != null)
+        {
+            clearPanel.NextStageRequested -= OnClickNextStage;
+            clearPanel.LobbyRequested -= OnClickLobbyFromClear;
+        }
+    }
 
     private void Awake()
     {
+       
+        if (DataManager.Instance != null)
+        {
+            // 있으면 로드, 없으면 새로 생성하도록 DataManager가 내부에서 처리하게 설계
+            DataManager.Instance.LoadData();    // 또는 EnsureLoaded()
+        }
         // 스테이지 로드
-        MapManager.Instance.LoadStage(stagePrefab);
+        if (MapManager.Instance != null)
+            MapManager.Instance.LoadStage(stagePrefab);
+
+        SelectStageForCurrentPrefab();
 
         // 카메라/이벤트시스템/레이캐스터 보장
         _cam = Camera.main ?? FindFirstObjectByType<Camera>();
@@ -70,65 +116,69 @@ public class GameManager : MonoBehaviour
             _panel.gameObject.SetActive(false);
         }
     }
+
     private void Start()
     {
         if (CostManager.Instance != null)
-        {
             CostManager.Instance.SetSkillValue(startSkillCurrency);
-        }
 
-        // 2) 로드아웃 비어있으면 테스트 스킬 강제 추가
-        SkillManager.Instance.AddToLoadout(new LaboratoryData
+        // 테스트 스킬 3개 자동 추가
+        if (addTestSkills && SkillManager.Instance != null && SkillManager.Instance._loadout.Count == 0)
         {
-            Id = "RangeHeal",
-            Info = "광역 힐(테스트)",
-            LaboratoryType = LaboratoryType.Defense,
-            Cost = rangeHealCost,
-            Effect = new Effect
+            SkillManager.Instance.AddToLoadout(new LaboratoryData
             {
-                Value = 50,
-                ValueType = ValueType.Add,
-                TargetType = TargetType.Unit,                 // 타워/유닛 대상
-                TargetStatus = TargetStatus.HealthPoint
-            },
-            ParentsId = new List<string>()
-        });
-        SkillManager.Instance.AddToLoadout(new LaboratoryData
-        {
-            Id = "ArrowRain",
-            Info = "광역 뎀(테스트)",
-            LaboratoryType = LaboratoryType.Attack,
-            Cost = 10,
-            Effect = new Effect
+                Id = "RangeHeal",
+                Info = "광역 힐(테스트)",
+                LaboratoryType = LaboratoryType.Defense,
+                Cost = rangeHealCost,
+                Effect = new Effect
+                {
+                    Value = rangeHealValue,
+                    ValueType = ValueType.Add,
+                    TargetType = TargetType.Unit,
+                    TargetStatus = TargetStatus.HealthPoint
+                },
+                ParentsId = new List<string>()
+            });
+
+            SkillManager.Instance.AddToLoadout(new LaboratoryData
             {
-                Value = 50,
-                ValueType = ValueType.Add,
-                TargetType = TargetType.Monster,                 // 타워/유닛 대상
-                TargetStatus = TargetStatus.HealthPoint
-            },
-            ParentsId = new List<string>()
-        });
-        SkillManager.Instance.AddToLoadout(new LaboratoryData
-        {
-            Id = "MonsterSlow",
-            Info = "광역 슬로우(테스트)",
-            LaboratoryType = LaboratoryType.Defense,
-            Cost = rangeHealCost,
-            Effect = new Effect
+                Id = "ArrowRain",
+                Info = "광역 데미지(테스트)",
+                LaboratoryType = LaboratoryType.Attack,
+                Cost = 10,
+                Effect = new Effect
+                {
+                    Value = 50,
+                    ValueType = ValueType.Add,
+                    TargetType = TargetType.Monster,
+                    TargetStatus = TargetStatus.HealthPoint
+                },
+                ParentsId = new List<string>()
+            });
+
+            SkillManager.Instance.AddToLoadout(new LaboratoryData
             {
-                Value = 50,
-                ValueType = ValueType.Add,
-                TargetType = TargetType.Monster,                 // 타워/유닛 대상
-                TargetStatus = TargetStatus.HealthPoint
-            },
-            ParentsId = new List<string>()
-        });
-        Debug.Log("[GameManagerBoot] Added test skill 'RangeHeal' to loadout (slot 0).");
-        
+                Id = "MonsterSlow",
+                Info = "광역 슬로우(테스트)",
+                LaboratoryType = LaboratoryType.Utility,
+                Cost = 12,
+                Effect = new Effect
+                {
+                    Value = 50,
+                    ValueType = ValueType.Add,
+                    TargetType = TargetType.Monster,
+                    TargetStatus = TargetStatus.AttackSpeed
+                },
+                ParentsId = new List<string>()
+            });
+        }
     }
-    void Update()
+
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) { ShowClearPanelTest(); return; }
+        // 일시정지 중에는 입력 막기
+        if (PauseControl.IsPaused) return;
 
         // 중클릭: 스테이지 리로드
         if (Input.GetMouseButtonDown(2))
@@ -140,9 +190,10 @@ public class GameManager : MonoBehaviour
             }
             else Debug.LogError("[GameManager] stagePrefab이 비어있습니다.");
         }
+
+        // 우클릭: 플레이어 베이스 선택
         if (Input.GetMouseButtonDown(1))
         {
-            // UI 위면 무시
             if (IsPointerOverUI()) return;
 
             var map = MapManager.Instance;
@@ -152,30 +203,21 @@ public class GameManager : MonoBehaviour
             world.z = 0f;
             Vector3Int cell = map.WorldToCell(world);
 
-            //킹타일이 아니면 false 반환됨
-            bool placed = map.SelectPlayerBase(cell, playerBasePrefab /* null이면 오브젝트 생성 안함 */, occupyBaseCell: true);
-            if (placed)
-            {
-                Debug.Log($"[GameManager] 플레이어 베이스 선택: {cell}");
-                // 이후 하이라이터는 OnPlayerBasePlaced 이벤트로 킹 강조를 자동 종료함
-            }
-            else
-            {
-                // 킹타일이 아니면 아무것도 안 함(원하면 토스트/사운드 추가 가능)
-                // PingInvalidAtCell(cell); // 필요하면 주석 해제
-            }
-            return; // 우클릭 동작 후 종료(좌클릭 로직과 분리)
+            bool placed = map.SelectPlayerBase(cell, playerBasePrefab, occupyBaseCell: true);
+            if (placed) Debug.Log($"[GameManager] 플레이어 베이스 선택: {cell}");
+            return;
         }
-        // 좌클릭
+
+        // 좌클릭: 파괴/발동/빌드
         if (Input.GetMouseButtonDown(0))
         {
-            // 1) 먼저 ObjectTile 클릭인지 검사 → 맞으면 '발동' 패널 열고 종료
+            // 1) ObjectTile '발동' 패널
             if (TryOpenObjectTilePanel()) return;
 
-            // 2) UI 위 클릭이면 무시
+            // 2) UI 위 클릭 무시
             if (IsPointerOverUI()) return;
 
-            // 3) 파괴/빌드 로직
+            // 3) 빌드/파괴
             var map = MapManager.Instance;
             if (!map || !map.IsReady) return;
 
@@ -183,7 +225,7 @@ public class GameManager : MonoBehaviour
             world.z = 0f;
             Vector3Int cell = map.WorldToCell(world);
 
-            // 파괴 가능 벽이면 '파괴' 패널
+            // 파괴 가능한 벽
             if (map.IsDestructible(cell))
             {
                 _panel.OpenAtCell(cell, "파괴", (id, payload) =>
@@ -198,15 +240,14 @@ public class GameManager : MonoBehaviour
 
             var infoAtClick = map.GetPlaceInfo(cell);
 
-            // 1) 빌드 불가면(또는 이미 점유) → UI 안 띄우고 토스트만
+            // 빌드 불가 or 이미 점유
             if (!infoAtClick.Placeable || infoAtClick.Occupied)
             {
-                // (주의) 파괴 가능 / 오브젝트 발동은 별도 분기로 이미 처리했다는 가정
                 PingInvalidAtCell(cell);
                 return;
             }
 
-            // 2) 여기서부터 빌드 가능한 타일만 BuildUI 오픈
+            // 빌드 가능 → BuildUI 오픈
             var buildOptions = MakeOptionsForTest(8); // 실제 옵션으로 교체
             _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
             {
@@ -226,8 +267,55 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // ───────── 타이머 종료 감시 ─────────
+    private IEnumerator CoWatchTimeout()
+    {
+        while (true)
+        {
+            if (TimerPanelUI.IsTimeOverGlobal)
+            {
+                var mgr = NormalStageManager.Instance;
+                if (mgr != null)
+                {
+                    // 선택된 스테이지 기준으로 필요한 값만 채운 스냅샷 구성
+                    var stage = mgr.SelectedStage;
+                    var snap = ConditionControl.BuildFor(stage);
+
+                    mgr.CompleteStageSuccess(snap);
+                }
+                yield break; // 한 번만 처리
+            }
+            yield return null;
+        }
+    }
+
+
+    // ───────── 클리어 시 UI 처리 ─────────
+    private void OnStageCleared(NormalStageData stage,
+                                NormalStageManager.StageEndSnapshot snap,
+                                int stars,
+                                NormalStageManager.RewardResult reward)
+    {
+        // 게임 정지
+        Time.timeScale = 0f;
+        PauseControl.SetPaused(true);
+
+        // 패널 표시
+        if (clearPanel != null)
+        {
+            clearPanel.gameObject.SetActive(true);
+            clearPanel.SetStageId(stage.Id);
+            clearPanel.ShowStars(stage, snap);
+
+            // 보상 라인 빌드
+            var rewards = NormalStageManager.Instance.GetRewardsForStage(stage.Id);
+            var prefab = rewardItemPrefab ?? clearPanel.GetComponentInChildren<RewardItemUI>(true);
+            if (prefab != null) clearPanel.BuildRewardsByIds(prefab, rewards);
+        }
+    }
+
     // ───────── 유틸 ─────────
-    bool IsPointerOverUI()
+    private bool IsPointerOverUI()
     {
         if (EventSystem.current == null) return false;
         if (EventSystem.current.IsPointerOverGameObject()) return true; // 마우스
@@ -238,14 +326,13 @@ public class GameManager : MonoBehaviour
     }
 
     // ObjectTile 클릭 시 '발동' 패널 열기
-    bool TryOpenObjectTilePanel()
+    private bool TryOpenObjectTilePanel()
     {
         if (_cam == null || _panel == null) return false;
 
         Vector3 wp = _cam.ScreenToWorldPoint(Input.mousePosition);
         wp.z = 0f;
 
-        // 겹침 고려해서 전 레이어 검사
         Collider2D[] hits = Physics2D.OverlapPointAll((Vector2)wp, ~0);
         for (int i = 0; i < hits.Length; i++)
         {
@@ -254,7 +341,7 @@ public class GameManager : MonoBehaviour
             {
                 _panel.OpenAtObject(objectTile, "발동", (id, payload) =>
                 {
-                    if (payload is ObjectTile objectTile) objectTile.Activate();
+                    if (payload is ObjectTile ot) ot.Activate();
                 });
                 return true;
             }
@@ -263,14 +350,15 @@ public class GameManager : MonoBehaviour
     }
 
     // 더미/테스트 옵션 생성
-    List<TowerOption> MakeOptionsForTest(int count)
+    private List<TowerOption> MakeOptionsForTest(int count)
     {
         var list = new List<TowerOption>(count);
         for (int i = 0; i < count; i++)
             list.Add(new TowerOption($"opt_{i + 1}", null, null, (i + 1) * 10));
         return list;
     }
-    Canvas FindOrCreateCanvas()
+
+    private Canvas FindOrCreateCanvas()
     {
         var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
         if (canvas == null)
@@ -281,7 +369,8 @@ public class GameManager : MonoBehaviour
         }
         return canvas;
     }
-    InvalidPlacementToast EnsureInvalidToast()
+
+    private InvalidPlacementToast EnsureInvalidToast()
     {
         if (_invalidToast != null) return _invalidToast;
 
@@ -298,93 +387,96 @@ public class GameManager : MonoBehaviour
     }
 
     // 셀 위에 토스트 띄우기
-    void PingInvalidAtCell(Vector3Int cell)
+    private void PingInvalidAtCell(Vector3Int cell)
     {
         if (_invalidToast == null)
         {
-            // 인스펙터에서 프리팹 할당했다면 Instantiate만 하고 꺼두지 마세요.
             var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
             _invalidToast = Instantiate(invalidPlacementPrefab, canvas.transform);
             _invalidToast.name = "InvalidPlacementToast(Runtime)";
-            // Awake에서 알아서 active=true + alpha=0 으로 준비됨
         }
 
         _invalidToast.ShowAtCell(cell);
     }
-    private void ShowClearPanelTest()
+    // ===== 클리어 시 패널 띄우는 기존 핸들러 유지 =====
+    // OnStageCleared(...) 안에서 clearPanel.Show(...), BuildRewardsByIds(...) 호출은 그대로.
+
+    // ===== 버튼 동작 구현 =====
+    private void OnClickLobbyFromClear()
     {
-        // 1) 패널 찾기
-        ClearPanelControl panel = FindFirstObjectByType<ClearPanelControl>(FindObjectsInactive.Include);
-        if (panel == null)
+        // 재개 후 로비로
+        Time.timeScale = 1f;
+        PauseControl.SetPaused(false);
+        if (!string.IsNullOrEmpty(lobbySceneName))
+            SceneManager.LoadScene(lobbySceneName);
+    }
+
+    private void OnClickNextStage()
+    {
+        var mgr = NormalStageManager.Instance;
+        if (mgr == null) return;
+
+        NormalStageData next;
+        WorldStageData world;
+        if (!mgr.TryGetNextStageFromSelected(out next, out world))
         {
-            Debug.LogWarning("[GameManager] ClearPanelControl 을 찾을 수 없습니다.");
+            Debug.Log("[GameManager] 다음 스테이지가 없습니다.");
             return;
         }
 
-        // 2) 스테이지/스냅샷 준비 (선택된 스테이지가 없으면 더미 생성)
-        NormalStageData stage = default(NormalStageData);
-        NormalStageManager mgr = NormalStageManager.Instance;
+        // 선택 스테이지 갱신(원하면 유지)
+        EventManager.Instance?.Invoke<NormalStageData>("SelectStage", next);
 
-        if (mgr != null && !string.IsNullOrEmpty(mgr.SelectedStage.Id))
+        // 프리팹 로드 (Id == 프리팹 파일명)
+        var prefab = StagePrefabResolver.LoadById(next.Id);
+        if (prefab == null) return;
+
+        // 재개 후 로드
+        Time.timeScale = 1f;
+        PauseControl.SetPaused(false);
+        MapManager.Instance.LoadStage(prefab);
+    }
+
+    public static class StagePrefabResolver
+    {
+        public static GameObject LoadById(string id)
         {
-            stage = mgr.SelectedStage;
+            if (string.IsNullOrEmpty(id)) return null;
+            var prefab = Resources.Load<GameObject>($"Stages/{id}");
+            if (prefab == null)
+                Debug.LogError($"[StagePrefabResolver] Resources/Stages/{id}.prefab 을 찾지 못했습니다.");
+            return prefab;
         }
-        else
+    }
+    private void SelectStageForCurrentPrefab()
+    {
+        var mgr = NormalStageManager.Instance;
+        if (mgr == null) return;
+
+        // 프리팹 이름을 곧바로 스테이지 ID로 사용
+        string id = stagePrefab != null ? stagePrefab.name : "Stage1-1";
+
+        NormalStageData stage;
+        WorldStageData world;
+        if (!mgr.TryFindStageById(id, out stage, out world))
         {
+            // 데이터 테이블에 없을 때는 더미 값으로라도 세팅 (UI용)
             stage = new NormalStageData
             {
-                Id = "Stage1-1",
+                Id = id,
                 Gold = 100,
                 Gem = 50,
                 Condition = new List<Condition>
             {
-                new Condition { ClearType = ClearType.MoneySave,  Info = "200원 남기기",       Value = 200 },
-                new Condition { ClearType = ClearType.HealthSave, Info = "베이스 HP 50% 이상", Value = 0.5f },
-                new Condition { ClearType = ClearType.UnitSave,   Info = "유닛 파괴 5 미만",  Value = 5 }
+                new Condition{ ClearType = ClearType.MoneySave,  Info = "200원 남기기",       Value = 200 },
+                new Condition{ ClearType = ClearType.HealthSave, Info = "베이스 HP 50% 이상", Value = 0.5f },
+                new Condition{ ClearType = ClearType.UnitSave,   Info = "유닛 파괴 5 미만",  Value = 5 }
             }
             };
         }
 
-        NormalStageManager.StageEndSnapshot snap = new NormalStageManager.StageEndSnapshot
-        {
-            moneyLeft = 210,
-            baseHpRatio = 0.62f,
-            unitDestroyedCount = 3
-        };
-
-        // 3) 패널 표시 (스테이지ID, 별 채우기)
-        panel.gameObject.SetActive(true);
-        panel.SetStageId(stage.Id);
-        panel.ShowStars(stage, snap);
-
-        // 4) 보상 생성 (아이콘은 매니저에서 ID로 찾음)
-        List<(string id, int value)> rewards = new List<(string id, int value)>();
-        if (mgr != null)
-        {
-            rewards = mgr.GetRewardsForStage(stage.Id);
-            if (rewards == null || rewards.Count == 0)
-            {
-                rewards = new List<(string id, int value)> { ("Gold", stage.Gold), ("Gem", stage.Gem) };
-            }
-        }
-        else
-        {
-            rewards = new List<(string id, int value)> { ("Gold", stage.Gold), ("Gem", stage.Gem) };
-        }
-
-        // Reward 프리팹 확보(우선 Resources → 없으면 씬 내 템플릿 복제)
-        RewardItemUI rewardPrefab = Resources.Load<RewardItemUI>("Reward/Reward");
-        if (rewardPrefab == null) rewardPrefab = Resources.Load<RewardItemUI>("Reward");
-        if (rewardPrefab == null)
-        {
-            rewardPrefab = panel.GetComponentInChildren<RewardItemUI>(true);
-            if (rewardPrefab == null)
-            {
-                Debug.LogWarning("[GameManager] RewardItemUI 프리팹을 찾을 수 없어 보상 표시는 생략합니다. (Resources/UI/RewardItem 권장)");
-                return;
-            }
-        }
-
-        panel.BuildRewardsByIds(rewardPrefab, rewards);
+        // NormalStageManager는 "SelectStage" 이벤트를 구독하고 있으니 이렇게 넘기면 SelectedStage가 세팅됨
+        EventManager.Instance?.Invoke<NormalStageData>("SelectStage", stage);
+        Debug.Log($"[GameManager] SelectedStage = {stage.Id}");
     }
 }

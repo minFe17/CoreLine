@@ -8,7 +8,11 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     private NormalStageData _selectedStage;                 // 선택된 스테이지 데이터
     private StageType _stageType = StageType.Stage1;
 
+    // 진행도 저장이 바뀔 때(세이브 반영 등)
     public event Action OnStageProgressChanged;
+
+    // ★ 클리어시 UI가 받을 이벤트(게임매니저가 구독)
+    public event Action<NormalStageData, StageEndSnapshot, int, RewardResult> StageCleared;
 
     public struct LastRun
     {
@@ -33,7 +37,7 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 
     public NormalStageData SelectedStage { get { return _selectedStage; } }
 
-    // ▶ Resources/RewardIcon/{ID}.png 로드 (폴더/이름 반드시 일치)
+    // ▶ Resources/Reward/{ID}.png 로드 (폴더/이름 반드시 일치)
     private const string _rewardIconResourcesPath = "Reward";
     private readonly Dictionary<string, Sprite> _rewardIconMap =
         new Dictionary<string, Sprite>(StringComparer.OrdinalIgnoreCase);
@@ -43,11 +47,16 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     // ─────────────────────────────────────────────────────────────────────
     public NormalStageManager()
     {
-        // 이벤트 구독
+        // 선택 이벤트 구독
         EventManager.Instance.Subscribe<NormalStageData>("SelectStage", SelectStage);
 
-        // 아이콘 캐시 미리 적재(선택 사항이지만 권장)
+        // 아이콘 캐시
         PrimeRewardIconCache();
+    }
+
+    private void SelectStage(NormalStageData data)
+    {
+        _selectedStage = data;
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -72,11 +81,6 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         return met;
     }
 
-    private void SelectStage(NormalStageData data)
-    {
-        _selectedStage = data;
-    }
-
     private bool IsConditionMet(in Condition c, in StageEndSnapshot s)
     {
         switch (c.ClearType)
@@ -89,7 +93,47 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // 클리어/보상 처리
+    // ★ 클리어/패배 처리 → 이벤트 발행
+    // ─────────────────────────────────────────────────────────────────────
+    /// <summary>성공 클리어: 별 계산, 보상 지급/저장, 이벤트 발행.</summary>
+    public void CompleteStageSuccess(in StageEndSnapshot snap)
+    {
+        // 현재 선택된 스테이지 기준
+        NormalStageData stage = _selectedStage;
+        if (string.IsNullOrEmpty(stage.Id))
+        {
+            Debug.LogWarning("[NormalStageManager] SelectedStage 가 비어있습니다. SelectStage 이벤트로 선택 먼저 해주세요.");
+            return;
+        }
+
+        // 별 계산 + 보상 반영/세이브
+        int stars = EvaluateStars(stage, snap);
+        var reward = ApplyClearAndSave(stage, stars, giveGoldEveryClear: true);
+
+        // 마지막 결과 캐싱
+        SetLastResult(stage, snap, stars, reward);
+
+        // 이벤트 발행 → GameManager.OnStageCleared(...) 호출됨
+        var ev = StageCleared;
+        if (ev != null) ev.Invoke(stage, snap, stars, reward);
+    }
+
+    /// <summary>패배 처리(원하면 별=0, 보상 없음으로 발행).</summary>
+    public void CompleteStageDefeat(in StageEndSnapshot snap)
+    {
+        NormalStageData stage = _selectedStage;
+        if (string.IsNullOrEmpty(stage.Id)) return;
+
+        int stars = 0;
+        var reward = new RewardResult(); // 패배 보상 없음
+        SetLastResult(stage, snap, stars, reward);
+
+        var ev = StageCleared;           // 필요 시 StageDefeated로 분리 가능
+        if (ev != null) ev.Invoke(stage, snap, stars, reward);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 클리어/보상 처리(세이브)
     // ─────────────────────────────────────────────────────────────────────
     /// <summary>스테이지 클리어 처리: 별 갱신, 보상 지급(젬은 3성 최초 1회), 저장까지 수행.</summary>
     public RewardResult ApplyClearAndSave(in NormalStageData stage, int starsEarned, bool giveGoldEveryClear = true)
@@ -98,8 +142,7 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 
         int maxPossible = stage.Condition != null ? stage.Condition.Count : 0;
         if (maxPossible > 3) maxPossible = 3;
-        if (starsEarned < 0) starsEarned = 0;
-        if (starsEarned > maxPossible) starsEarned = maxPossible;
+        starsEarned = Mathf.Clamp(starsEarned, 0, maxPossible);
 
         GameData gd = DataManager.Instance.GameData;
         if (gd == null)
@@ -150,9 +193,7 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         gd.ClearStage[idx] = cs;
         DataManager.Instance.SaveData();
 
-        Action ev = OnStageProgressChanged;
-        if (ev != null) ev.Invoke();
-
+        OnStageProgressChanged?.Invoke();
         rewardResult.NewBestStars = newBest;
         return rewardResult;
     }
@@ -160,7 +201,6 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     // ─────────────────────────────────────────────────────────────────────
     // 조회/검색
     // ─────────────────────────────────────────────────────────────────────
-    /// <summary>스테이지 세이브 조회. 없으면 null.</summary>
     public ClearStage GetClearStageOrNull(string stageId)
     {
         GameData gd = DataManager.Instance.GameData;
@@ -172,7 +212,6 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         return null;
     }
 
-    /// <summary>월드들에서 id로 스테이지 검색.</summary>
     public bool TryFindStageById(string stageId, out NormalStageData stage, out WorldStageData world)
     {
         stage = default;
@@ -200,19 +239,53 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         return false;
     }
 
-    /// <summary>
-    /// id로 스테이지 조회. 없으면 default 반환(SelectedStage가 동일 id이면 그걸 반환).
-    /// </summary>
     public NormalStageData GetStageOrDefault(string stageId)
     {
         NormalStageData found;
-        WorldStageData dummyWorld;
-        if (TryFindStageById(stageId, out found, out dummyWorld)) return found;
+        WorldStageData _;
+        if (TryFindStageById(stageId, out found, out _)) return found;
 
         if (!string.IsNullOrEmpty(_selectedStage.Id) && _selectedStage.Id == stageId)
             return _selectedStage;
 
         return default;
+    }
+
+    /// <summary>현재 선택된 스테이지 기준으로 “다음 스테이지” 조회.</summary>
+    public bool TryGetNextStageFromSelected(out NormalStageData next, out WorldStageData world)
+    {
+        next = default; world = default;
+        if (string.IsNullOrEmpty(_selectedStage.Id)) return false;
+
+        List<WorldStageData> worlds = DataManager.Instance.WorldStageDatas;
+        if (worlds == null) return false;
+
+        for (int w = 0; w < worlds.Count; w++)
+        {
+            var wd = worlds[w];
+            var list = wd.Stages;
+            if (list == null || list.Count == 0) continue;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Id == _selectedStage.Id)
+                {
+                    if (i + 1 < list.Count)
+                    {
+                        next = list[i + 1]; world = wd; return true;        // 같은 월드 다음
+                    }
+                    // 마지막이면 다음 월드 첫 스테이지
+                    if (w + 1 < worlds.Count && worlds[w + 1].Stages != null && worlds[w + 1].Stages.Count > 0)
+                    {
+                        world = worlds[w + 1];
+                        next = world.Stages[0];
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -247,26 +320,16 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         return s;
     }
 
-    /// <summary>
-    /// 스테이지 보상 목록을 (id, value) 리스트로 반환.
-    /// stageId를 못 찾으면 SelectedStage 기준으로 백업.
-    /// </summary>
     public List<(string id, int value)> GetRewardsForStage(string stageId)
     {
         List<(string id, int value)> list = new List<(string id, int value)>();
-
         NormalStageData s = GetStageOrDefault(stageId);
-        if (string.IsNullOrEmpty(s.Id))
-        {
-            // fallback: 선택된 스테이지 사용
-            s = _selectedStage;
-        }
+        if (string.IsNullOrEmpty(s.Id)) s = _selectedStage;
 
         if (!string.IsNullOrEmpty(s.Id))
         {
             if (s.Gold > 0) list.Add(("Gold", s.Gold));
             if (s.Gem > 0) list.Add(("Gem", s.Gem));
-            // TODO: 동적 보상 테이블 추가 시 여기서 병합
         }
         return list;
     }
