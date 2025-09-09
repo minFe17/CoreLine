@@ -1,0 +1,15 @@
+﻿Key,StoreType,Price,Quantity,ImageName
+1001,Money,1000,10000,ShopItem_Coin_1
+1002,Money,5000,60000,ShopItem_Coin_1
+1003,Money,10000,150000,ShopItem_Coin_2
+1004,Money,30000,500000,ShopItem_Coin_3
+1011,Gem,1000,100,ShopItem_Gem_1
+1012,Gem,5000,550,ShopItem_Gem_2
+1013,Gem,10000,1150,ShopItem_Gem_3
+1014,Gem,30000,3500,ShopItem_Gem_4
+1015,Gem,50000,6000,ShopItem_Gem_5
+1016,Gem,100000,13000,ShopItem_Gem_6
+1021,InfinityKey,1000,1,ItemIcon_Key_Gold
+1022,InfinityKey,5000,5,ItemIcon_Key_Gold
+1023,InfinityKey,10000,11,ItemIcon_Key_Gold
+1024,InfinityKey,30000,35,ItemIcon_Key_Gold

@@ -12,6 +12,7 @@ public class LaboratoryNode : BaseButton
     private List<LaboratoryNode> _parents = new List<LaboratoryNode>();
     private Image _icon;
     private LaboratoryData _data;
+    private UIColorApplier _color;
 
     public LaboratoryData Data
     {
@@ -26,7 +27,11 @@ public class LaboratoryNode : BaseButton
     public bool IsUnlocked
     {
         get { return _isUnlocked; }
-        set { _isUnlocked = value; }
+        set 
+        {
+            _isUnlocked = value;
+            ChangeColor();
+        }
     }
     
     public void AddParent(LaboratoryNode node)
@@ -37,10 +42,12 @@ public class LaboratoryNode : BaseButton
     {
         base.Awake();
         _icon = transform.Find("Icon").GetComponent<Image>();
+        _color = GetComponent<UIColorApplier>();
     }
     private void OnEnable()
     {
         EventManager.Instance.Subscribe<LaboratoryData>("BuyLaboratory", BuyLaboratory);
+        ChangeColor();
     }
     private void OnDisable()
     {
@@ -88,10 +95,20 @@ public class LaboratoryNode : BaseButton
         }
         _icon.sprite = Resources.Load<Sprite>(path);
     }
+    private void ChangeColor()
+    {
+        if (_isUnlocked)
+        {
+            _color.MyColorType = ColorType.Light;
+        }
+        else
+            _color.MyColorType = ColorType.Dark;
+    }
     private void BuyLaboratory(LaboratoryData data)
     {
         if (data.Id != _data.Id) return;
         _isUnlocked = true;
+        ChangeColor();
     }
 
     private bool CheckParent()

@@ -15,6 +15,7 @@ public enum PopUpStatus
 public class UIManager : SimpleSingleton<UIManager>
 {
     private Stack<Panel> _panelStack = new Stack<Panel>();
+    private PopUp _popUp;
     private Dictionary<PanelStatus, Panel> _panelDictionary = new Dictionary<PanelStatus, Panel>();
     private Dictionary<PopUpStatus, PopUp> _popUpDictionary = new Dictionary<PopUpStatus, PopUp>();
 
@@ -34,6 +35,17 @@ public class UIManager : SimpleSingleton<UIManager>
     {
         if (_panelStack.Count!=0)
         {
+            if (_panelStack.Contains(_panelDictionary[status]))
+            {
+                var tempStack = new Stack<Panel>(new Stack<Panel>(_panelStack));
+                _panelStack.Clear();
+
+                foreach (var panel in tempStack) //이렇게 꼬일리가있나? 그나마 상점가는거정도인데 흠
+                {
+                    if (panel != _panelDictionary[status])
+                        _panelStack.Push(panel);
+                }
+            }
             _panelStack.Peek().SwitchOffPanel();
         }
         _panelStack.Push(_panelDictionary[status]);
@@ -48,5 +60,21 @@ public class UIManager : SimpleSingleton<UIManager>
         _panelStack.Pop().SwitchOffPanel();
         if (_panelStack.Count == 0) return;
         _panelStack.Peek().SwitchOnPanel();
+    }
+    public void OpenPopUp(PopUpStatus status)
+    {
+        if(_popUp != null)
+        {
+            _popUp.gameObject.SetActive(false);
+        }
+        _popUp = _popUpDictionary[status];
+        _popUp.gameObject.SetActive(true);
+    }
+    public void ClosePopUp()
+    {
+        if (_popUp == null) return;
+
+        _popUp.gameObject.SetActive(false);
+        _popUp = null;
     }
 }

@@ -23,6 +23,7 @@ public class StageSettingManager : MonoBehaviour
         DataManager.Instance.LoadData();
         SettingButtons();
         EventManager.Instance.Subscribe<NormalStageData>("SelectStage", UpdateText);
+        ResetText();
     }
     private void OnDisable()
     {
@@ -65,5 +66,10 @@ public class StageSettingManager : MonoBehaviour
             text += conditionData.Info + "\n";
         }
         _starInfo.text = text;
+    }
+    private void ResetText()
+    {
+        _stageId.text = "";
+        _starInfo.text = "";
     }
 }

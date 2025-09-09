@@ -28,6 +28,14 @@ public class Panel : MonoBehaviour
         SwitchOffPanel();
         UIManager.Instance.RegisterPanel(_status, this);
     }
+    protected virtual void Start()
+    {
+        if (_status == PanelStatus.LobyPanel) return;
+        GameObject exitButton = Resources.Load<GameObject>("UI/Prefabs/Button/Share/ExitButton");
+        GameObject newButton = Instantiate(exitButton);
+        newButton.transform.SetParent(this.transform, false);
+    }
+
 
     protected void FindAllButtons()
     {
