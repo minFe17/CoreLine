@@ -13,8 +13,10 @@ public abstract class PopUp : MonoBehaviour
     }
     protected virtual void Awake()
     {
+        SetStatus();
         gameObject.SetActive(false);
         UIManager.Instance.RegisterPopUp(_status, this);
     }
+    protected abstract void SetStatus();
 
 }

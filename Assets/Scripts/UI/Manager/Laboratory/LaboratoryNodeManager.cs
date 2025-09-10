@@ -35,7 +35,7 @@ public class LaboratoryNodeManager : MonoBehaviour
     private void CreateNodes()
     {
         string prefabsPath = "UI/Prefabs/Image/Line";
-        string parentPath = "UI/LaboratoryPanel/NodePanel/Viewport/";
+        string parentPath = "UI(Clone)/LaboratoryPanel/NodePanel/Viewport/";
 
         _poolingLines[LaboratoryType.Attack] = new PoolingManager(prefabsPath, parentPath + "Attack", 20);
         _poolingLines[LaboratoryType.Defense] = new PoolingManager(prefabsPath, parentPath + "Defense", 20);

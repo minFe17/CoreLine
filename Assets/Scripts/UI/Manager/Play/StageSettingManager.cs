@@ -20,10 +20,17 @@ public class StageSettingManager : MonoBehaviour
     }
     private void OnEnable()
     {
+        if (NormalStageManager.Instance.StageType == StageType.Infinity)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+            
         DataManager.Instance.LoadData();
         SettingButtons();
         EventManager.Instance.Subscribe<NormalStageData>("SelectStage", UpdateText);
         ResetText();
+
     }
     private void OnDisable()
     {
@@ -33,7 +40,7 @@ public class StageSettingManager : MonoBehaviour
     private void CreateButtons()
     {
         string prefabsPath = "UI/Prefabs/Button/Play/StageButton";
-        string parentPath = "UI/PlayPanel/StagePanel/StageChoiceButtons";
+        string parentPath = "UI(Clone)/PlayPanel/StagePanel/StageChoiceButtons";
         _buttons = new PoolingManager(prefabsPath, parentPath, 10);
     }
     private void SettingButtons()
@@ -61,9 +68,10 @@ public class StageSettingManager : MonoBehaviour
         _stageId.text = data.Name;
         List<Condition> condition = data.Condition;
         string text="";
+        int count = 1;
         foreach (var conditionData in condition)
         {
-            text += conditionData.Info + "\n";
+            text += count++ +" : " + conditionData.Info + "\n";
         }
         _starInfo.text = text;
     }

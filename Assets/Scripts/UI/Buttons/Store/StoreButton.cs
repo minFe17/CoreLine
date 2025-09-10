@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 
 public class StoreButton : BaseButton
@@ -8,6 +9,7 @@ public class StoreButton : BaseButton
     private TextMeshProUGUI _quantity;
     private TextMeshProUGUI _price;
     private StoreData _data;
+    protected SpriteAtlas _atlas;
 
     public StoreData Data
     {
@@ -28,13 +30,18 @@ public class StoreButton : BaseButton
         _icon = transform.Find("Icon").GetComponent<Image>();
         _quantity = transform.Find("Quantity").GetComponent<TextMeshProUGUI>();
         _price = transform.Find("BuyButton/Price").GetComponent <TextMeshProUGUI>();
+        _atlas = Resources.Load<SpriteAtlas>("UI/Image/Icon/Store/ShopIconAtlas");
     }
     protected void Setting()
     {
         _price.text = _data.Price.ToString();
         _quantity.text = _data.Quantity.ToString();
-        _icon.sprite = Resources.Load<Sprite>("UI/Image/Icon/Store/" + _data.ImageName);
+        _icon.sprite = SpriteReturn(_data.ImageName);
         
+    }
+    protected Sprite SpriteReturn(string name)
+    {
+        return _atlas.GetSprite(name);
     }
 
 

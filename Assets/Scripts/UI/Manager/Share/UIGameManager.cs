@@ -3,22 +3,17 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 
-public class UIGameManager : MonoSingleton<UIGameManager>
+public class UIGameManager : MonoBehaviour
 {
+    private GameObject _uiPanel;
 
-    private void Awake()
+    private async void Awake()
     {
+        DontDestroyOnLoad(gameObject);
         DataManager.Instance.LoadData();
-        
+        Lobby lobby = GetComponent<Lobby>();
+        await lobby.InitializeAsync();
+        _uiPanel = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.UIPanel);
+        Instantiate(_uiPanel);
     }
-    private void Start()
-    {
-        //UIManager.Instance.AddPanelStack(PanelStatus.SettingPanel);
-        UIManager.Instance.AddPanelStack(PanelStatus.LobyPanel);
-        //UIManager.Instance.AddPanelStack(PanelStatus.InventoryPanel);
-        //UIManager.Instance.AddPanelStack(PanelStatus.UpgradePanel);
-        //UIManager.Instance.AddPanelStack(PanelStatus.LaboratoryPanel);
-        //UIManager.Instance.AddPanelStack(PanelStatus.StorePanel);
-    }
-
 }

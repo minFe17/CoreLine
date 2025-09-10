@@ -16,6 +16,11 @@ public class SettingPanelManager : MonoBehaviour
 
     public void OnClickPlayButton()
     {
+        if(_selectedUnitDatas.Count <= 0)
+        {
+            UIManager.Instance.OpenPopUp(PopUpStatus.NoChoiceUnitAlret);
+            return;
+        }
         UIManager.Instance.AddPanelStack(PanelStatus.PlayPanel);
     }
     public void OnClickUpgradeButton()

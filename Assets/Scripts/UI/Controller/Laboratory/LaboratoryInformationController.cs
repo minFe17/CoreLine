@@ -3,10 +3,12 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.U2D;
 
 public class LaboratoryInformationController : MonoBehaviour
 {
     private Image _icon;
+    protected SpriteAtlas _atlas;
     private TextMeshProUGUI _id;
     private TextMeshProUGUI _info;
     private LaboratoryBuyButton _button;
@@ -19,6 +21,7 @@ public class LaboratoryInformationController : MonoBehaviour
         _id = transform.Find("Id").GetComponent<TextMeshProUGUI>();
         _info = transform.Find("Information").GetComponent <TextMeshProUGUI>();
         _button = GetComponentInChildren<LaboratoryBuyButton>();
+        _atlas = Resources.Load<SpriteAtlas>("UI/Image/Icon/LaboratoryIconAtlas");
     }
     private void OnEnable()
     {
@@ -50,17 +53,20 @@ public class LaboratoryInformationController : MonoBehaviour
     }
     private void SetIcon()
     {
-        string path = "UI/Image/Icon/";
         LaboratoryData data = LaboratoryManager.Instance.ChoiceLaboratory;
         switch (data.Effect.TargetStatus)
         {
             case TargetStatus.Skill:
-                path = "Skills/" + data.Id;
+                _icon.sprite = Resources.Load<Sprite>("Skills/" + data.Id);
                 break;
             default:
-                path += data.Effect.TargetStatus.ToString();
+                _icon.sprite = SpriteReturn(data.Effect.TargetStatus);
                 break;
         }
-        _icon.sprite = Resources.Load<Sprite>(path);
     }
+    protected Sprite SpriteReturn(TargetStatus type)
+    {
+        return _atlas.GetSprite(type.ToString());
+    }
+
 }

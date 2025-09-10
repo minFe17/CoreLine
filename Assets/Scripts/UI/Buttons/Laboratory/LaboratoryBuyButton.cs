@@ -12,6 +12,7 @@ public class LaboratoryBuyButton : BaseButton
         }
 
         DataManager.Instance.GameData.PlayerGem -= LaboratoryManager.Instance.ChoiceLaboratory.Cost;
+        EventManager.Instance.Invoke("UpdateMoneyText");
         EventManager.Instance.Invoke<LaboratoryData>("BuyLaboratory",LaboratoryManager.Instance.ChoiceLaboratory);
         EventManager.Instance.Invoke("UpdateLaboratoryInfo");
     }

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 using Unity.VisualScripting;
+using UnityEngine.U2D;
 
 public class LaboratoryNode : BaseButton
 {
@@ -11,6 +12,7 @@ public class LaboratoryNode : BaseButton
     private bool _isSelect = false;
     private List<LaboratoryNode> _parents = new List<LaboratoryNode>();
     private Image _icon;
+    protected SpriteAtlas _atlas;
     private LaboratoryData _data;
     private UIColorApplier _color;
 
@@ -43,6 +45,7 @@ public class LaboratoryNode : BaseButton
         base.Awake();
         _icon = transform.Find("Icon").GetComponent<Image>();
         _color = GetComponent<UIColorApplier>();
+        _atlas = Resources.Load<SpriteAtlas>("UI/Image/Icon/LaboratoryIconAtlas");
     }
     private void OnEnable()
     {
@@ -81,19 +84,22 @@ public class LaboratoryNode : BaseButton
 
         //패널 켜기
     }
+    protected Sprite SpriteReturn(TargetStatus type)
+    {
+        return _atlas.GetSprite(type.ToString());
+    }
     private void ChangeIcon()
     {
-        string path = "UI/Image/Icon/";
         switch(_data.Effect.TargetStatus)
         {
             case TargetStatus.Skill:
-                path = "Skills/" + _data.Id;
+                _icon.sprite = Resources.Load<Sprite>("Skills/" + _data.Id);
                 break;
             default:
-                path += _data.Effect.TargetStatus.ToString();
+                _icon.sprite = SpriteReturn(_data.Effect.TargetStatus);
                 break;
         }
-        _icon.sprite = Resources.Load<Sprite>(path);
+        
     }
     private void ChangeColor()
     {

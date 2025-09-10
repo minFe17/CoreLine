@@ -1,14 +1,16 @@
 using UnityEngine;
 using Utils;
+using System.Threading.Tasks;
 
 public class Lobby : MonoBehaviour
 {
     PrefabManager _prefabManager;
 
-    async void Start()
+    public async Task InitializeAsync()
     {
-        if(_prefabManager == null)
+        if (_prefabManager == null)
             _prefabManager = SimpleSingleton<PrefabManager>.Instance;
+
         if (!_prefabManager.CheckLoadPrefab())
             await _prefabManager.LoadPrefab();
 

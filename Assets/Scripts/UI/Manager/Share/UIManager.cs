@@ -5,12 +5,12 @@ using static UnityEngine.Rendering.DebugUI;
 
 public enum PanelStatus
 {
-    LobyPanel,InventoryPanel, UpgradePanel, LaboratoryPanel, PlayPanel, SettingPanel,
+    LobbyPanel,InventoryPanel, UpgradePanel, LaboratoryPanel, PlayPanel, SettingPanel,
     StorePanel
 }
 public enum PopUpStatus
 {
-    NoMoneyAlret, CheckBuyPopup
+    NoMoneyAlret, NoChoiceUnitAlret, NoChoiceStageAlret, SettingPopUp
 }
 public class UIManager : SimpleSingleton<UIManager>
 {

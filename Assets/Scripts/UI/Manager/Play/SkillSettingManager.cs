@@ -34,9 +34,9 @@ public class SkillSettingManager : MonoBehaviour
     private void CreateButtons()
     {
         string prefabsPath = "UI/Prefabs/Button/Play/SelectButton";
-        string parentPath = "UI/PlayPanel/SkillSettingPanel/Scroll View/Viewport/Content";
+        string parentPath = "UI(Clone)/PlayPanel/SkillSettingPanel/Scroll View/Viewport/Content";
         _buttons[false] = new PoolingManager(prefabsPath, parentPath);
-        parentPath = "UI/PlayPanel/SkillSettingPanel/SettingSkills";
+        parentPath = "UI(Clone)/PlayPanel/SkillSettingPanel/SettingSkills";
         _buttons[true] = new PoolingManager(prefabsPath, parentPath, 10);
     }
     private void SettingSkill()

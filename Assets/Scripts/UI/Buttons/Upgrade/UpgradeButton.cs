@@ -37,6 +37,7 @@ public class UpgradeButton : BaseButton
             return;
         }
         DataManager.Instance.GameData.PlayerMoney -= money;
+        EventManager.Instance.Invoke("UpdateMoneyText");
         EventManager.Instance.Invoke<UpgradeType>("UpgradeUnit", _status);
         EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", UnitManager.Instance.ChoiceUnit.UnitType);
         ChangeText();

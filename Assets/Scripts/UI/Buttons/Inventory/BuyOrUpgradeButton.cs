@@ -25,6 +25,7 @@ public class BuyOrUpgradeButton : BaseButton
             return;
         }
         DataManager.Instance.GameData.PlayerMoney -= _showUnit.UnlockPrice;
+        EventManager.Instance.Invoke("UpdateMoneyText");
         EventManager.Instance.Invoke("BuyUnit");
 
     }

@@ -3,15 +3,20 @@ using UnityEngine.UI;
 using System;
 using NUnit.Framework;
 using System.Collections.Generic;
+<<<<<<< Updated upstream
+=======
+using UnityEngine.U2D;
+>>>>>>> Stashed changes
 
 public class StarController : MonoBehaviour
 {
     private List<Pair<int,Image>> _stars = new List<Pair<int, Image>>();
+    protected SpriteAtlas _atlas;
 
     private void Awake()
     {
         FindImage();
-       
+        _atlas = Resources.Load<SpriteAtlas>("UI/Image/Icon/LaboratoryIconAtlas");
     }
     private void OnEnable()
     {
@@ -34,7 +39,7 @@ public class StarController : MonoBehaviour
         }
         foreach (var star in _stars)
         {
-            star.Second.sprite = Resources.Load<Sprite>("UI/Image/Icon/ItemIcon_Star_Disable");
+            star.Second.sprite = SpriteReturn("ItemIcon_Star_Disable");
         }
     }
     private void FindImage()
@@ -46,6 +51,10 @@ public class StarController : MonoBehaviour
             _stars.Add(new Pair<int, Image>(count++, image));
         }
     }
+    protected Sprite SpriteReturn(string name)
+    {
+        return _atlas.GetSprite(name);
+    }
     private void ChangeStar(ClearStage stage)
     {
         foreach(var star in _stars)
@@ -53,25 +62,15 @@ public class StarController : MonoBehaviour
             switch (star.First)
             {
                 case 1:
-                    {
-                        if (stage.Star.FirstStar)
-                            star.Second.sprite = Resources.Load<Sprite>("UI/Image/Icon/ItemIcon_Star");
-                        continue ;
-                    }
                 case 2:
-                    {
-                        if (stage.Star.SecondStar)
-                            star.Second.sprite = Resources.Load<Sprite>("UI/Image/Icon/ItemIcon_Star");
-                        continue;
-                    }
                 case 3:
                     {
-                        if (stage.Star.ThirdStar)
-                            star.Second.sprite = Resources.Load<Sprite>("UI/Image/Icon/ItemIcon_Star");
-                        continue;
+                        if (stage.Star.FirstStar)
+                            star.Second.sprite = SpriteReturn("ItemIcon_Star");
+                        continue ;
                     }
             }
-            star.Second.sprite = Resources.Load<Sprite>("UI/Image/Icon/ItemIcon_Star_Disable");
+            star.Second.sprite = SpriteReturn("ItemIcon_Star_Disable");
         }
         
 
