@@ -6,8 +6,9 @@ using UnityEngine.EventSystems; // UI 위 클릭 무시용
 /// - 기본: 외곽선 비표시
 /// - 아무 타일이든 터치/클릭 시: 빌드 가능 전체 외곽선 표시
 /// - 그때 탭한 타일이 빌드 가능이면 해당 타일만 반짝
-/// - (신규) 플레이어 베이스가 아직 배치되지 않았다면 킹타일을 자동 강조(펄스) 표시
-/// - (선택) autoHideSec > 0 이면 빌드가능 강조만 일정 시간 뒤 자동 숨김
+/// - (신규) 스테이지가 로드 완료(GameManager.IsStageLoaded == true)된 뒤부터만 동작
+/// - (옵션) 베이스 미배치 시 킹타일 펄스 강조
+/// - (옵션) autoHideSec > 0 이면 빌드가능 강조 자동 숨김
 /// </summary>
 [DefaultExecutionOrder(1000)]
 public class BuildableHighlighter : MonoBehaviour
@@ -57,6 +58,7 @@ public class BuildableHighlighter : MonoBehaviour
     private Vector3 _cellSize = Vector3.one;
 
     // 상태
+    private bool _stageReady = false;      // ★ 스테이지 로드(Global Flag) 완료 여부
     private bool _showAll = false;
     private Vector3Int _selectedCell;
     private bool _selectedPlaceable = false;
@@ -67,7 +69,7 @@ public class BuildableHighlighter : MonoBehaviour
 
     private void Awake()
     {
-        _map = MapManager.Instance;
+        _cam = Camera.main ?? _cam;
 
         var shader = Shader.Find("Sprites/Default");
         _baseMat = new Material(shader); _baseMat.color = _baseColor;
@@ -77,54 +79,45 @@ public class BuildableHighlighter : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_map != null)
-        {
-            _map.OnCellChanged += OnCellChanged;
-            _map.OnPlayerBasePlaced += OnPlayerBasePlaced;
-        }
+        // 스테이지 로드 완료 이벤트 구독
+        EventManager.Instance.Subscribe<string>(GameManager.EVT_STAGE_LOADED, OnStageLoaded);
+
+        // 이미 로드된 상태라면 즉시 준비
+        if (GameManager.IsStageLoaded)
+            OnStageLoaded(GameManager.LastLoadedStageId);
     }
 
     private void OnDisable()
     {
-        if (_map != null)
-        {
-            _map.OnCellChanged -= OnCellChanged;
-            _map.OnPlayerBasePlaced -= OnPlayerBasePlaced;
-        }
-    }
-
-    private void Start()
-    {
-        if (_map == null || !_map.IsReady) return;
-        _map.GetNavFrame(out _, out _, out _cellSize);
-        ClearAllImmediate();
+        // 이벤트 해제
+        EventManager.Instance.UnSubscribe(GameManager.EVT_STAGE_LOADED, (System.Action<string>)OnStageLoaded);
+        UnhookMapEvents();
     }
 
     private void Update()
     {
-        if (PauseControl.IsPaused)
-        {
-            //if (_showAll) ClearAllImmediate(); // 켜져 있던 표시 끄기
-            return;
-        }
+        if (!_stageReady) return;          // ★ 스테이지 준비 전에는 아무 것도 안 함
+        if (PauseControl.IsPaused) return;
 
         if (_map == null || !_map.IsReady) return;
+
         // ── 베이스 미배치 구간: 킹타일만 상시 강조, 빌드가능 하이라이트는 아예 끔 ──
         if (buildablesOnlyAfterBasePlaced && !_map.HasPlayerBase)
         {
-            // 입력으로 _showAll 켜지지 않게 차단
             _showAll = false;
             _selectedPlaceable = false;
             _hideAt = -1f;
 
-            _usedBuildables = 0; // 혹시 켜져 있던 라인들 정리
+            _usedBuildables = 0;
             _usedKings = 0;
 
-            DrawAllKings();                            // 킹타일 펄스 상시표시
-            DisableUnusedPool(_poolBuildables, 0, true); // 빌드가능 라인 전부 OFF
-            DisableUnusedPool(_poolKings, _usedKings);   // 남는 킹 라인 OFF
-            if (_hoverLR) _hoverLR.enabled = false;    // 선택 펄스도 OFF
-            return;                                    // ← 여기서 프레임 종료
+            if (_highlightKingsUntilBasePlaced)
+                DrawAllKings();
+
+            DisableUnusedPool(_poolBuildables, 0, true);
+            DisableUnusedPool(_poolKings, _usedKings);
+            if (_hoverLR) _hoverLR.enabled = false;
+            return;
         }
 
         // ── 베이스 배치 이후: 기존 로직(탭 → 빌드가능 표시 + autoHide) ──
@@ -162,22 +155,46 @@ public class BuildableHighlighter : MonoBehaviour
             if (_hoverLR) _hoverLR.enabled = false;
         }
 
-        // 안전망: 남은 킹 라인 정리
         DisableUnusedPool(_poolKings, _usedKings);
     }
 
+    // ─────────────────────────────────────────────────────────
+    // 스테이지 로드 완료 처리 (EVT_STAGE_LOADED 핸들러)
+    // ─────────────────────────────────────────────────────────
+    private void OnStageLoaded(string _stageId)
+    {
+        _map = MapManager.Instance;
+        _stageReady = (_map != null && _map.IsReady);
+
+        UnhookMapEvents();
+        if (_stageReady)
+        {
+            _map.GetNavFrame(out _, out _, out _cellSize);
+            HookMapEvents();
+            ClearAllImmediate(); // 시작 시 표시 꺼두기
+        }
+    }
+
+    private void HookMapEvents()
+    {
+        if (_map == null) return;
+        _map.OnCellChanged += OnCellChanged;
+        _map.OnPlayerBasePlaced += OnPlayerBasePlaced;
+    }
+
+    private void UnhookMapEvents()
+    {
+        if (_map == null) return;
+        _map.OnCellChanged -= OnCellChanged;
+        _map.OnPlayerBasePlaced -= OnPlayerBasePlaced;
+    }
 
     // 맵 셀 상태 변경 시
-    private void OnCellChanged(Vector3Int _)
-    {
-        // 풀은 매 프레임 재배치되므로 별도 즉시 처리 없음
-        // 필요하면 플래그만 세워 다음 Update에서 다시 그리기
-    }
+    private void OnCellChanged(Vector3Int _) { /* 필요 시 플래그 세워 다음 프레임 갱신 */ }
 
     // 플레이어 베이스 배치 완료 시: 킹 강조 종료
     private void OnPlayerBasePlaced(Vector3Int _)
     {
-        // 킹 강조를 끄기 위해 풀린 라인 비활성화
         DisableUnusedPool(_poolKings, 0, forceAll: true);
     }
 
@@ -189,7 +206,7 @@ public class BuildableHighlighter : MonoBehaviour
         BoundsInt bounds = _map.GetNavBounds();
         foreach (Vector3Int cell in bounds.allPositionsWithin)
         {
-            MapManager.PlaceInfo info = _map.GetPlaceInfo(cell);
+            var info = _map.GetPlaceInfo(cell);
             if (!info.Placeable) continue;
 
             Vector3 center = _map.CellCenterWorld(cell);
@@ -212,7 +229,7 @@ public class BuildableHighlighter : MonoBehaviour
         {
             Vector3 center = _map.CellCenterWorld(kings[i]);
             LineRenderer lr = GetLR(_poolKings, ref _usedKings, "KingOutline_");
-            // 펄스
+
             float width = _kingWidth;
             float alphaMul = 1f;
             if (_kingPulse)
@@ -222,15 +239,12 @@ public class BuildableHighlighter : MonoBehaviour
                 alphaMul = Mathf.Clamp01(1f - _kingPulseAlphaAmp + s * _kingPulseAlphaAmp);
             }
             Color c = _kingColor; c.a *= alphaMul;
-
-            // 머티리얼 컬러 갱신(독립 인스턴스라 안전)
             _kingMat.color = c;
 
             SetupLR(lr, _kingMat, width, _sortingOrder + 2);
             SetSquare(lr, center, _cellSize);
             lr.enabled = true;
         }
-        // 사용 안 한 킹 라인 끄기는 프레임 말미에서 공통 처리
     }
 
     // ─────────────────────────────────────────────────────────
@@ -253,7 +267,6 @@ public class BuildableHighlighter : MonoBehaviour
             return;
         }
 
-        // 펄스(두께 + 알파)
         float width = _hoverWidth;
         float alphaMul = 1f;
         if (_hoverPulse)

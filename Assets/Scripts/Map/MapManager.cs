@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-
+using System.Threading.Tasks;
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance => Utils.MonoSingleton<MapManager>.Instance;

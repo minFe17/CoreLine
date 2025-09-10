@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using System;
 using NUnit.Framework;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 
 public class StarController : MonoBehaviour
 {

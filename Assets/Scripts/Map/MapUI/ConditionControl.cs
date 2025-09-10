@@ -1,4 +1,5 @@
 using UnityEngine;
+using Utils;
 
 public static class ConditionControl
 {
@@ -30,9 +31,12 @@ public static class ConditionControl
                 case ClearType.HealthSave:
                     if (!baseHpDone)
                     {
-                        // 프로젝트의 실제 베이스 HP 비율로 교체
-                        // 예: PlayerBase.Instance ? PlayerBase.Instance.HpRatio : 1f
-                        snap.baseHpRatio = 1f;
+                        MapUnitManager m = SimpleSingleton<MapUnitManager>.Instance;
+                        float ratio = 1f;
+                        if (m != null && m.King != null)
+                            ratio = Mathf.Clamp01(m.King.GetHPRatio());
+
+                        snap.baseHpRatio = ratio;
                         baseHpDone = true;
                     }
                     break;
@@ -40,9 +44,12 @@ public static class ConditionControl
                 case ClearType.UnitSave:
                     if (!unitDestroyedDone)
                     {
-                        // 프로젝트의 실제 파괴 유닛 수로 교체
-                        // 예: TowerManager.Instance != null ? TowerManager.Instance.DestroyedCount : 0
-                        snap.unitDestroyedCount = 0;
+                        MapUnitManager m = SimpleSingleton<MapUnitManager>.Instance;
+                        int count = 0;
+                        if (m != null)
+                            count = Mathf.Max(0, m.UnitDieCount);
+
+                        snap.unitDestroyedCount = count;
                         unitDestroyedDone = true;
                     }
                     break;
