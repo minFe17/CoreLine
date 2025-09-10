@@ -21,9 +21,6 @@ public class GameStart : MonoBehaviour
 
         CreateCamera();
         CreateUI();
-
-        // 임시
-        ReadJson();
     }
 
     // 임시

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
@@ -14,11 +15,12 @@ public class GameState : IState, IMediatorEvent
     Vector3Int _cell;
     Vector3 _worldPosition;
 
-    List<EUnitType> _unitList = new List<EUnitType>() { EUnitType.Hammer, EUnitType.ThunderWizard, EUnitType.Gunner, EUnitType.Archer, EUnitType.Assassin, EUnitType.Wizard };
+    List<EUnitType> _unitList = new List<EUnitType>();
 
-    public GameState()
+    public void Init()
     {
         SimpleSingleton<MediatorManager>.Instance.Register(EMediatorType.EndSelectTile, this);
+        _unitList = UnitManager.Instance.SettingUnits.Keys.ToList();
         CreateUI();
     }
 

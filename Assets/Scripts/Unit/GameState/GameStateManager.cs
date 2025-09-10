@@ -21,6 +21,10 @@ public class GameStateManager : MonoBehaviour
             { EGameStateType.SelectKingTile, new SelectKingTileState() },
             {EGameStateType.Game, new GameState() }
         };
+
+        if(_gameStateDict[EGameStateType.Game] is GameState gameState)
+            gameState.Init();
+
         ChangeState(EGameStateType.SelectKingTile);
     }
 
