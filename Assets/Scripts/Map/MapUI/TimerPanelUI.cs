@@ -1,6 +1,8 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TimerPanelUI : MonoBehaviour
@@ -206,4 +208,31 @@ public class TimerPanelUI : MonoBehaviour
     public static float RemainingSecondsOrZero => _current ? _current.GetRemainingSeconds() : 0f;
 
     public static bool IsTimeOverGlobal => _current ? _current.IsTimeOver() : false;
+
+    public static bool IsClickOnBlockButton()
+    {
+        if (_current == null || _current._toggleButton == null)
+            return false;
+
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, raycastResults);
+
+        GameObject toggleButtonObj = _current._toggleButton.gameObject;
+
+        foreach (RaycastResult result in raycastResults)
+        {
+            GameObject hit = result.gameObject;
+
+            if (hit == toggleButtonObj || hit.transform.IsChildOf(toggleButtonObj.transform))
+                return true;
+        }
+
+        return false;
+    }
+
 }

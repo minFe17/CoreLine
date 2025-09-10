@@ -140,6 +140,8 @@ public class GameState : IState, IMediatorEvent
                 return;
             if (_unitUI.IsClickOnBlockButton())
                 return;
+            if(TimerPanelUI.IsClickOnBlockButton())
+                return;
             HandleMouseClick();
         }
     }
