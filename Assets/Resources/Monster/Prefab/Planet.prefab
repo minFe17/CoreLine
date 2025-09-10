@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6063507246940110196}
   - component: {fileID: 9103193517895033609}
   - component: {fileID: 7540968173222314596}
+  - component: {fileID: 8448301436553689479}
   m_Layer: 3
   m_Name: Planet
   m_TagString: Monster
@@ -217,6 +218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHp: 100
+  _baseAttack: 100
 --- !u!114 &7540968173222314596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,3 +234,26 @@ MonoBehaviour:
   _panelTag: BarPanel
   _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
   _screenOffset: {x: 0, y: 1.2}
+--- !u!114 &8448301436553689479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2181408392083027494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 784b101586420e142af54b9251189beb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _map: {fileID: 0}
+  _attackStateName: Attack
+  _rangeCell: 1
+  _affectDestructibles: 1
+  _affectTowers: 1
+  _triggerAtNormalizedTime: 0.05
+  _explosionFxPrefab: {fileID: 7596863107726885215, guid: 9458eb69748b5d74d935a6e2a86022b3, type: 3}
+  _fxLifetime: 1
+  _fxSortingLayer: Effects
+  _fxOrderInLayer: 200
+  _sfx: {fileID: 0}

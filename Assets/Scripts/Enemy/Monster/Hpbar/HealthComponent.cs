@@ -3,14 +3,21 @@ using System;
 
 public sealed class HealthComponent : MonoBehaviour
 {
+    [Header("Health")]
     [SerializeField] private int _maxHp = 100;
-
     private int _currentHp = 0;
     private bool _isDead = false;
+
+    [Header("Attack")]
+    [SerializeField] private int _baseAttack = 10;
+    private int _currentAttack = 0;
 
     public int MaxHp { get { return _maxHp; } }
     public int CurrentHp { get { return _currentHp; } }
     public bool IsDead { get { return _isDead; } }
+
+    public int BaseAttack { get { return _baseAttack; } }
+    public int CurrentAttack { get { return _currentAttack; } }
 
     public event Action<int, int> OnHealthChanged;
     public event Action OnDied;
@@ -19,7 +26,9 @@ public sealed class HealthComponent : MonoBehaviour
     {
         _isDead = false;
         _currentHp = Mathf.Max(1, _maxHp);
+        _currentAttack = Mathf.Max(1, _baseAttack);
         FireHealthChanged();
+       
     }
 
     public void Damage(int amount)
@@ -56,4 +65,6 @@ public sealed class HealthComponent : MonoBehaviour
     {
         if (OnHealthChanged != null) { OnHealthChanged(_currentHp, _maxHp); }
     }
+
+   
 }

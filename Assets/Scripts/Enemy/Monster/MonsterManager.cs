@@ -6,6 +6,9 @@ using UnityEngine;
 
 public sealed class MonsterManager : MonoBehaviour
 {
+    // GameManager에서 Invoke<string>(EVT_STAGE_LOADED, stageId)로 쏘는 키와 동일해야 함
+    private const string EVT_STAGE_LOADED = "EVT_STAGE_LOADED";
+
     public static MonsterManager Instance { get; private set; }
 
     [Header("References")]
@@ -41,11 +44,14 @@ public sealed class MonsterManager : MonoBehaviour
     private readonly Dictionary<string, MonsterMover> _prefabCache = new Dictionary<string, MonsterMover>();
     private readonly Dictionary<MonsterMover, (bool allowWalls, bool allowTowers)> _policy = new Dictionary<MonsterMover, (bool allowWalls, bool allowTowers)>();
     private readonly Dictionary<MonsterMover, Stack<MonsterMover>> _pool = new Dictionary<MonsterMover, Stack<MonsterMover>>();
-
     private readonly Queue<PooledMonster> _pendingReturn = new Queue<PooledMonster>();
 
     private Coroutine _scheduleCo;
     private Coroutine _prewarmCo;
+
+    // 중복 실행 방지용
+    private bool _didPrewarm = false;
+    private bool _didSchedule = false;
 
     public List<MonsterMover> Monsters { get { return _monsters; } }
 
@@ -74,6 +80,18 @@ public sealed class MonsterManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+       
+        EventManager.Instance?.Subscribe<string>(EVT_STAGE_LOADED, OnStageLoaded);
+    }
+
+    private void OnDisable()
+    {
+        // UnSubscribe는 Delegate 타입 요구 → (Action<string>) 캐스팅 필요
+        EventManager.Instance?.UnSubscribe(EVT_STAGE_LOADED, (Action<string>)OnStageLoaded);
+    }
+
     private void Start()
     {
         if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
@@ -90,12 +108,14 @@ public sealed class MonsterManager : MonoBehaviour
         if (_prewarmOnStart && csv != null)
         {
             StartPrewarmFromCsv(csv, _defaultPrewarmCount);
+            _didPrewarm = true;
         }
 
         // 3) 웨이브 실행
         if (_runCsvOnStart && csv != null)
         {
             StartScheduleFromCsv(csv);
+            _didSchedule = true;
         }
         else if (_runCsvOnStart && csv == null)
         {
@@ -117,6 +137,39 @@ public sealed class MonsterManager : MonoBehaviour
         }
     }
 
+    // ===== Stage Loaded 이벤트 콜백 =====
+    private void OnStageLoaded(string stageId)
+    {
+        // 새 맵/경로 참조 보강
+        if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
+        if (_route == null) { _route = FindAnyObjectByType<RouteManager>(); }
+
+        _bossSpawned = false;
+
+        // 경로 재빌드 및 보스 스폰
+        if (_route != null) { _route.RebuildAndApply(true); }
+        TrySpawnBossAtBase();
+
+        // 스테이지별 CSV 로드 후 프리웜/웨이브 (중복 방지 플래그로 1회만)
+        TextAsset csv = _csvWaveFile;
+        if (csv == null && _autoLoadStageCsv)
+        {
+            csv = ResolveStageCsvFromSelected();
+        }
+
+        if (_prewarmOnStart && !_didPrewarm && csv != null)
+        {
+            StartPrewarmFromCsv(csv, _defaultPrewarmCount);
+            _didPrewarm = true;
+        }
+
+        if (_runCsvOnStart && !_didSchedule && csv != null)
+        {
+            StartScheduleFromCsv(csv);
+            _didSchedule = true;
+        }
+    }
+
     /* =========================
      *  CSV 자동 로드 (Resources/Monster/Table/<StageId>.csv)
      * ========================= */
@@ -132,11 +185,11 @@ public sealed class MonsterManager : MonoBehaviour
         }
 
         NormalStageData stage = nsm.SelectedStage;
-        if (string.IsNullOrEmpty(stage.Id))
-        {
-            Debug.LogWarning("[MonsterManager] SelectedStage.Id 가 비어있습니다. SelectStage 이벤트로 스테이지를 먼저 선택하세요.");
-            return null;
-        }
+        //if (stage == null)
+        //{
+        //    Debug.LogWarning("[MonsterManager] SelectedStage가 없습니다.");
+        //    return null;
+        //}
 
         string root = _csvResourcesRoot != null ? _csvResourcesRoot.Trim().TrimEnd('/', '\\') : string.Empty;
         string path = string.IsNullOrEmpty(root) ? stage.Id : (root + "/" + stage.Id);
@@ -150,6 +203,9 @@ public sealed class MonsterManager : MonoBehaviour
         return csv;
     }
 
+    /* =========================
+     *  스케줄 실행
+     * ========================= */
     public void StartScheduleFromCsv(TextAsset csvFile)
     {
         List<CsvSpawnRow> rows = ParseCsv(csvFile);
@@ -224,7 +280,6 @@ public sealed class MonsterManager : MonoBehaviour
     /* =========================
      *  프리팹 로드 / 캐시
      * ========================= */
-
     private MonsterMover GetOrLoadPrefab(string monsterId, string resourcesPath)
     {
         if (!string.IsNullOrWhiteSpace(monsterId))
@@ -247,7 +302,6 @@ public sealed class MonsterManager : MonoBehaviour
     /* =========================
      *  프리웜 / 풀링
      * ========================= */
-
     public void StartPrewarmFromCsv(TextAsset csvFile, int fallbackEach)
     {
         if (_prewarmCo != null) { StopCoroutine(_prewarmCo); }
@@ -397,6 +451,9 @@ public sealed class MonsterManager : MonoBehaviour
         stack.Push(m);
     }
 
+    /* =========================
+     *  스폰/이동
+     * ========================= */
     public MonsterMover SpawnAtRC(MonsterMover prefab, Vector2Int rc, bool sendToGoal = true)
     {
         if (prefab == null || _map == null) { return null; }
@@ -449,10 +506,6 @@ public sealed class MonsterManager : MonoBehaviour
         return m;
     }
 
-    /* =========================
-     *  이동/목표 배달
-     * ========================= */
-
     private void SendToGoal(MonsterMover m)
     {
         if (m == null || _route == null) { return; }
@@ -500,7 +553,6 @@ public sealed class MonsterManager : MonoBehaviour
     /* =========================
      *  유틸
      * ========================= */
-
     private void TrySpawnBossAtBase()
     {
         if (_bossSpawned) { return; }
@@ -516,31 +568,6 @@ public sealed class MonsterManager : MonoBehaviour
 
         Instantiate(_bossPrefab, world, Quaternion.identity);
         _bossSpawned = true;
-    }
-
-    public GameObject SpawnEnemyAt(GameObject prefab, Vector3 world, bool? allowWallsOverride = null, bool? allowTowersOverride = null, bool sendToGoal = true)
-    {
-        if (prefab == null) { return null; }
-
-        MonsterMover moverPrefab = prefab.GetComponent<MonsterMover>();
-        if (moverPrefab == null)
-        {
-            Instantiate(prefab, world, Quaternion.identity);
-            return null;
-        }
-
-        MonsterMover m;
-        if (allowWallsOverride.HasValue || allowTowersOverride.HasValue)
-        {
-            m = SpawnAtWorld(moverPrefab, world, false);
-            _policy[m] = (allowWallsOverride.HasValue && allowWallsOverride.Value, allowTowersOverride.HasValue && allowTowersOverride.Value);
-            if (sendToGoal) { SendToGoal(m); }
-        }
-        else
-        {
-            m = SpawnAtWorld(moverPrefab, world, sendToGoal);
-        }
-        return m != null ? m.gameObject : null;
     }
 
     private List<CsvSpawnRow> ParseCsv(TextAsset csvFile)

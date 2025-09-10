@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public sealed class MonsterMover : MonoBehaviour
 {
+    private const string EVT_STAGE_LOADED = "EVT_STAGE_LOADED";
+
     [SerializeField] private TestMap _map;
 
     [Header("Move")]
@@ -23,12 +24,9 @@ public sealed class MonsterMover : MonoBehaviour
     private float _attackTimer = 0f;
     private RouteManager _route;
 
-    public TestMap Map
-    {
-        get { return _map; }
-        set { _map = value; }
-    }
+    private HealthComponent _stats;
 
+    public TestMap Map { get { return _map; } set { _map = value; } }
     public Vector2Int Cell { get; private set; }
     public bool IsFollowingPath { get; private set; }
     public float CurrentMoveSpeed { get { return _moveSpeed; } }
@@ -39,13 +37,11 @@ public sealed class MonsterMover : MonoBehaviour
     private Coroutine _moveCo;
     private Monster _monster;
 
-    
     private IMoveStyle _style;
 
     private bool _allowWalls = false;
     private bool _allowTowers = false;
 
-    
     public enum SpeedType { Skill = 0, Tile = 1, Boss = 2 }
 
     private struct SpeedModifier
@@ -57,10 +53,11 @@ public sealed class MonsterMover : MonoBehaviour
 
     private void Awake()
     {
-        if (!_map) _map = FindAnyObjectByType<TestMap>();
-        if (!_route) _route = FindAnyObjectByType<RouteManager>();
+        if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
+        if (_route == null) { _route = FindAnyObjectByType<RouteManager>(); }
         _monster = GetComponent<Monster>();
         _style = GetComponent<IMoveStyle>();
+        _stats = GetComponent<HealthComponent>();
 
         _baseMoveSpeed = Mathf.Max(_minMoveSpeed, _moveSpeed);
         _moveSpeed = _baseMoveSpeed;
@@ -68,7 +65,7 @@ public sealed class MonsterMover : MonoBehaviour
 
     private void Start()
     {
-        if (_map)
+        if (_map != null)
         {
             Vector2Int rc = _map.WorldToCell(transform.position);
             Cell = rc;
@@ -78,11 +75,25 @@ public sealed class MonsterMover : MonoBehaviour
 
     private void OnEnable()
     {
+        EventManager.Instance.Subscribe<string>(GameManager.EVT_STAGE_LOADED, OnStageLoaded);
         _speedMods.Clear();
         _moveSpeed = _baseMoveSpeed;
     }
 
-   
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe(GameManager.EVT_STAGE_LOADED, (System.Action<string>)OnStageLoaded);
+    }
+
+    private void OnStageLoaded(string stageId)
+    {
+        if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
+        if (_map == null) { return; }
+
+        Vector2Int rc = _map.WorldToCell(transform.position);
+        SetCellAndSnap(rc);
+    }
+
     public void MoveToCell(Vector2Int dst, bool allowWalls, bool allowTowers)
     {
         if (!isActiveAndEnabled) { return; }
@@ -95,7 +106,7 @@ public sealed class MonsterMover : MonoBehaviour
 
         List<Vector2Int> path = AStarPathfinder.FindPath(
             _map.Height, _map.Width,
-            (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
+            (int r, int c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
             Cell, _dstCell
         );
 
@@ -124,7 +135,6 @@ public sealed class MonsterMover : MonoBehaviour
         transform.position = _map.CellToWorld(rc.x, rc.y);
     }
 
-    
     private bool IsPassableOrTarget(int r, int c)
     {
         if (_map.IsWalkable(r, c)) { return true; }
@@ -159,10 +169,8 @@ public sealed class MonsterMover : MonoBehaviour
 
             bool isUnderFeet = (step.x == Cell.x && step.y == Cell.y);
             if (!isUnderFeet &&
-                (
-                    (_allowWalls && _map.IsDestructible(step.x, step.y)) ||
-                    (_allowTowers && _map.HasTower(step.x, step.y))
-                ))
+                ((_allowWalls && _map.IsDestructible(step.x, step.y)) ||
+                 (_allowTowers && _map.HasTower(step.x, step.y))))
             {
                 if (_monster != null)
                 {
@@ -177,7 +185,7 @@ public sealed class MonsterMover : MonoBehaviour
 
                     List<Vector2Int> newPath = AStarPathfinder.FindPath(
                         _map.Height, _map.Width,
-                        (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
+                        (int r, int c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
                         Cell, _dstCell
                     );
                     if (newPath != null && newPath.Count > 1)
@@ -198,7 +206,7 @@ public sealed class MonsterMover : MonoBehaviour
                         Unit unit = towerGo.GetComponent<Unit>();
                         if (unit != null && !unit.IsDie)
                         {
-                            unit.TakeDamage(1);
+                            unit.TakeDamage(_stats != null ? _stats.CurrentAttack : 1);
                             i--;
                             continue;
                         }
@@ -213,7 +221,7 @@ public sealed class MonsterMover : MonoBehaviour
             {
                 List<Vector2Int> newPath = AStarPathfinder.FindPath(
                     _map.Height, _map.Width,
-                    (r, c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
+                    (int r, int c) => IsPassableOrTarget(r, c) || (r == Cell.x && c == Cell.y),
                     Cell, _dstCell
                 );
 
@@ -250,9 +258,7 @@ public sealed class MonsterMover : MonoBehaviour
 
                 if (_style != null)
                 {
-                    (Vector3 targetWorld, float speedMul) res =
-                        _style.Tick(transform.position, baseTarget, dir, _moveSpeed, Time.deltaTime);
-
+                    (Vector3 targetWorld, float speedMul) res = _style.Tick(transform.position, baseTarget, dir, _moveSpeed, Time.deltaTime);
                     t = res.targetWorld;
                     mul = res.speedMul;
 
@@ -332,7 +338,6 @@ public sealed class MonsterMover : MonoBehaviour
 
     private void Update()
     {
-        // 만료 즉시 반영
         RecomputeMoveSpeed(Time.time);
 
         if (_monster != null && _monster.IsDead) { return; }
@@ -375,7 +380,7 @@ public sealed class MonsterMover : MonoBehaviour
             Unit towerUnit = towerGo.GetComponent<Unit>();
             if (towerUnit != null && !towerUnit.IsDie)
             {
-                towerUnit.TakeDamage(1);
+                towerUnit.TakeDamage(_stats != null ? _stats.CurrentAttack : 1);
                 return;
             }
         }
