@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using NUnit.Framework;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 
 public class StarController : MonoBehaviour
 {
@@ -31,6 +32,10 @@ public class StarController : MonoBehaviour
                 ChangeStar(stage);
                 return;
             }
+        }
+        foreach (var star in _stars)
+        {
+            star.Second.sprite = Resources.Load<Sprite>("UI/Image/Icon/ItemIcon_Star_Disable");
         }
     }
     private void FindImage()

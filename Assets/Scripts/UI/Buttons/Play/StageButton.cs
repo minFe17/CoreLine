@@ -7,9 +7,17 @@ public class StageButton : BaseButton
     public NormalStageData Data
     {
         get { return _data; }
-        set { _data = value; }
+        set 
+        {
+            _data = value;
+            SettingText();
+        }
     }
 
+    protected void SettingText()
+    {
+        _buttonText.text = _data.Id;
+    }
     protected override void OnClick()
     {
         EventManager.Instance.Invoke<NormalStageData>("SelectStage", _data);

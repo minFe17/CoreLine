@@ -2848,7 +2848,7 @@ MonoBehaviour:
   _route: {fileID: 2125745506}
   _bossPrefab: {fileID: 1756996183535018546, guid: bb4be34c342d7db489254592e7fb4173, type: 3}
   _spawnBossOnBase: 1
-  _csvWaveFile: {fileID: 4900000, guid: 86b5c54b7b385fd4f98847ed43bda59b, type: 3}
+  _csvWaveFile: {fileID: 0}
   _runCsvOnStart: 1
   _autoLoadStageCsv: 1
   _csvResourcesRoot: Monster/Table
