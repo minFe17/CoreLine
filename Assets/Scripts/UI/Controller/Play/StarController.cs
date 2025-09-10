@@ -3,10 +3,8 @@ using UnityEngine.UI;
 using System;
 using NUnit.Framework;
 using System.Collections.Generic;
-<<<<<<< Updated upstream
-=======
 using UnityEngine.U2D;
->>>>>>> Stashed changes
+
 
 public class StarController : MonoBehaviour
 {

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "209969054683",
+    "project_id": "coreline-4f199",
+    "storage_bucket": "coreline-4f199.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209969054683:android:9003958f38c5bbeee41dfe",
+        "android_client_info": {
+          "package_name": "com.team.CoreLine"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "209969054683-n6mqmht4i1ajql2jr167jd6plta351p6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbOfwRKEvAuc83DIazoWnZCM5-cNCmkg4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "209969054683-n6mqmht4i1ajql2jr167jd6plta351p6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

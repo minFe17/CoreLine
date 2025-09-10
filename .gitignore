@@ -466,3 +466,25 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,unity
+# Firebase C++ SDK 빌드 산출물
+*.so
+*.dll
+*.dylib
+*.bundle
+*.a
+*.lib
+
+# 빌드 디렉토리
+/build/
+/bin/
+/out/
+
+# 임시 파일
+*.log
+*.tmp
+*.user
+*.cache
+
+# OS별 불필요 파일
+.DS_Store
+Thumbs.db
