@@ -5,6 +5,8 @@ public class KingUnit : Unit
 {
     EUnitType _unitType = EUnitType.King;
 
+    public int GetHPRatio() => _currentHp / _unitStateData.HP;
+
     void Start()
     {
         _animator = GetComponent<Animator>();
