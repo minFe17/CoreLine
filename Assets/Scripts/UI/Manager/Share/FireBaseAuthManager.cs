@@ -71,6 +71,20 @@ public class FireBaseAuthManager : SimpleSingleton<FireBaseAuthManager>
     {
         FirebaseAuth.DefaultInstance.SignOut();
     }
+    public void SignInWithGoogle(string idToken, string accessToken)
+    {
+        Credential credential = GoogleAuthProvider.GetCredential(idToken, accessToken);
+        _auth.SignInWithCredentialAsync(credential).ContinueWith(task =>
+        {
+            if (task.IsCanceled || task.IsFaulted)
+            {
+                Debug.LogError("Firebase 로그인 실패: " + task.Exception);
+                return;
+            }
 
+            FirebaseUser newUser = task.Result;
+            Debug.LogFormat("Firebase 로그인 성공! User: {0} ({1})", newUser.DisplayName, newUser.UserId);
+        });
+    }
 
 }
