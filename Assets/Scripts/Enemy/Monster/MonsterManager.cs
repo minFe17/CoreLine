@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
 using UnityEngine;
+using Utils; // AddressableManager / SimpleSingleton
 
 public sealed class MonsterManager : MonoBehaviour
 {
-    // GameManager에서 Invoke<string>(EVT_STAGE_LOADED, stageId)로 쏘는 키와 동일해야 함
     private const string EVT_STAGE_LOADED = "EVT_STAGE_LOADED";
 
     public static MonsterManager Instance { get; private set; }
@@ -41,13 +42,17 @@ public sealed class MonsterManager : MonoBehaviour
     [SerializeField] private Transform _poolContainer;
 
     private readonly List<MonsterMover> _monsters = new List<MonsterMover>();
-    private readonly Dictionary<string, MonsterMover> _prefabCache = new Dictionary<string, MonsterMover>();
+    private readonly Dictionary<string, MonsterMover> _prefabCache = new Dictionary<string, MonsterMover>(); // (monsterId → prefab) 기존 유지
     private readonly Dictionary<MonsterMover, (bool allowWalls, bool allowTowers)> _policy = new Dictionary<MonsterMover, (bool allowWalls, bool allowTowers)>();
     private readonly Dictionary<MonsterMover, Stack<MonsterMover>> _pool = new Dictionary<MonsterMover, Stack<MonsterMover>>();
     private readonly Queue<PooledMonster> _pendingReturn = new Queue<PooledMonster>();
 
     private Coroutine _scheduleCo;
     private Coroutine _prewarmCo;
+
+    // Addressables
+    private AddressableManager _addrMgr;
+    private readonly Dictionary<string, MonsterMover> _addrCache = new Dictionary<string, MonsterMover>(); // (address → prefab)
 
     // 중복 실행 방지용
     private bool _didPrewarm = false;
@@ -82,36 +87,34 @@ public sealed class MonsterManager : MonoBehaviour
 
     private void OnEnable()
     {
-       
         EventManager.Instance?.Subscribe<string>(EVT_STAGE_LOADED, OnStageLoaded);
     }
 
     private void OnDisable()
     {
-        // UnSubscribe는 Delegate 타입 요구 → (Action<string>) 캐스팅 필요
         EventManager.Instance?.UnSubscribe(EVT_STAGE_LOADED, (Action<string>)OnStageLoaded);
     }
 
     private void Start()
     {
+        if (_addrMgr == null) { _addrMgr = SimpleSingleton<AddressableManager>.Instance; }
+
         if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
         if (_route == null) { _route = FindAnyObjectByType<RouteManager>(); }
 
-        // 1) CSV 결정: 수동 지정 우선, 없으면 자동 로드
         TextAsset csv = _csvWaveFile;
         if (csv == null && _autoLoadStageCsv)
         {
             csv = ResolveStageCsvFromSelected();
         }
 
-        // 2) 프리웜
+        // 프리웜을 쓴다면: Addressables 프리로드 후 프리웜
         if (_prewarmOnStart && csv != null)
         {
-            StartPrewarmFromCsv(csv, _defaultPrewarmCount);
+            StartCoroutine(CoPreloadThenPrewarm(csv));
             _didPrewarm = true;
         }
 
-        // 3) 웨이브 실행
         if (_runCsvOnStart && csv != null)
         {
             StartScheduleFromCsv(csv);
@@ -121,6 +124,13 @@ public sealed class MonsterManager : MonoBehaviour
         {
             Debug.LogWarning("[MonsterManager] 시작 시 로드할 CSV를 찾지 못했습니다. (_csvWaveFile 비었고, Stage Id 기반 자동 로드 실패)");
         }
+    }
+
+    private IEnumerator CoPreloadThenPrewarm(TextAsset csvFile)
+    {
+        List<CsvSpawnRow> rows = ParseCsv(csvFile);
+        yield return PreloadMonstersFromCsv(rows);
+        StartPrewarmFromCsv(csvFile, _defaultPrewarmCount);
     }
 
     private void LateUpdate()
@@ -137,20 +147,16 @@ public sealed class MonsterManager : MonoBehaviour
         }
     }
 
-    // ===== Stage Loaded 이벤트 콜백 =====
     private void OnStageLoaded(string stageId)
     {
-        // 새 맵/경로 참조 보강
         if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
         if (_route == null) { _route = FindAnyObjectByType<RouteManager>(); }
 
         _bossSpawned = false;
 
-        // 경로 재빌드 및 보스 스폰
         if (_route != null) { _route.RebuildAndApply(true); }
         TrySpawnBossAtBase();
 
-        // 스테이지별 CSV 로드 후 프리웜/웨이브 (중복 방지 플래그로 1회만)
         TextAsset csv = _csvWaveFile;
         if (csv == null && _autoLoadStageCsv)
         {
@@ -159,7 +165,7 @@ public sealed class MonsterManager : MonoBehaviour
 
         if (_prewarmOnStart && !_didPrewarm && csv != null)
         {
-            StartPrewarmFromCsv(csv, _defaultPrewarmCount);
+            StartCoroutine(CoPreloadThenPrewarm(csv));
             _didPrewarm = true;
         }
 
@@ -185,11 +191,6 @@ public sealed class MonsterManager : MonoBehaviour
         }
 
         NormalStageData stage = nsm.SelectedStage;
-        //if (stage == null)
-        //{
-        //    Debug.LogWarning("[MonsterManager] SelectedStage가 없습니다.");
-        //    return null;
-        //}
 
         string root = _csvResourcesRoot != null ? _csvResourcesRoot.Trim().TrimEnd('/', '\\') : string.Empty;
         string path = string.IsNullOrEmpty(root) ? stage.Id : (root + "/" + stage.Id);
@@ -247,10 +248,12 @@ public sealed class MonsterManager : MonoBehaviour
     {
         if (_map == null || _route == null) { yield break; }
 
+        // Addressables 프리로드(카탈로그 없이 CSV 주소 그대로)
+        yield return PreloadMonstersFromCsv(rows);
+
         yield return new WaitUntil(() => MapManager.Instance != null && MapManager.Instance.HasPlayerBase);
 
         TrySpawnBossAtBase();
-
         _route.RebuildAndApply(true);
 
         for (int ri = 0; ri < rows.Count; ri++)
@@ -278,10 +281,62 @@ public sealed class MonsterManager : MonoBehaviour
     }
 
     /* =========================
+     *  Addressables 프리로드
+     * ========================= */
+    private IEnumerator PreloadMonstersFromCsv(IList<CsvSpawnRow> rows)
+    {
+        if (rows == null) { yield break; }
+        if (_addrMgr == null) { _addrMgr = SimpleSingleton<AddressableManager>.Instance; }
+
+        HashSet<string> need = new HashSet<string>();
+        for (int i = 0; i < rows.Count; i++)
+        {
+            string addr = DeriveAddress(rows[i]);
+            if (!string.IsNullOrWhiteSpace(addr) && !_addrCache.ContainsKey(addr))
+            {
+                need.Add(addr);
+            }
+        }
+
+        foreach (string addr in need)
+        {
+            Task<GameObject> t = _addrMgr.GetAddressableAsset<GameObject>(addr);
+            while (!t.IsCompleted) { yield return null; }
+
+            MonsterMover prefab = null;
+            GameObject go = t.Result;
+            if (go != null) { prefab = go.GetComponent<MonsterMover>(); }
+
+            if (prefab != null) { _addrCache[addr] = prefab; }
+            else { Debug.LogWarning("[MonsterManager] Addressables load failed or component missing: " + addr); }
+        }
+    }
+
+    private static string DeriveAddress(CsvSpawnRow row)
+    {
+        if (row == null) { return null; }
+        if (!string.IsNullOrWhiteSpace(row.prefabPath)) { return row.prefabPath.Trim(); }
+        if (!string.IsNullOrWhiteSpace(row.monsterId)) { return row.monsterId.Trim(); }
+        return null;
+    }
+
+    /* =========================
      *  프리팹 로드 / 캐시
      * ========================= */
     private MonsterMover GetOrLoadPrefab(string monsterId, string resourcesPath)
     {
+        // 1) Addressables 캐시 우선 (prefabPath=Address 권장)
+        string addr = !string.IsNullOrWhiteSpace(resourcesPath) ? resourcesPath : monsterId;
+        if (!string.IsNullOrWhiteSpace(addr))
+        {
+            MonsterMover cachedAddr;
+            if (_addrCache.TryGetValue(addr, out cachedAddr) && cachedAddr != null)
+            {
+                return cachedAddr;
+            }
+        }
+
+        // 2) 기존 캐시(monsterId → prefab)도 유지
         if (!string.IsNullOrWhiteSpace(monsterId))
         {
             MonsterMover cached;
@@ -291,7 +346,13 @@ public sealed class MonsterManager : MonoBehaviour
             }
         }
 
-        MonsterMover loaded = Resources.Load<MonsterMover>(resourcesPath);
+        // 3) 폴백: Resources (이행기 안정성; Addressables-only로 강제하려면 아래 블록 제거)
+        MonsterMover loaded = null;
+        if (!string.IsNullOrWhiteSpace(resourcesPath))
+        {
+            loaded = Resources.Load<MonsterMover>(resourcesPath);
+        }
+
         if (loaded != null && !string.IsNullOrWhiteSpace(monsterId))
         {
             _prefabCache[monsterId] = loaded;

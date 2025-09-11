@@ -7,15 +7,15 @@ public sealed class MonsterSlow : IMonsterSkillHandler, ISkillTargetingSpecProvi
     // === 효과(타워 힐) ===
     public void Apply(GameObject towerObject, in SkillManager.SelectedSkill skill)
     {
-        Debug.Log("Use");
-        int damageAmount = Mathf.RoundToInt(skill.Effect.Value);
-        if (damageAmount <= 0) return;
+        if (!SkillManager.Instance.TryGetSkillDef(skill.Id, out var def)) return;
+
+        int damageAmount = Mathf.RoundToInt(def.Value);
 
         MonsterMover monster;
         //float duration =  나중에 시간 정해지면 추가
         if (towerObject.TryGetComponent<MonsterMover>(out monster))
         {
-            monster.ApplySpeedModifier(MonsterMover.SpeedType.Skill, skill.Effect.Value, skill.Effect.Value);
+            monster.ApplySpeedModifier(MonsterMover.SpeedType.Skill, def.Value, def.Duration);
             return;
         }
     }

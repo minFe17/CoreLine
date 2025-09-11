@@ -106,9 +106,11 @@ public class PauseUI : MonoBehaviour
         Resume();
         SimpleSingleton<MapUnitManager>.Instance.RestartGame();
         SimpleSingleton<MediatorManager>.Instance.ClearAll();
+        MapManager.Instance.UnloadStage();
         var active = SceneManager.GetActiveScene();
         SceneManager.LoadScene(active.buildIndex);
         CostManager.Instance.SetUnitValue(0);
+        CostManager.Instance.SetSkillValue(0);
     }
 
     public void GoToLobby()

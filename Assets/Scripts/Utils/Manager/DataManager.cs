@@ -10,6 +10,7 @@ public class DataManager : SimpleSingleton<DataManager>
     private List<UpgradeData> _upgradeDatas;
     private List<WorldStageData> _worldStagesDatas;
     private List<StoreData> _storeDatas;
+    private List<SkillData> _skillDatas;
     private GameData _gameData;
 
     public List<InventoryData> InventoryDatas
@@ -32,6 +33,10 @@ public class DataManager : SimpleSingleton<DataManager>
     {
         get { return _storeDatas; } 
     }
+    public List<SkillData> SkillDatas
+    {
+        get { return _skillDatas; }
+    }
 
     public GameData GameData
     {
@@ -46,6 +51,7 @@ public class DataManager : SimpleSingleton<DataManager>
         LoadUpgradeData();
         LoadNormalStageData();
         LoadStoreData();
+        LoadSkillData();
     }
     public UpgradeData GetUpgradeData(UpgradeType type)
     {
@@ -98,5 +104,9 @@ public class DataManager : SimpleSingleton<DataManager>
     private void LoadStoreData()
     {
         _storeDatas = CsvManager.Instance.Load<StoreData>("StoreData");
+    }
+    private void LoadSkillData()
+    {
+        _skillDatas = CsvManager.Instance.Load<SkillData>("SkillData");
     }
 }

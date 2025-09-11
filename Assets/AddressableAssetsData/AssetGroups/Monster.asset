@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Monster
+  m_EditorClassIdentifier: 
+  m_GroupName: Monster
+  m_GUID: c5f10482ee27cc548bdd6248b324dfeb
+  m_SerializeEntries:
+  - m_GUID: 22812e06959cac44eb92cc68c2c7345d
+    m_Address: Assets/Prefabs/Monster/Prefab/Wolf.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4bc47f495aac86545a1ed873da403ae2
+    m_Address: Assets/Prefabs/Monster/Prefab/Tree.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c77ba88cac376741a16003603f7d70d
+    m_Address: Assets/Prefabs/Monster/Prefab/Slime.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c8f9fcc03242a14ea66ed264500aa97
+    m_Address: Assets/Prefabs/Monster/Prefab/Skeleton.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86940134f51dc8943884d78bf17a9929
+    m_Address: Assets/Prefabs/Monster/Prefab/Planet.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9533204747915df40bd73e7706fc5165
+    m_Address: Assets/Prefabs/Monster/Prefab/Block.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ba24fff2c13f10a4d82e6fab6a4765d9
+    m_Address: Assets/Prefabs/Monster/Prefab/Ghost.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bb4be34c342d7db489254592e7fb4173
+    m_Address: Assets/Prefabs/Monster/Prefab/BossDragon.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bb74a1e0990e0c94582f8f4a93bfd331
+    m_Address: Assets/Prefabs/Monster/Prefab/Golem.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6a66e2bbb055884fb9e753ce8225a85
+    m_Address: Assets/Prefabs/Monster/Prefab/Dragon.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f327e3577e9f6714daa4f4ad90256381
+    m_Address: Assets/Prefabs/Monster/Prefab/Yeti.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: b4ea09713c0206c41bbd752ebba986c7, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 757cc975e3343a944959c3d9f2dffc4d, type: 2}
+    - {fileID: 11400000, guid: c1caa1b790caf62459b70bd8093e1f5b, type: 2}

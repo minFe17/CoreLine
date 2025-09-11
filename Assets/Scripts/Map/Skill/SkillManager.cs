@@ -3,117 +3,166 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
-public partial class SkillManager : MonoSingleton<SkillManager>
+/// <summary>
+/// ½ºÅ³Àº ·Îµå¾Æ¿ô¿£ Id¸¸ ÀúÀåÇÏ°í, ½ÇÁ¦ ¼öÄ¡(Cost/Value/Cooltime/Duration)´Â
+/// CSV(DataManager.SkillDatas)¿¡¼­ ·±Å¸ÀÓ¿¡ Á¶È¸ÇØ »ç¿ëÇÏ´Â ±¸Á¶.
+/// </summary>
+public class SkillManager : MonoSingleton<SkillManager>
 {
-    // ===== µ¥ÀÌÅÍ/¼±ÅÃ =====
-    [Header("µ¥ÀÌÅÍ/¼±ÅÃ")]
-    [SerializeField] private LaboratoryData _database; // ÇÊ¿ä ½Ã »ç¿ë
-    [SerializeField] private int _maxSlots = 3;
-    [SerializeField] public List<SelectedSkill> _loadout = new List<SelectedSkill>();
-
-    [Header("¼³Á¤")]
-    [SerializeField] private Transform _unitRoot;      // ¼±ÅÃ: À¯´Ö ºÎ¸ð(¾ø¾îµµ ¹«¹æ)
-    [SerializeField] private string _monsterTag = "Monster";
-
-    // ÇÚµé·¯ ·¹Áö½ºÆ®¸®
-    private Dictionary<string, ITowerSkillHandler> _towerHandlers = new Dictionary<string, ITowerSkillHandler>();
-    private Dictionary<string, IMonsterSkillHandler> _monsterHandlers = new Dictionary<string, IMonsterSkillHandler>();
-    private Dictionary<TargetType, IIncomeSkillHandler> _incomeHandlers = new Dictionary<TargetType, IIncomeSkillHandler>();
-    private Dictionary<string, ISkillTargetingSpecProvider> _targetingProviders = new Dictionary<string, ISkillTargetingSpecProvider>();
-
-    // ¼±ÅÃ: ¸ó½ºÅÍ ±âº» Ã³¸®ÀÚ(µî·Ï ¾øÀ½ ½Ã)
-    private IMonsterSkillHandler _defaultMonsterHandler;
-
-    public event Action OnLoadoutChanged;
-
-    // ===== SelectedSkill (µ¥ÀÌÅÍ ÃÖ¼Ò ÇÊµå¸¸) =====
-    public struct SelectedSkill
+    // ===== CSV Á¤ÀÇ Ä³½Ã =====
+    public struct SkillDef
     {
         public string Id;
         public int Cost;
-        public Effect Effect; // Value, ValueType, TargetType, TargetStatus
-
-        public SelectedSkill(LaboratoryData data)
-        {
-            Id = data.Id;
-            Cost = data.Cost;
-            Effect = data.Effect;
-        }
+        public float Value;
+        public float Cooltime;
+        public float Duration;
     }
 
-    // ===== ·Îµå/µî·Ï =====
+    // ·Îµå¾Æ¿ô ¿£Æ®¸®: Id¸¸ ÀúÀå
+    public struct SelectedSkill
+    {
+        public string Id;
+
+        public SelectedSkill(string id) => Id = id;
+
+        // ÇÚµé·¯°¡ °£ÆíÈ÷ CSV Á¤ÀÇ¸¦ °¡Á®°¡µµ·Ï Á¦°ø
+        public bool TryGetDef(out SkillDef def) => SkillManager.Instance.TryGetDef(Id, out def);
+    }
+
+    // ÇÁ¸®ºä Å¸°ÙÆÃ ±¸ºÐ(±âÁ¸ À¯Áö)
+    [System.Flags]
+    public enum TargetKind
+    {
+        Towers = 1 << 0,
+        Monsters = 1 << 1,
+        Both = Towers | Monsters
+    }
+
+    [Header("Selection/Slots")]
+    [SerializeField] private int _maxSlots = 3;
+    public readonly List<SelectedSkill> _loadout = new List<SelectedSkill>();
+
+    [Header("Optional tags/roots")]
+    [SerializeField] private Transform _unitRoot;     // ¼±ÅÃ
+    [SerializeField] private string _monsterTag = "Monster";
+
+    // ÇÚµé·¯(¾ÆÀÌµð ¡æ ±¸Çö)
+    private readonly Dictionary<string, ITowerSkillHandler> _towerHandlers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, IMonsterSkillHandler> _monsterHandlers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<TargetType, IIncomeSkillHandler> _incomeHandlers = new();
+    private readonly Dictionary<string, ISkillTargetingSpecProvider> _targetingProviders = new(StringComparer.OrdinalIgnoreCase);
+
+    // CSV Ä³½Ã
+    private readonly Dictionary<string, SkillDef> _defs = new(StringComparer.OrdinalIgnoreCase);
+
+    // ½½·Ôº° Äð´Ù¿î Á¾·á ½Ã°¢
+    private readonly Dictionary<int, float> _slotCooldownEnd = new();
+
+    public event Action OnLoadoutChanged;
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ÃÊ±âÈ­: CSV ÀÐ¾î Ä³½Ã, ºôÆ®ÀÎ ÇÚµé·¯ µî·Ï
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     private void Awake()
     {
+        // CSV ¡æ ·±Å¸ÀÓ Ä³½Ã
+        _defs.Clear();
+        var rows = DataManager.Instance?.SkillDatas;
+        if (rows != null)
+        {
+            for (int i = 0; i < rows.Count; i++)
+            {
+                var r = rows[i];
+                _defs[r.Id] = new SkillDef
+                {
+                    Id = r.Id,
+                    Cost = r.Cost,
+                    Value = r.Value,
+                    Cooltime = r.Cooltime,
+                    Duration = r.Duration
+                };
+            }
+        }
+
         RegisterBuiltinSkills();
     }
 
+    // ÇÁ·ÎÁ§Æ®¿¡ ÀÖ´Â ±¸Çö¿¡ ¸ÂÃç µî·Ï(¾ø´Â °æ¿ì ÁÖ¼®Ã³¸®ÇØµµ µÊ)
     private void RegisterBuiltinSkills()
     {
-        // RangeHeal: È¿°ú + Å¸°ÔÆÃ Á¦°øÀ» ÇÏ³ªÀÇ ÀÎ½ºÅÏ½º·Î
-        RangeHeal rangeHeal = new RangeHeal();
-        RegisterTowerHandler(rangeHeal);
-        RegisterTargetingProvider(rangeHeal);
+        // ¿¹½Ã: Å¸¿ö(¾Æ±º) Èú
+        if (TryMake<RangeHeal>(out var rh)) { RegisterTowerHandler(rh); RegisterTargetingProvider(rh); }
 
-        // ¸ó½ºÅÍ¿ë ½ºÅ³ (±âº» Ã³¸®ÀÚ)
-        ArrowRain arrowRain = new ArrowRain();
-        RegisterMonsterHandler(arrowRain);
-        RegisterTargetingProvider(arrowRain);
-        MonsterSlow monsterSlow = new MonsterSlow();
-        RegisterMonsterHandler(monsterSlow);
-        RegisterTargetingProvider(monsterSlow);
-        // ¿¹: Æ¯¼ö ¸ó½ºÅÍ ½ºÅ³ Ãß°¡ÇÏ·Á¸é ¾Æ·¡Ã³·³ µî·Ï
-        // RegisterMonsterHandler(new RangeNukeSkill());
+        // ¿¹½Ã: ¸ó½ºÅÍ °ø°Ý/µð¹öÇÁ
+        if (TryMake<ArrowRain>(out var ar)) { RegisterMonsterHandler(ar); RegisterTargetingProvider(ar); }
+        if (TryMake<MonsterSlow>(out var ms)) { RegisterMonsterHandler(ms); RegisterTargetingProvider(ms); }
 
-        // ÀÎÄÄ(º¸»ó) ½ºÅ³
-        RegisterIncomeHandler(new IncomeMoneyHandler());
-        RegisterIncomeHandler(new IncomeSkillHandler());
-
+        // ÀÎÄÄ ½ºÅ³ »ç¿ë ½Ã
+        if (TryMake<IncomeMoneyHandler>(out var im)) RegisterIncomeHandler(im);
+        if (TryMake<IncomeSkillHandler>(out var iskill)) RegisterIncomeHandler(iskill);
     }
 
-    private void RegisterTowerHandler(ITowerSkillHandler handler)
+    private static bool TryMake<T>(out T obj) where T : class, new()
     {
-        if (handler == null || string.IsNullOrEmpty(handler.Id)) return;
-        _towerHandlers[handler.Id] = handler;
+        try { obj = new T(); return true; } catch { obj = null; return false; }
     }
 
-    private void RegisterMonsterHandler(IMonsterSkillHandler handler)
+    private void RegisterTowerHandler(ITowerSkillHandler h) { if (h != null && !string.IsNullOrEmpty(h.Id)) _towerHandlers[h.Id] = h; }
+    private void RegisterMonsterHandler(IMonsterSkillHandler h) { if (h != null && !string.IsNullOrEmpty(h.Id)) _monsterHandlers[h.Id] = h; }
+    private void RegisterIncomeHandler(IIncomeSkillHandler h) { if (h != null) _incomeHandlers[h.TargetType] = h; }
+    private void RegisterTargetingProvider(ISkillTargetingSpecProvider p)
     {
-        if (handler == null || string.IsNullOrEmpty(handler.Id)) return;
-        _monsterHandlers[handler.Id] = handler;
+        if (p != null && !string.IsNullOrEmpty(p.Id)) _targetingProviders[p.Id] = p;
     }
 
-    private void RegisterIncomeHandler(IIncomeSkillHandler handler)
-    {
-        if (handler == null) return;
-        _incomeHandlers[handler.TargetType] = handler;
-    }
+    // CSV Á¤ÀÇ Á¶È¸(¿ÜºÎ/ÇÚµé·¯/ÇÁ¸®ºä¿¡¼­ »ç¿ë)
+    public bool TryGetDef(string id, out SkillDef def) => _defs.TryGetValue(id, out def);
 
-    private void RegisterTargetingProvider(ISkillTargetingSpecProvider provider)
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ·Îµå¾Æ¿ô API
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    public bool AddToLoadout(string id)
     {
-        if (provider == null || string.IsNullOrEmpty(provider.Id)) return;
-        _targetingProviders[provider.Id] = provider;
-    }
+        if (string.IsNullOrEmpty(id)) return false;
+        if (_loadout.Count >= _maxSlots) return false;
+        if (_loadout.Exists(s => s.Id == id)) return false; // Áßº¹ ¹æÁö
+        if (!_defs.ContainsKey(id)) { Debug.LogWarning($"[SkillManager] CSV¿¡ ¾ø´Â ½ºÅ³: {id}"); return false; }
 
-    // ===== ¿ÜºÎ API =====
-    public bool AddToLoadout(LaboratoryData def)
-    {
-        if (_loadout.Count >= _maxSlots) { Debug.LogWarning("[SkillManager] ·Îµå¾Æ¿ô °¡µæ Âü"); return false; }
-        if (_loadout.Exists(s => s.Id == def.Id))
-            return false;
-
-        _loadout.Add(new SelectedSkill(def));
+        _loadout.Add(new SelectedSkill { Id = id });
         OnLoadoutChanged?.Invoke();
         return true;
     }
-    public bool RemoveAtLoadout(LaboratoryData def)
+
+    // (±¸¹öÀü È£È¯) ±âÁ¸ LaboratoryData·Î µé¾î¿À¸é Id¸¸ ÃëÇÔ
+    public bool AddToLoadout(in LaboratoryData def)
+    => !string.IsNullOrEmpty(def.Id) && AddToLoadout(def.Id);
+
+    public bool RemoveFromLoadout(in LaboratoryData def)
+    => !string.IsNullOrEmpty(def.Id) && RemoveFromLoadout(def.Id);
+
+    // 2) SelectedSkillÀ» Á÷Á¢ ³Ñ±â´Â °æ¿ìµµ Áö¿ø
+    public bool RemoveFromLoadout(in SelectedSkill sel)
+        => !string.IsNullOrEmpty(sel.Id) && RemoveFromLoadout(sel.Id);
+    public bool RemoveFromLoadout(string id)
     {
-        if (_loadout.Count == 0)  return false;
+        if (string.IsNullOrEmpty(id)) return false;
 
-        int removed = _loadout.RemoveAll(s => s.Id == def.Id);
-        if (removed <= 0) return false;
+        int removed = _loadout.RemoveAll(s =>
+            string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase));
 
+        if (removed > 0)
+        {
+            OnLoadoutChanged?.Invoke();
+            return true;
+        }
+        return false;
+    }
+    public void ClearLoadout()
+    {
+        if (_loadout.Count == 0) return;
+        _loadout.Clear();
         OnLoadoutChanged?.Invoke();
-        return true;
     }
 
     public SelectedSkill GetSelectedSkillBySlotIndex(int slotIndex)
@@ -121,6 +170,7 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         if (slotIndex < 0 || slotIndex >= _loadout.Count) throw new IndexOutOfRangeException();
         return _loadout[slotIndex];
     }
+
     public string[] GetLoadoutIds()
     {
         var arr = new string[_loadout.Count];
@@ -128,15 +178,15 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         return arr;
     }
 
-    public bool TryGetTargetingSpec(SelectedSkill skill, out SkillTargetingSpec spec)
+    public bool TryGetTargetingSpec(in SelectedSkill skill, out SkillTargetingSpec spec)
     {
-        ISkillTargetingSpecProvider provider;
-        if (_targetingProviders.TryGetValue(skill.Id, out provider))
+        if (_targetingProviders.TryGetValue(skill.Id, out var provider))
         {
-            spec = provider.GetSpec(skill);
+            spec = provider.GetSpec(in skill);
             return true;
         }
-        // ±âº»°ª: Æ÷ÀÎÆ® Å¸°Ù
+
+        // ±âº»(Æ÷ÀÎÆ®, ¾Æ¹« ÀÇ¹Ì ¾ø´Â µðÆúÆ®)
         spec = new SkillTargetingSpec
         {
             Mode = TargetingMode.Point,
@@ -147,255 +197,248 @@ public partial class SkillManager : MonoSingleton<SkillManager>
         return false;
     }
 
-    // ===== ½ºÅ³ »ç¿ë(´ÜÀÏ/¹üÀ§) =====
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ½ºÅ³ »ç¿ë(Æ÷ÀÎÆ®/»ç°¢/¿øÇü)
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     public void UseSkill(int slotIndex, GameObject explicitTarget = null)
     {
         if (PauseControl.IsPaused) return;
+        if (!ValidateSlotAndPay(slotIndex, out var sel, out var def)) return;
 
-        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] Àß¸øµÈ ½½·Ô ÀÎµ¦½º"); return; }
-        SelectedSkill skill = _loadout[slotIndex];
+        // ÀÎÄÄ ½ºÅ³ÀÌ¸é Áï½Ã º¸»ó Àû¿ë
+        if (TryApplyIncomeReward(in sel)) return;
 
-        // ºñ¿ë: ½ºÅ³ Áö°©
-        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
-        {
-            Debug.LogWarning("[SkillManager] ½ºÅ³ ÄÚ½ºÆ® ºÎÁ·");
-            return;
-        }
-
-        // ÀÎÄÄ(º¸»ó) Å¸ÀÔÀÌ¸é Áï½Ã Áö±Þ
-        if (TryApplyIncomeReward(skill)) return;
-
-        // ½ÇÁ¦ È¿°ú Àû¿ë
-        ApplySkillEffect(skill, explicitTarget);
+        // Å¸°Ù ¿ÀºêÁ§Æ®°¡ ÁÖ¾îÁ³À» ¶§¸¸ ´ÜÀÏ Àû¿ë
+        if (explicitTarget != null) DispatchToTarget(explicitTarget, in sel);
     }
 
     public void UseSkillAreaRectWorld(int slotIndex, Vector3 centerWorld, int halfSizeCells, TargetKind targetKind)
     {
         if (PauseControl.IsPaused) return;
-
-        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] Àß¸øµÈ ½½·Ô ÀÎµ¦½º"); return; }
-        SelectedSkill skill = _loadout[slotIndex];
-
-        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
-        {
-            Debug.LogWarning("[SkillManager] ½ºÅ³ ÄÚ½ºÆ® ºÎÁ·");
-            return;
-        }
-
-        if (TryApplyIncomeReward(skill)) return;
+        if (!ValidateSlotAndPay(slotIndex, out var sel, out var def)) return;
+        if (TryApplyIncomeReward(in sel)) return;
 
         centerWorld.z = 0f;
-        List<GameObject> targets = AcquireTargetsRectWorld(centerWorld, halfSizeCells, targetKind);
-        ApplyEffectToTargets(skill, targets);
+        var targets = AcquireTargetsRectWorld(centerWorld, halfSizeCells, targetKind);
+        ApplyEffectToTargets(in sel, targets);
     }
 
     public void UseSkillAreaRadiusWorld(int slotIndex, Vector3 centerWorld, float radiusWorld, TargetKind targetKind)
     {
         if (PauseControl.IsPaused) return;
-
-        if (slotIndex < 0 || slotIndex >= _loadout.Count) { Debug.LogWarning("[SkillManager] Àß¸øµÈ ½½·Ô ÀÎµ¦½º"); return; }
-        SelectedSkill skill = _loadout[slotIndex];
-
-        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(skill.Cost))
-        {
-            Debug.LogWarning("[SkillManager] ½ºÅ³ ÄÚ½ºÆ® ºÎÁ·");
-            return;
-        }
-
-        if (TryApplyIncomeReward(skill)) return;
+        if (!ValidateSlotAndPay(slotIndex, out var sel, out var def)) return;
+        if (TryApplyIncomeReward(in sel)) return;
 
         centerWorld.z = 0f;
-        List<GameObject> targets = AcquireTargetsRadiusWorld(centerWorld, radiusWorld, targetKind);
-        ApplyEffectToTargets(skill, targets);
+        var targets = AcquireTargetsRadiusWorld(centerWorld, radiusWorld, targetKind);
+        ApplyEffectToTargets(in sel, targets);
     }
 
-    // ===== µð½ºÆÐÄ¡ =====
-    private void ApplySkillEffect(SelectedSkill selectedSkill, GameObject explicitTarget)
+    // ºñ¿ë/Äð´Ù¿î °øÅë °ËÁõ
+    private bool ValidateSlotAndPay(int slotIndex, out SelectedSkill sel, out SkillDef def)
     {
-        if (selectedSkill.Effect.TargetType != TargetType.Unit) return;
+        sel = default; def = default;
 
-        if (explicitTarget == null) return;
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) return false;
 
-        MapManager mapManager = MapManager.Instance;
-        if (mapManager == null || !mapManager.IsReady) return;
+        // Äð´Ù¿î Ã¼Å©
+        if (_slotCooldownEnd.TryGetValue(slotIndex, out var end) && Time.time < end)
+            return false;
 
-        if (explicitTarget.CompareTag(_monsterTag))
+        sel = _loadout[slotIndex];
+
+        if (!TryGetDef(sel.Id, out def)) { Debug.LogWarning($"[SkillManager] Á¤ÀÇ ¾øÀ½: {sel.Id}"); return false; }
+
+        // ºñ¿ë Â÷°¨
+        if (!CostManager.Instance || !CostManager.Instance.TrySpendSkill(def.Cost))
         {
-            ApplyToMonsterObject(selectedSkill, explicitTarget);
-            return;
+            Debug.LogWarning("[SkillManager] ½ºÅ³ ÄÚ½ºÆ® ºÎÁ·");
+            return false;
         }
 
-        Vector3Int cell = mapManager.WorldToCell(explicitTarget.transform.position);
-        GameObject towerAtCell;
-        if (mapManager.TryGetTowerAt(cell, out towerAtCell) && towerAtCell == explicitTarget)
-        {
-            ApplyToTowerObject(selectedSkill, explicitTarget);
-        }
+        // Äð´Ù¿î ½ÃÀÛ
+        _slotCooldownEnd[slotIndex] = Time.time + Mathf.Max(0f, def.Cooltime);
+        return true;
     }
 
-    private void ApplyEffectToTargets(SelectedSkill selectedSkill, List<GameObject> targetObjects)
+    // ÀÎÄÄ ½ºÅ³ Ã³¸® (ÇÊ¿ä ¾øÀ¸¸é Ç×»ó false ¹ÝÈ¯)
+    private bool TryApplyIncomeReward(in SelectedSkill selectedSkill)
     {
-        if (targetObjects == null || targetObjects.Count == 0) return;
-
-        for (int i = 0; i < targetObjects.Count; i++)
-        {
-            GameObject targetObject = targetObjects[i];
-            if (targetObject == null || !targetObject.activeInHierarchy) continue;
-
-            if (targetObject.CompareTag(_monsterTag))
-            {
-                ApplyToMonsterObject(selectedSkill, targetObject);
-            }
-            else
-            {
-                ApplyToTowerObject(selectedSkill, targetObject);
-            }
-        }
-    }
-
-    private void ApplyToTowerObject(SelectedSkill selectedSkill, GameObject towerObject)
-    {
-        ITowerSkillHandler handler;
-        if (_towerHandlers.TryGetValue(selectedSkill.Id, out handler))
-        {
-            handler.Apply(towerObject, selectedSkill);
-        }
-    }
-
-    private void ApplyToMonsterObject(SelectedSkill selectedSkill, GameObject monsterObject)
-    {
-        IMonsterSkillHandler handler;
-        if (_monsterHandlers.TryGetValue(selectedSkill.Id, out handler))
-        {
-            handler.Apply(monsterObject, selectedSkill);
-            return;
-        }
-
-        if (_defaultMonsterHandler != null)
-        {
-            _defaultMonsterHandler.Apply(monsterObject, selectedSkill);
-        }
-    }
-
-    private bool TryApplyIncomeReward(SelectedSkill selectedSkill)
-    {
-        IIncomeSkillHandler handler;
-        if (_incomeHandlers.TryGetValue(selectedSkill.Effect.TargetType, out handler))
-        {
-            handler.Apply(selectedSkill);
-            return true;
-        }
+        // Effect.TargetTypeÀ¸·Î ºÐ±âÇÏ´ø °ú°Å ±¸Á¶¸¦ ¾²Áö ¾ÊÀ¸¹Ç·Î
+        // ÀÎÄÄ ½ºÅ³À» ¾²½Ç °Å¸é Idº°·Î ÇÚµé·¯¸¦ µî·ÏÇØ »ç¿ëÇÏ¼¼¿ä.
+        // ¾Æ·¡´Â ¿¹½Ã(ÇÚµé·¯°¡ µî·ÏµÇ¾î ÀÖÀ¸¸é ±×ÂÊ¿¡¼­ Ã³¸®).
         return false;
     }
 
-    // ===== Å¸°Ù ¼öÁý À¯Æ¿ (´ç½Å ÇÁ·ÎÁ§Æ®ÀÇ ±âÁ¸ ¹öÀü Àç»ç¿ë) =====
-
-    [System.Flags]
-    public enum TargetKind
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ½ÇÁ¦ Àû¿ë(´ÜÀÏ/º¹¼ö)
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    private void DispatchToTarget(GameObject target, in SelectedSkill sel)
     {
-        Towers = 1 << 0,
-        Monsters = 1 << 1,
-        Both = Towers | Monsters
+        if (target == null) return;
+
+        if (target.CompareTag(_monsterTag))
+        {
+            if (_monsterHandlers.TryGetValue(sel.Id, out var mh))
+                mh.Apply(target, in sel);
+            return;
+        }
+
+        var map = MapManager.Instance;
+        if (map != null && map.IsReady)
+        {
+            var cell = map.WorldToCell(target.transform.position);
+            if (map.TryGetTowerAt(cell, out var tower) && tower == target)
+            {
+                if (_towerHandlers.TryGetValue(sel.Id, out var th))
+                    th.Apply(target, in sel);
+            }
+        }
     }
 
+    private void ApplyEffectToTargets(in SelectedSkill sel, List<GameObject> targets)
+    {
+        if (targets == null || targets.Count == 0) return;
+
+        for (int i = 0; i < targets.Count; i++)
+        {
+            var obj = targets[i];
+            if (obj == null || !obj.activeInHierarchy) continue;
+
+            if (obj.CompareTag(_monsterTag))
+            {
+                if (_monsterHandlers.TryGetValue(sel.Id, out var mh))
+                    mh.Apply(obj, in sel);
+            }
+            else
+            {
+                if (_towerHandlers.TryGetValue(sel.Id, out var th))
+                    th.Apply(obj, in sel);
+            }
+        }
+    }
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // Å¸°Ù ¼öÁý(¸Ê ±â¹Ý)
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
     private List<GameObject> AcquireTargetsRectWorld(Vector3 worldCenter, int halfSizeCells, TargetKind targetKind)
     {
-        MapManager mapManager = MapManager.Instance;
-        if (mapManager == null || !mapManager.IsReady) return new List<GameObject>();
-        Vector3 worldCenter2D = worldCenter; worldCenter2D.z = 0f;
-        Vector3Int centerCell = mapManager.WorldToCell(worldCenter2D);
+        var map = MapManager.Instance;
+        var result = new List<GameObject>(32);
+        if (map == null || !map.IsReady) return result;
+
+        Vector3 world2D = worldCenter; world2D.z = 0f;
+        Vector3Int centerCell = map.WorldToCell(world2D);
+
         return AcquireTargetsRectCells(centerCell, halfSizeCells, targetKind);
     }
 
     private List<GameObject> AcquireTargetsRectCells(Vector3Int centerCell, int halfSizeCells, TargetKind targetKind)
     {
-        MapManager mapManager = MapManager.Instance;
-        List<GameObject> resultObjects = new List<GameObject>(32);
-        if (mapManager == null || !mapManager.IsReady) return resultObjects;
+        var map = MapManager.Instance;
+        var result = new List<GameObject>(32);
+        if (map == null || !map.IsReady) return result;
 
-        HashSet<GameObject> uniqueObjects = new HashSet<GameObject>();
+        var uniq = new HashSet<GameObject>();
+        BoundsInt bounds = map.GetNavBounds();
 
-        BoundsInt navigationBounds = mapManager.GetNavBounds();
-        int minCellX = Mathf.Max(navigationBounds.xMin, centerCell.x - halfSizeCells);
-        int maxCellX = Mathf.Min(navigationBounds.xMax - 1, centerCell.x + halfSizeCells);
-        int minCellY = Mathf.Max(navigationBounds.yMin, centerCell.y - halfSizeCells);
-        int maxCellY = Mathf.Min(navigationBounds.yMax - 1, centerCell.y + halfSizeCells);
+        int minX = Mathf.Max(bounds.xMin, centerCell.x - halfSizeCells);
+        int maxX = Mathf.Min(bounds.xMax - 1, centerCell.x + halfSizeCells);
+        int minY = Mathf.Max(bounds.yMin, centerCell.y - halfSizeCells);
+        int maxY = Mathf.Min(bounds.yMax - 1, centerCell.y + halfSizeCells);
 
         if ((targetKind & TargetKind.Towers) != 0)
         {
-            for (int cellY = minCellY; cellY <= maxCellY; cellY++)
-            {
-                for (int cellX = minCellX; cellX <= maxCellX; cellX++)
+            for (int y = minY; y <= maxY; y++)
+                for (int x = minX; x <= maxX; x++)
                 {
-                    Vector3Int cell = new Vector3Int(cellX, cellY, 0);
-                    GameObject towerObject;
-                    if (mapManager.TryGetTowerAt(cell, out towerObject) && towerObject != null && towerObject.activeInHierarchy)
-                    {
-                        if (uniqueObjects.Add(towerObject)) resultObjects.Add(towerObject);
-                    }
+                    var cell = new Vector3Int(x, y, 0);
+                    if (map.TryGetTowerAt(cell, out var tower) && tower != null && tower.activeInHierarchy)
+                        if (uniq.Add(tower)) result.Add(tower);
                 }
-            }
         }
 
         if ((targetKind & TargetKind.Monsters) != 0)
         {
-            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(_monsterTag);
-            foreach (GameObject monsterObject in monsterObjects)
+            var monsters = GameObject.FindGameObjectsWithTag(_monsterTag);
+            for (int i = 0; i < monsters.Length; i++)
             {
-                if (monsterObject == null || !monsterObject.activeInHierarchy) continue;
-                Vector3Int monsterCell = mapManager.WorldToCell(monsterObject.transform.position);
-                if (monsterCell.x < minCellX || monsterCell.x > maxCellX || monsterCell.y < minCellY || monsterCell.y > maxCellY) continue;
-                if (uniqueObjects.Add(monsterObject)) resultObjects.Add(monsterObject);
+                var m = monsters[i];
+                if (m == null || !m.activeInHierarchy) continue;
+                var mc = map.WorldToCell(m.transform.position);
+                if (mc.x < minX || mc.x > maxX || mc.y < minY || mc.y > maxY) continue;
+                if (uniq.Add(m)) result.Add(m);
             }
         }
 
-        return resultObjects;
+        return result;
     }
 
     private List<GameObject> AcquireTargetsRadiusWorld(Vector3 worldCenter, float radiusWorld, TargetKind targetKind)
     {
-        MapManager mapManager = MapManager.Instance;
-        List<GameObject> resultObjects = new List<GameObject>(32);
-        if (mapManager == null || !mapManager.IsReady) return resultObjects;
+        var map = MapManager.Instance;
+        var result = new List<GameObject>(32);
+        if (map == null || !map.IsReady) return result;
 
-        Vector3 worldCenter2D = worldCenter; worldCenter2D.z = 0f;
-        float radiusSquared = radiusWorld * radiusWorld;
-        HashSet<GameObject> uniqueObjects = new HashSet<GameObject>();
+        Vector3 c = worldCenter; c.z = 0f;
+        float r2 = radiusWorld * radiusWorld;
 
-        Vector3Int originCell; Vector3Int sizeCells; Vector3 cellSize;
-        mapManager.GetNavFrame(out originCell, out sizeCells, out cellSize);
+        var uniq = new HashSet<GameObject>();
 
+        // ¼¿ ±â¹Ý ÈÄº¸ Ãà¼Ò
+        map.GetNavFrame(out _, out var sizeCells, out var cellSize);
         float cellStep = Mathf.Max(Mathf.Abs(cellSize.x), Mathf.Abs(cellSize.y));
-        int halfSizeCells = Mathf.Max(0, Mathf.CeilToInt(radiusWorld / Mathf.Max(cellStep, 0.0001f)));
-
-        Vector3Int centerCell = mapManager.WorldToCell(worldCenter2D);
+        int half = Mathf.Max(0, Mathf.CeilToInt(radiusWorld / Mathf.Max(cellStep, 0.0001f)));
+        var centerCell = map.WorldToCell(c);
 
         if ((targetKind & TargetKind.Towers) != 0)
         {
-            List<GameObject> towerCandidates = AcquireTargetsRectCells(centerCell, halfSizeCells, TargetKind.Towers);
-            for (int i = 0; i < towerCandidates.Count; i++)
+            var rect = AcquireTargetsRectCells(centerCell, half, TargetKind.Towers);
+            for (int i = 0; i < rect.Count; i++)
             {
-                GameObject towerObject = towerCandidates[i];
-                if (towerObject == null || !towerObject.activeInHierarchy) continue;
-                float distanceSquared = (towerObject.transform.position - worldCenter2D).sqrMagnitude;
-                if (distanceSquared <= radiusSquared && uniqueObjects.Add(towerObject))
-                    resultObjects.Add(towerObject);
+                var t = rect[i];
+                if (t == null || !t.activeInHierarchy) continue;
+                if ((t.transform.position - c).sqrMagnitude <= r2 && uniq.Add(t)) result.Add(t);
             }
         }
 
         if ((targetKind & TargetKind.Monsters) != 0)
         {
-            GameObject[] monsterObjects = GameObject.FindGameObjectsWithTag(_monsterTag);
-            for (int i = 0; i < monsterObjects.Length; i++)
+            var monsters = GameObject.FindGameObjectsWithTag(_monsterTag);
+            for (int i = 0; i < monsters.Length; i++)
             {
-                GameObject monsterObject = monsterObjects[i];
-                if (monsterObject == null || !monsterObject.activeInHierarchy) continue;
-                float distanceSquared = (monsterObject.transform.position - worldCenter2D).sqrMagnitude;
-                if (distanceSquared <= radiusSquared && uniqueObjects.Add(monsterObject))
-                    resultObjects.Add(monsterObject);
+                var m = monsters[i];
+                if (m == null || !m.activeInHierarchy) continue;
+                if ((m.transform.position - c).sqrMagnitude <= r2 && uniq.Add(m)) result.Add(m);
             }
         }
 
-        return resultObjects;
+        return result;
     }
+    // SkillManager ³»ºÎ¿¡ µÎ¸é ÆíÇÔ
+    public bool TryGetSkillDef(string id, out SkillDef def)
+    {
+        def = default;
+
+        var list = DataManager.Instance?.SkillDatas;
+        if (list == null || string.IsNullOrEmpty(id)) return false;
+
+        // struct/class ±¸ºÐ ¾øÀÌ ¾ÈÀüÇÑ Ã£±â
+        int idx = list.FindIndex(s => string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase));
+        if (idx < 0) return false;
+
+        var data = list[idx];
+
+        def = new SkillDef
+        {
+            Id = data.Id,
+            Cost = Mathf.RoundToInt(data.Cost), // floatÀÌ¸é int·Î º¯È¯
+            Value = data.Value,
+            Cooltime = data.Cooltime,
+            Duration = data.Duration
+        };
+        return true;
+    }
+
+
 }
