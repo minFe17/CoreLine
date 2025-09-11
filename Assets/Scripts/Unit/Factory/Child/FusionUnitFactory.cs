@@ -1,5 +1,6 @@
 using UnityEngine;
 using Utils;
+
 public class FusionUnitFactory : IFactory
 {
     GameObject _unitPrefab;

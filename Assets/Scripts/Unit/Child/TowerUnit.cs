@@ -57,12 +57,12 @@ public class TowerUnit : Unit
 
     public override void Remove()
     {
+        if (UnitUI != null && UnitUI.Unit == this)
+            UnitUI.Close();
         base.Remove();
         MonoSingleton<ObjectPoolManager>.Instance.Push(_unitType, gameObject);
         if (SimpleSingleton<AttackRangeManager>.Instance.IsSameUnit(this))
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
-        if (UnitUI.Unit == this)
-            UnitUI.Close();
     }
 
     void SetLevel()
@@ -94,9 +94,7 @@ public class TowerUnit : Unit
     {
         targetObject.layer = layer;
         foreach (Transform child in targetObject.transform)
-        {
             SetLayerRecursively(child.gameObject, layer);
-        }
     }
 
     public GameObject GetCurrentUnit()

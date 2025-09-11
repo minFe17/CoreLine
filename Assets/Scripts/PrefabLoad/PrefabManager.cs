@@ -17,6 +17,7 @@ public class PrefabManager
             {EPrefabType.Bullet, new BulletPrefabLoad() },
             {EPrefabType.Camera, new CameraPrefabLoad() },
             {EPrefabType.Data, new DataPrefabLoad()},
+            {EPrefabType.Sound, new SoundPrefabLoad() },
         };
     }
 

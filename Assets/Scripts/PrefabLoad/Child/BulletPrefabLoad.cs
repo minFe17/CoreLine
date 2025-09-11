@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+
 public class BulletPrefabLoad : PrefabLoadBase
 {
     Dictionary<EBulletType, GameObject> _bulletDict = new Dictionary<EBulletType, GameObject>();

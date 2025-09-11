@@ -16,6 +16,7 @@ public class GameStart : MonoBehaviour
 
         CreateCamera();
         CreateUI();
+        MonoSingleton<AudioClipManager>.Instance.Init();
     }
 
     private void CreateUI()

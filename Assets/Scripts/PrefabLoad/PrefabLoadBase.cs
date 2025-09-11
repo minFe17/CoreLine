@@ -20,4 +20,5 @@ public abstract class PrefabLoadBase
     public virtual GameObject GetPrefab<TEnum>(TEnum type) where TEnum : Enum => null;
     public virtual TextAsset GetPrefabTextAsset<TEnum>(TEnum type) where TEnum : Enum => null;
     public virtual SpriteAtlas GetPrefabAtlas<TEnum>(TEnum type) where TEnum : Enum => null;
+    public virtual AudioClip GetAudioPrefab<TEnum>(TEnum type) where TEnum : Enum => null;
 }

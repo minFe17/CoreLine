@@ -75,7 +75,8 @@ public class GameState : IState, IMediatorEvent
 
     void ShowMapInteractUI()
     {
-        if (TryOpenObjectTilePanel()) return;
+        if (TryOpenObjectTilePanel()) 
+            return;
         if (MapManager.Instance.IsDestructible(_cell))
         {
             _isSelectTile = true;

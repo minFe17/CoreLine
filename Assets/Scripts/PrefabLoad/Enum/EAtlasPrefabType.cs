@@ -1,4 +1,3 @@
-
 public enum EAtlasPrefabType
 {
     UnitSpriteAtlas,

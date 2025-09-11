@@ -69,8 +69,6 @@ public class ThorAttack : AttackBase
             else
                 break;
         }
-
         return monsterList;
     }
-
 }

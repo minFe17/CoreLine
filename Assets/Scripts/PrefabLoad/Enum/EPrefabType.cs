@@ -8,5 +8,6 @@ public enum EPrefabType
     Bullet,
     Camera,
     Data,
+    Sound,
     Max,
 }

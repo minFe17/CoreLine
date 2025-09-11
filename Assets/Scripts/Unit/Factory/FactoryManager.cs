@@ -17,7 +17,6 @@ public class FactoryManager
     void SetFactories()
     {
         _factories.Add(new AttackRangeFactory());
-        // юс╫ц
         for (int i = 0; i < (int)EUnitType.Max; i++)
             _factories.Add(new UnitFactory((EUnitType)i));
         for (int i = 0; i < (int)EFusionUnitType.Max; i++)
