@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using UnityEditor;
-using Utils;
 
 [DefaultExecutionOrder(-10)]
 public class PauseUI : MonoBehaviour
@@ -12,63 +10,69 @@ public class PauseUI : MonoBehaviour
     private const string NAME_PlayButton = "PlayButton";
     private const string NAME_RestartButton = "RestartButton";
     private const string NAME_QuitButton = "QuitButton";
-    
-    private const string LOBBY_SCENE_NAME = "Lobby"; // 없으면 빌드 인덱스 0으로 이동
+
+    private const string LOBBY_SCENE_NAME = "LobyScene";
     private const KeyCode TOGGLE_KEY = KeyCode.Escape;
-    
+
     private GameObject _pausePanel;
     private Button _pauseBtn, _playBtn, _restartBtn, _quitBtn;
 
     public static bool IsPaused { get; private set; }
+    private bool _loadingScene; // 씬 전환 중 입력/토글 차단
 
     private void Awake()
     {
-        // 기준 캔버스 탐색
+        // 기준 캔버스
         Canvas canvas = GetComponentInParent<Canvas>(true);
         if (!canvas) canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
-        // 이름으로 모두 찾기(비활성 포함)
-        _pauseBtn = FindByName<Button>(canvas.transform, NAME_PauseButton);
-        _pausePanel = FindByName<Transform>(canvas.transform, NAME_PausePanel)?.gameObject;
-        _playBtn = FindByName<Button>(canvas.transform, NAME_PlayButton);
-        _restartBtn = FindByName<Button>(canvas.transform, NAME_RestartButton);
-        _quitBtn = FindByName<Button>(canvas.transform, NAME_QuitButton);
+        // 이름으로 가져오기(비활성 포함)
+        _pauseBtn = FindByName<Button>(canvas?.transform, NAME_PauseButton);
+        _pausePanel = FindByName<Transform>(canvas?.transform, NAME_PausePanel)?.gameObject;
+        _playBtn = FindByName<Button>(canvas?.transform, NAME_PlayButton);
+        _restartBtn = FindByName<Button>(canvas?.transform, NAME_RestartButton);
+        _quitBtn = FindByName<Button>(canvas?.transform, NAME_QuitButton);
 
-        // 초기 상태
         if (_pausePanel) _pausePanel.SetActive(false);
 
-        // 클릭 이벤트 배선
-        if (_pauseBtn)
-        {
-            _pauseBtn.onClick.RemoveAllListeners();
-            _pauseBtn.onClick.AddListener(TogglePause);
-        }
-        if (_playBtn)
-        {
-            _playBtn.onClick.RemoveAllListeners();
-            _playBtn.onClick.AddListener(Resume);
-        }
-        if (_restartBtn)
-        {
-            _restartBtn.onClick.RemoveAllListeners();
-            _restartBtn.onClick.AddListener(RestartScene);
-        }
+        // 이벤트 배선
+        if (_pauseBtn) { _pauseBtn.onClick.RemoveAllListeners(); _pauseBtn.onClick.AddListener(TogglePause); }
+        if (_playBtn) { _playBtn.onClick.RemoveAllListeners(); _playBtn.onClick.AddListener(Resume); }
+        if (_restartBtn) { _restartBtn.onClick.RemoveAllListeners(); _restartBtn.onClick.AddListener(RestartScene); }
         if (_quitBtn)
         {
             _quitBtn.onClick.RemoveAllListeners();
-            _quitBtn.onClick.AddListener(GoToLobby);
+            _quitBtn.onClick.AddListener(RequestDefeatAndShowPanel);
         }
 
-        // 누락된 요소가 있으면 경고만 띄움(실행은 계속)
-        if (!_pauseBtn) Debug.LogWarning("[PauseUIAuto] PauseButton not found.");
-        if (!_pausePanel) Debug.LogWarning("[PauseUIAuto] PausePanel not found.");
-        if (!_playBtn) Debug.LogWarning("[PauseUIAuto] PlayButton not found.");
-        if (!_restartBtn) Debug.LogWarning("[PauseUIAuto] RestartButton not found.");
-        if (!_quitBtn) Debug.LogWarning("[PauseUIAuto] QuitButton not found.");
+
+#if UNITY_EDITOR
+        if (!_pauseBtn) Debug.LogWarning("[PauseUI] PauseButton not found.");
+        if (!_pausePanel) Debug.LogWarning("[PauseUI] PausePanel not found.");
+        if (!_playBtn) Debug.LogWarning("[PauseUI] PlayButton not found.");
+        if (!_restartBtn) Debug.LogWarning("[PauseUI] RestartButton not found.");
+        if (!_quitBtn) Debug.LogWarning("[PauseUI] QuitButton not found.");
+#endif
+
+        // 씬 시작 시 항상 재생 상태 보정
+        ForceResumeState();
+    }
+
+    private void OnEnable()
+    {
+        // 새 씬 로드 후에도 항상 보정
+        SceneManager.sceneLoaded += EnsureUnpausedOnSceneLoaded;
+        ForceResumeState();
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= EnsureUnpausedOnSceneLoaded;
     }
 
     private void Update()
     {
+        if (_loadingScene) return; // 전환 중 입력 무시
         if (Input.GetKeyDown(TOGGLE_KEY))
             TogglePause();
     }
@@ -77,46 +81,54 @@ public class PauseUI : MonoBehaviour
 
     public void TogglePause()
     {
+        if (_loadingScene) return;
         if (IsPaused) Resume();
         else Pause();
     }
 
     public void Pause()
     {
-        if (IsPaused) return;
+        if (IsPaused || _loadingScene) return;
         IsPaused = true;
         if (_pausePanel) _pausePanel.SetActive(true);
         Time.timeScale = 0f;
         PauseControl.SetPaused(true);
-        //AudioListener.pause = true;
+        // AudioListener.pause = true;
     }
 
     public void Resume()
     {
-        if (!IsPaused) return;
+        ForceResumeState();
+    }
+
+    private void ForceResumeState()
+    {
         IsPaused = false;
         if (_pausePanel) _pausePanel.SetActive(false);
         Time.timeScale = 1f;
         PauseControl.SetPaused(false);
-        //AudioListener.pause = false;
+        // AudioListener.pause = false;
+    }
+
+    private void ForceHidePanelImmediate()
+    {
+        if (_pausePanel && _pausePanel.activeSelf)
+            _pausePanel.SetActive(false);
     }
 
     public void RestartScene()
     {
-        Resume();
-        SimpleSingleton<MapUnitManager>.Instance.RestartGame();
-        SimpleSingleton<MediatorManager>.Instance.ClearAll();
-        MapManager.Instance.UnloadStage();
+        BeginSceneChange();
+
+        MapManager.Instance?.UnloadStage(); // 선택
         var active = SceneManager.GetActiveScene();
         SceneManager.LoadScene(active.buildIndex);
-        CostManager.Instance.SetUnitValue(0);
-        CostManager.Instance.SetSkillValue(0);
     }
 
     public void GoToLobby()
     {
-        Resume();
-        // 먼저 이름으로 시도, 없으면 인덱스 0
+        BeginSceneChange();
+        GameManager.Instance?.ResetRunState();
         try
         {
             if (!string.IsNullOrEmpty(LOBBY_SCENE_NAME))
@@ -129,21 +141,47 @@ public class PauseUI : MonoBehaviour
             SceneManager.LoadScene(0);
         }
     }
+    private void RequestDefeatAndShowPanel()
+    {
+        // 일시정지 패널만 숨기고(씬 전환/리셋 X)
+        ForceHidePanelImmediate();
+
+        var mgr = NormalStageManager.Instance;
+        if (mgr == null) return;
+
+        var stage = mgr.SelectedStage;
+        var snap = ConditionControl.BuildFor(stage);
+
+        // 패배(포기)로 마감 → GameManager.OnStageDefeated가 패널을 띄움
+        mgr.CompleteStageDefeat(snap);
+    }
+
+    private void BeginSceneChange()
+    {
+        _loadingScene = true;        // 전환 중 입력/토글 차단
+        ForceHidePanelImmediate();   // 깜빡임 방지
+        ForceResumeState();          // 전환 전에 반드시 재생 상태
+
+        GameManager.Instance?.ResetRunState(resetCostToZero: false);
+    }
+
+    private void EnsureUnpausedOnSceneLoaded(Scene s, LoadSceneMode m)
+    {
+        _loadingScene = false;
+        ForceResumeState();
+    }
 
     // ─────────────────────────────────────────────
     // 유틸: 이름으로 찾기
-    static T FindByName<T>(Transform root, string name) where T : Component
+    private static T FindByName<T>(Transform root, string name) where T : Component
     {
         if (!root) return null;
-        foreach (var c in root.GetComponentsInChildren<T>(true))
-            if (c.name == name) return c;
-        return null;
-    }
-    static Transform FindByName<Transform>(Transform root, string name) where Transform : Component
-    {
-        if (!root) return null;
-        foreach (var t in root.GetComponentsInChildren<Transform>(true))
-            if (t.name == name) return t;
+        var list = root.GetComponentsInChildren<T>(true);
+        for (int i = 0; i < list.Length; i++)
+        {
+            var c = list[i];
+            if (c && c.name == name) return c;
+        }
         return null;
     }
 }

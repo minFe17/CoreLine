@@ -85,6 +85,8 @@ public sealed class DefeatPanelControl : MonoBehaviour
             PauseControl.SetPaused(false);
         }
 
+        GameManager.Instance?.ResetRunState(resetCostToZero: false);
+
         if (string.IsNullOrEmpty(_lobbySceneName))
         {
             Debug.LogError("[DefeatPanelControl] 로비 씬 이름이 비었습니다.");

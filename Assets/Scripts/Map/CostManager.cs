@@ -227,6 +227,30 @@ public class CostManager : MonoSingleton<CostManager>
         _wallets[(int)type] = w;
     }
 
+    public void PrepareForNewStage(bool resetToZero)
+    {
+        // 현재값 초기화
+        if (resetToZero)
+        {
+            SetUnitValue(0);
+            SetSkillValue(0);
+        }
+        else
+        {
+            // 시작값으로 리셋하고 싶다면 이렇게(필요 시)
+            SetUnitValue(unitSettings.startValue);
+            SetSkillValue(skillSettings.startValue);
+        }
+
+        // 분수 캐리 리셋
+        _wallets[(int)CostType.Unit].carry = 0f;
+        _wallets[(int)CostType.Skill].carry = 0f;
+
+         _basePlacedGate = false;
+         TryHookMapEvent(); // 새 MapManager에 다시 구독(이미 구독이라면 내부에서 무시)
+    }
+
+
     // 하위 호환 래퍼
     public void AddUnit(int a) => Add(CostType.Unit, a); public void AddUnitFraction(float a) => Add(CostType.Unit, a);
     public void SetUnitValue(int v) => SetValue(CostType.Unit, v); public bool TrySpendUnit(int a) => TrySpend(CostType.Unit, a);

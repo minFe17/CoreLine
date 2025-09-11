@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Map
   m_GUID: 2f27fc4f5adcc0745a3044081256c146
   m_SerializeEntries:
+  - m_GUID: 3437073acdccaa84f88adb1177f82011
+    m_Address: Stage1-2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 648af1f6160dda147bb0e94b9aa44320
     m_Address: Stage1-1
     m_ReadOnly: 0

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,10 +14,10 @@ public class TimerPanelUI : MonoBehaviour
     [SerializeField] private RectTransform _marker;  // (¿É¼Ç) Marker. Áö±ÝÀº ¸ØÃã¿¡ »ç¿ëÇÏÁö ¾ÊÀ½
 
     [Header("Countdown Label")]
-    [SerializeField] private TextMeshProUGUI _countdownText;         // 120,119,... Ç¥½ÃÇÒ Text (BarBgÀÇ ÀÚ½Ä ÃßÃµ)
-    [SerializeField] private RectTransform _countdownRt;  // ¶óº§ RectTransform(¹ÌÁöÁ¤ÀÌ¸é countdownTextÀÇ RT »ç¿ë)
-    [SerializeField] private float _countdownYOffset = 60f; // ¹Ù À§·Î ¶ç¿ï ¿ÀÇÁ¼Â
-    [SerializeField] private float _countdownXPadding = 6f; // ¾ç ³¡¿¡¼­ »ìÂ¦ ¾ÈÂÊÀ¸·Î Å¬·¥ÇÁ
+    [SerializeField] private TextMeshProUGUI _countdownText; // 120,119,... Ç¥½ÃÇÒ Text (BarBgÀÇ ÀÚ½Ä ÃßÃµ)
+    [SerializeField] private RectTransform _countdownRt;     // ¶óº§ RectTransform(¹ÌÁöÁ¤ÀÌ¸é countdownTextÀÇ RT »ç¿ë)
+    [SerializeField] private float _countdownYOffset = 60f;  // ¹Ù À§·Î ¶ç¿ï ¿ÀÇÁ¼Â
+    [SerializeField] private float _countdownXPadding = 6f;  // ¾ç ³¡¿¡¼­ »ìÂ¦ ¾ÈÂÊÀ¸·Î Å¬·¥ÇÁ
 
     [Header("Refs - Toggle Button")]
     [SerializeField] private Button _toggleButton;   // ÃÊ·Ï ¹öÆ°
@@ -34,6 +35,9 @@ public class TimerPanelUI : MonoBehaviour
     [Tooltip("ÇÃ·¹ÀÌ¾î º£ÀÌ½º°¡ ¼³Ä¡µÈ µÚ¿¡¸¸ Å¸ÀÌ¸Ó¸¦ ½ÃÀÛÇÕ´Ï´Ù.")]
     [SerializeField] private bool _startOnlyWhenBasePlaced = true;
 
+    // ÀÌº¥Æ®: Å¸ÀÌ¸Ó°¡ ½ÇÁ¦·Î ½ÃÀÛµÉ ¶§ 1È¸ ¹ßÈ­(ÄÚ½ºÆ® ÇØÁ¦ µî¿¡ »ç¿ë)
+    public event Action ProgressStarted;
+    public float TotalDuration => _durationSeconds;
 
     private RectTransform _panel;
     private Vector2 _panelStartPos;
@@ -42,9 +46,14 @@ public class TimerPanelUI : MonoBehaviour
 
     private bool _running;
     private float _elapsed;
+    private bool _victoryFired;
+    private bool _progressStartedFired;
 
-    // ¦¡¦¡ Ãß°¡: MapManager ÀÌº¥Æ® ±¸µ¶ °ü¸® ¦¡¦¡
-    private bool _hookedBaseEvent = false;
+    // MapManager ÀÌº¥Æ® ±¸µ¶ °ü¸®
+    private bool _hookedBaseEvent;
+
+    // Àü¿ªÃ³·³ Á¢±ÙÇÒ ¼ö ÀÖ°Ô À¯Áö
+    private static TimerPanelUI _current;
 
     private void Awake()
     {
@@ -58,26 +67,38 @@ public class TimerPanelUI : MonoBehaviour
         }
 
         if (_barFill) _barFill.fillAmount = 0f;
-        SetCountdown(_durationSeconds);
-        PositionCountdownAlongBar(0f);
+
+        // _countdownRt°¡ ºñ¾îÀÖÀ¸¸é ÅØ½ºÆ®ÀÇ RectTransform »ç¿ë
+        if (_countdownRt == null && _countdownText != null)
+            _countdownRt = _countdownText.rectTransform;
+
+        // ÃÊ±â UI ¼¼ÆÃ
+        _elapsed = 0f;
+        UpdateBarFromElapsed();
     }
 
     private void OnEnable()
     {
         _current = this;
-        ResetProgress();
+
+        _victoryFired = false;
+        _progressStartedFired = false;
+
+        // Ç×»ó ½Ã°¢Àû/³»ºÎ »óÅÂ ¸®¼Â(ÁøÇàÀº StartRunning¿¡¼­¸¸ ½ÃÀÛ)
+        _elapsed = 0f;
+        _running = false;
+        UpdateBarFromElapsed();
 
         if (_startOnlyWhenBasePlaced)
         {
-            _running = false;                 // ¼³Ä¡ Àü¿¡´Â ¸ØÃã
             HookBaseEvent();
-            // ÀÌ¹Ì ¼³Ä¡µÅ ÀÖÀ¸¸é Áï½Ã ½ÃÀÛ
+            // ÀÌ¹Ì º£ÀÌ½º°¡ ¼³Ä¡µÇ¾î ÀÖÀ¸¸é Áï½Ã ½ÃÀÛ
             if (MapManager.Instance != null && MapManager.Instance.HasPlayerBase)
-                _running = true;
+                StartRunning();
         }
         else
         {
-            if (_autoStart) _running = true;  // ±âÁ¸ µ¿ÀÛ À¯Áö
+            if (_autoStart) StartRunning();
         }
     }
 
@@ -87,9 +108,50 @@ public class TimerPanelUI : MonoBehaviour
         UnhookBaseEvent();
     }
 
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ½ÃÀÛ/ÁßÁö/¸®¼Â
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+
+    private void StartRunning()
+    {
+        if (_running) return;
+        _running = true;
+
+        if (!_progressStartedFired)
+        {
+            _progressStartedFired = true;
+            ProgressStarted?.Invoke(); // ¿¹: CostManager.Instance?.SetEarningEnabled(true);
+        }
+    }
+
+    public void StopProgress() => _running = false;
+
+    public void ResumeProgress() => StartRunning();
+
+    /// <summary>
+    /// ½Ã°¢Àû ¸®¼Â¸¸ ¼öÇà(¿Ï·á ÆÇÁ¤/ÀÌº¥Æ® ¹ßÈ­ ¾øÀ½).
+    /// toSeconds: ³²Àº ½Ã°£(ÃÊ)·Î ¼¼ÆÃ. ¿¹: 0 ¡æ °ÔÀÌÁö 0, 60 ¡æ Àý¹Ý.
+    /// </summary>
+    public void RestartProgress(float toSeconds)
+    {
+        _running = false;
+        _victoryFired = false;
+
+        float clampedLeft = Mathf.Clamp(toSeconds, 0f, _durationSeconds);
+        _elapsed = _durationSeconds - clampedLeft; // ³»ºÎ´Â elapsed ±âÁØ
+        _elapsed = Mathf.Clamp(_elapsed, 0f, _durationSeconds);
+
+        UpdateBarFromElapsed();
+    }
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // MapManager ¿¬µ¿(º£ÀÌ½º ¼³Ä¡ °ÔÀÌÆ®)
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+
     private void HookBaseEvent()
     {
         if (_hookedBaseEvent) return;
+
         if (MapManager.Instance != null)
         {
             MapManager.Instance.OnPlayerBasePlaced += OnBasePlaced;
@@ -119,44 +181,68 @@ public class TimerPanelUI : MonoBehaviour
 
     private void OnBasePlaced(Vector3Int _)
     {
-        _running = true;            // ¼³Ä¡µÇ¸é Ä«¿îÆ® ½ÃÀÛ
+        StartRunning();
         // ÇÑ ¹ø¸¸ ÇÊ¿äÇÏ¸é ±¸µ¶ ÇØÁ¦
         UnhookBaseEvent();
     }
 
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¾÷µ¥ÀÌÆ® & ¿Ï·á Ã³¸®
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
 
     private void Update()
     {
         if (_running && _barFill && _durationSeconds > 0f)
         {
             _elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(_elapsed / _durationSeconds); // 0¡æ1
-            _barFill.fillAmount = t;
+            if (_elapsed > _durationSeconds) _elapsed = _durationSeconds;
 
-            // ³²Àº ½Ã°£(ÃÊ) = ¿Ã¸²(Ceil)·Î 120,119,...0
-            float remain = Mathf.Max(0f, _durationSeconds - _elapsed);
-            SetCountdown(remain);
+            UpdateBarFromElapsed();
 
-            // ¶óº§À» ¹Ù ÁøÇà À§Ä¡¿¡ ¸ÂÃç ÀÌµ¿
-            PositionCountdownAlongBar(t);
+            if (Mathf.Approximately(_elapsed, _durationSeconds))
+            {
+                _running = false;
 
-            if (t >= 1f) _running = false; // 2ºÐ °æ°ú ½Ã Á¤Áö
+                // ¿©±â¼­ ½Â¸® ÇÑ ¹ø¸¸ ¹ßµ¿
+                if (!_victoryFired)
+                {
+                    _victoryFired = true;
+                    OnTimerFinished();
+                }
+            }
         }
     }
+
+    private void OnTimerFinished()
+    {
+        if (_victoryFired) return;
+        _victoryFired = true;
+
+        var mgr = NormalStageManager.Instance;
+        if (mgr == null) return;
+
+        var stage = mgr.SelectedStage;
+        var snap = ConditionControl.BuildFor(stage);
+        mgr.CompleteStageSuccess(snap); // ½Â¸® ÇÑ ¹ø¸¸!
+    }
+
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // UI: ÆÐ³Î ½½¶óÀÌµå/Åä±Û
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+
     private void OnToggleButton()
     {
         if (_sliding) return;
         _isHidden = !_isHidden;
 
-        // È­»ìÇ¥ À§/¾Æ·¡ ¹ÝÀü(¼¼·Î µÚÁý±â) : scale.y Åä±Û
+        // È­»ìÇ¥ À§/¾Æ·¡ ¹ÝÀü(¼¼·Î µÚÁý±â)
         if (_arrow)
         {
-            Vector3 arrowDirection = _arrow.localScale;
-            arrowDirection.y = _isHidden ? -Mathf.Abs(arrowDirection.y) : Mathf.Abs(arrowDirection.y);
-            _arrow.localScale = arrowDirection;
+            Vector3 s = _arrow.localScale;
+            s.y = _isHidden ? -Mathf.Abs(s.y) : Mathf.Abs(s.y);
+            _arrow.localScale = s;
         }
 
-        // ÆÐ³Î ½½¶óÀÌµå
         Vector2 from = _panel.anchoredPosition;
         Vector2 to = _panelStartPos + new Vector2(0f, _isHidden ? _slideDistance : 0f);
         StartCoroutine(CoSlide(from, to, _slideDuration));
@@ -170,9 +256,9 @@ public class TimerPanelUI : MonoBehaviour
         while (elapsedSeconds < durationSeconds)
         {
             elapsedSeconds += Time.unscaledDeltaTime;
-            float progress = Mathf.Clamp01(elapsedSeconds / durationSeconds);
+            float p = Mathf.Clamp01(elapsedSeconds / durationSeconds);
 
-            _panel.anchoredPosition = Vector2.Lerp(startAnchoredPos, targetAnchoredPos, progress);
+            _panel.anchoredPosition = Vector2.Lerp(startAnchoredPos, targetAnchoredPos, p);
             yield return null;
         }
 
@@ -180,10 +266,19 @@ public class TimerPanelUI : MonoBehaviour
         _sliding = false;
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ³»ºÎ À¯Æ¿
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ³»ºÎ À¯Æ¿ (°ÔÀÌÁö/¶óº§)
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
 
+    private void UpdateBarFromElapsed()
+    {
+        float t = (_durationSeconds > 0f) ? Mathf.Clamp01(_elapsed / _durationSeconds) : 0f;
+        if (_barFill) _barFill.fillAmount = t;
+
+        float remain = Mathf.Max(0f, _durationSeconds - _elapsed);
+        SetCountdown(remain);
+        PositionCountdownAlongBar(t);
+    }
 
     private void SetCountdown(float secondsLeft)
     {
@@ -207,47 +302,26 @@ public class TimerPanelUI : MonoBehaviour
         float xMax = r.xMax - _countdownXPadding;
         float x = Mathf.Lerp(xMin, xMax, Mathf.Clamp01(t01));
 
-        // y´Â ¹Ù À­º¯ + ¿ÀÇÁ¼Â (¹Ù ³ôÀÌ¿¡ »ó°ü¾øÀÌ Ç×»ó À­ÂÊ)
+        // y´Â ¹Ù À­º¯ + ¿ÀÇÁ¼Â
         float y = r.yMax + _countdownYOffset;
 
         _countdownRt.anchoredPosition = new Vector2(x, y);
     }
 
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // ¿ÜºÎ Á¢±Ù ·¡ÆÛ
+    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
 
-    private void ResetProgress()
-    {
-        _elapsed = 0f;
-        if (_barFill) _barFill.fillAmount = 0f;
-        SetCountdown(_durationSeconds);
-        PositionCountdownAlongBar(0f);
-    }
-
-    // ¿ÜºÎ¿¡¼­ Á¦¾î¿ë
-    public void RestartProgress(float startSeconds = -1f)
-    {
-        // startSeconds < 0 ÀÌ¸é 0ÃÊºÎÅÍ
-        _elapsed = Mathf.Max(0f, (startSeconds < 0f) ? 0f : (_durationSeconds - startSeconds));
-        _running = true;
-    }
-    public void StopProgress() => _running = false;
-    public void ResumeProgress() => _running = true;
     public float GetRemainingSeconds()
     {
-        // ³²Àº ½Ã°£(ÃÊ)
         return Mathf.Max(0f, _durationSeconds - _elapsed);
     }
 
     public bool IsTimeOver()
     {
-        // Á¦ÇÑ ½Ã°£ ¼ÒÁø ¿©ºÎ
         return _elapsed >= _durationSeconds;
     }
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    //  - °¡Àå ÃÖ±Ù¿¡ Enabled µÈ TimerPanelUI¸¦ ÂüÁ¶
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    private static TimerPanelUI _current;
 
-    // "Àü¿ªÃ³·³" ¾²´Â °£´Ü ·¡ÆÛµé
     public static bool TryGetRemainingSeconds(out float seconds)
     {
         if (_current != null)
@@ -258,34 +332,32 @@ public class TimerPanelUI : MonoBehaviour
         seconds = 0f;
         return false;
     }
+
     public static float RemainingSecondsOrZero => _current ? _current.GetRemainingSeconds() : 0f;
 
     public static bool IsTimeOverGlobal => _current ? _current.IsTimeOver() : false;
 
     public static bool IsClickOnBlockButton()
     {
-        if (_current == null || _current._toggleButton == null)
-            return false;
+        if (_current == null || _current._toggleButton == null) return false;
+        if (EventSystem.current == null) return false;
 
         PointerEventData pointerData = new PointerEventData(EventSystem.current)
         {
             position = Input.mousePosition
         };
 
-        List<RaycastResult> raycastResults = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerData, raycastResults);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
 
-        GameObject toggleButtonObj = _current._toggleButton.gameObject;
+        GameObject toggleGO = _current._toggleButton.gameObject;
 
-        foreach (RaycastResult result in raycastResults)
+        for (int i = 0; i < results.Count; i++)
         {
-            GameObject hit = result.gameObject;
-
-            if (hit == toggleButtonObj || hit.transform.IsChildOf(toggleButtonObj.transform))
+            GameObject hit = results[i].gameObject;
+            if (hit == toggleGO || hit.transform.IsChildOf(toggleGO.transform))
                 return true;
         }
-
         return false;
     }
-
 }

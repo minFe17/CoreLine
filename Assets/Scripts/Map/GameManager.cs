@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using Utils;
 
 [DefaultExecutionOrder(-1000)]
-public class GameManager : MonoBehaviour
+public class GameManager : MonoSingleton<GameManager>
 {
     // ─────────────────────────────────────────────────────────────
     // 외부에서 쓰기 편하도록 공개 상수/플래그
@@ -25,12 +25,17 @@ public class GameManager : MonoBehaviour
     private TwoButtonUI _panel;              // 파괴/발동 2버튼
     private InvalidPlacementToast _invalidToast; // 불가 토스트
     private ClearPanelControl _clearPanelRef;    // 클리어 패널
-
+    private DefeatPanelControl _defeatPanelRef;
+    private bool _endingShown;
     // ─────────────────────────────────────────────────────────────
     private void OnEnable()
     {
-        if (NormalStageManager.Instance != null)
-            NormalStageManager.Instance.StageCleared += OnStageCleared;
+        var nsm = NormalStageManager.Instance;
+        if (nsm != null)
+        {
+            nsm.StageCleared += OnStageCleared;
+            nsm.StageDefeated += OnStageDefeated;
+        }
 
         _clearPanelRef = FindFirstObjectByType<ClearPanelControl>(FindObjectsInactive.Include);
         if (_clearPanelRef != null)
@@ -38,14 +43,16 @@ public class GameManager : MonoBehaviour
             _clearPanelRef.NextStageRequested += OnClickNextStage;
             _clearPanelRef.LobbyRequested += OnClickLobbyFromClear;
         }
-
-        StartCoroutine(CoWatchTimeout());
     }
 
     private void OnDisable()
     {
-        if (NormalStageManager.Instance != null)
-            NormalStageManager.Instance.StageCleared -= OnStageCleared;
+        var nsm = NormalStageManager.Instance;
+        if (nsm != null)
+        {
+            nsm.StageCleared -= OnStageCleared;
+            nsm.StageDefeated -= OnStageDefeated;
+        }
 
         if (_clearPanelRef != null)
         {
@@ -53,6 +60,7 @@ public class GameManager : MonoBehaviour
             _clearPanelRef.LobbyRequested -= OnClickLobbyFromClear;
         }
     }
+
 
     private async void Awake()
     {
@@ -119,24 +127,6 @@ public class GameManager : MonoBehaviour
                 PingInvalidAtCell(cell);
                 return;
             }
-
-            // TODO: 실제 빌드 옵션으로 교체
-            var buildOptions = MakeOptionsForTest(8);
-            _buildUI.OpenAtCell(cell, buildOptions, (picked, selectedCell) =>
-            {
-                if (picked.Prefab == null) return;
-
-                var info = map.GetPlaceInfo(selectedCell);
-                if (!info.Placeable || info.Occupied)
-                {
-                    PingInvalidAtCell(selectedCell);
-                    return;
-                }
-
-                Vector3 pos = map.CellCenterWorld(selectedCell);
-                var go = Instantiate(picked.Prefab, pos, Quaternion.identity);
-                map.RegisterTower(selectedCell, go);
-            });
         }
     }
 
@@ -180,30 +170,14 @@ public class GameManager : MonoBehaviour
 
         IsStageLoaded = true;
         LastLoadedStageId = stageId;
+        _endingShown = false;
 
         // 로드 완료 이벤트 브로드캐스트 (페이로드: stageId)
         EventManager.Instance?.Invoke<string>(EVT_STAGE_LOADED, stageId);
     }
 
     // ───────── 타이머 종료 감시(클리어 트리거) ─────────
-    private IEnumerator CoWatchTimeout()
-    {
-        while (true)
-        {
-            if (TimerPanelUI.IsTimeOverGlobal)
-            {
-                var mgr = NormalStageManager.Instance;
-                if (mgr != null)
-                {
-                    var stage = mgr.SelectedStage;
-                    var snap = ConditionControl.BuildFor(stage); // 조건에 필요한 필드만 채움
-                    mgr.CompleteStageSuccess(snap);
-                }
-                yield break;
-            }
-            yield return null;
-        }
-    }
+    
 
     // ───────── 클리어 시 UI 처리 ─────────
     private void OnStageCleared(NormalStageData stage,
@@ -211,6 +185,9 @@ public class GameManager : MonoBehaviour
                                 int stars,
                                 NormalStageManager.RewardResult reward)
     {
+        if (_endingShown) return;    
+        _endingShown = true;
+
         Time.timeScale = 0f;
         PauseControl.SetPaused(true);
 
@@ -238,6 +215,41 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning("[GameManager] ClearPanelControl 을 찾지 못했습니다.");
+        }
+    }
+    private void OnStageDefeated(NormalStageData stage,
+                             NormalStageManager.StageEndSnapshot snap,
+                             int stars,
+                             NormalStageManager.RewardResult reward)
+    {
+        if (_endingShown) return;
+        _endingShown = true;
+
+        // 1) 게임 정지(패널에서도 다시 한 번 처리하지만, 안전하게)
+        Time.timeScale = 0f;
+        PauseControl.SetPaused(true);
+
+        // 2) 코스트 정지(있으면)
+        //CostManager.Instance?.SetEarningEnabled(false);
+
+        // 3) 충돌 가능 UI 닫기(선택)
+        FindFirstObjectByType<BuildUI>(FindObjectsInactive.Include)?.Close();
+        FindFirstObjectByType<TwoButtonUI>(FindObjectsInactive.Include)?.Close();
+
+        // 4) 패배 패널 표시
+        var panel = _defeatPanelRef ?? FindFirstObjectByType<DefeatPanelControl>(FindObjectsInactive.Include);
+        if (panel != null)
+        {
+            panel.Show(stage.Id);
+            _defeatPanelRef = panel;
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] DefeatPanelControl을 찾지 못했습니다.");
+            // (옵션) 패널이 없으면 바로 로비로 보낼 수도 있음
+            // Time.timeScale = 1f;
+            // PauseControl.SetPaused(false);
+            // SceneManager.LoadScene("LobyScene");
         }
     }
 
@@ -322,6 +334,39 @@ public class GameManager : MonoBehaviour
 
         if (_invalidToast != null)
             _invalidToast.ShowAtCell(cell);
+    }
+    public void ResetRunState(bool resetCostToZero = true)
+    {
+        // 시간/일시정지 해제
+        Time.timeScale = 1f;
+        PauseControl.SetPaused(false);
+
+        // 전투/중개 상태 정리
+        SimpleSingleton<MapUnitManager>.Instance?.RestartGame();
+        SimpleSingleton<MediatorManager>.Instance?.ClearAll();
+
+        // 열려있는 패널/타겟팅/빌드UI 등 닫기(있으면)
+        FindFirstObjectByType<BuildUI>(FindObjectsInactive.Include)?.Close();
+        FindFirstObjectByType<TwoButtonUI>(FindObjectsInactive.Include)?.Close();
+        FindFirstObjectByType<UnitUI>(FindObjectsInactive.Include)?.Close();
+        var clear = FindFirstObjectByType<ClearPanelControl>(FindObjectsInactive.Include);
+        if (clear) clear.gameObject.SetActive(false);
+        var defeat = FindFirstObjectByType<DefeatPanelControl>(FindObjectsInactive.Include);
+        if (defeat) defeat.gameObject.SetActive(false);
+
+        // 타이머 정지+리셋 (설치 게이트를 사용한다면 시작은 베이스 설치 후 자동)
+        var timer = FindFirstObjectByType<TimerPanelUI>(FindObjectsInactive.Include);
+        if (timer)
+        {
+            timer.StopProgress();
+            timer.RestartProgress(timer.TotalDuration);
+        }
+
+        // 코스트 초기화 (아래 CostManager 헬퍼 사용)
+        if (resetCostToZero)
+            CostManager.Instance?.PrepareForNewStage(resetToZero: true);
+        else
+            CostManager.Instance?.PrepareForNewStage(resetToZero: false);
     }
 
     // ───────── 프리팹 로더 ─────────

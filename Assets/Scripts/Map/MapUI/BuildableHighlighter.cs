@@ -15,7 +15,7 @@ public class BuildableHighlighter : MonoBehaviour
 {
     [Header("일반 외곽선(전체 표시시)")]
     [SerializeField] private Color _baseColor = new Color(0f, 1f, 0.6f, 0.55f);
-    [SerializeField] private float _baseWidth = 0.03f;
+    private float _baseWidth = 0.05f;
 
     [Header("강조(선택 셀)")]
     [SerializeField] private Color _hoverColor = new Color(0.2f, 1f, 0.9f, 1f);

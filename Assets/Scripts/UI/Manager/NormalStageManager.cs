@@ -13,7 +13,7 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 
     // ★ 클리어시 UI가 받을 이벤트(게임매니저가 구독)
     public event Action<NormalStageData, StageEndSnapshot, int, RewardResult> StageCleared;
-
+    public event Action<NormalStageData, StageEndSnapshot, int, RewardResult> StageDefeated;
     public struct LastRun
     {
         public NormalStageData Stage;
