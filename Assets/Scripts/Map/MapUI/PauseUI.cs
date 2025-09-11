@@ -110,6 +110,7 @@ public class PauseUI : MonoBehaviour
         var active = SceneManager.GetActiveScene();
         SceneManager.LoadScene(active.buildIndex);
         CostManager.Instance.SetUnitValue(0);
+        CostManager.Instance.SetSkillValue(0);
     }
 
     public void GoToLobby()

@@ -30,14 +30,21 @@ public class TimerPanelUI : MonoBehaviour
     [SerializeField] private float _slideDistance = 200f; // 위/아래로 이동 폭(px)
     [SerializeField] private float _slideDuration = 0.2f; // 슬라이드 시간(초)
 
-    private RectTransform _panel;       // 이 스크립트가 붙은 패널
-    private Vector2 _panelStartPos;     // 시작 anchoredPosition
-    private bool _isHidden;             // 위로 숨김 상태?
-    private bool _sliding;              // 슬라이드 중?
+    [Header("Start Gate")]
+    [Tooltip("플레이어 베이스가 설치된 뒤에만 타이머를 시작합니다.")]
+    [SerializeField] private bool _startOnlyWhenBasePlaced = true;
 
-    // 진행 관련
-    private bool _running;              // 진행 중인지
-    private float _elapsed;             // 진행 경과 시간(초)
+
+    private RectTransform _panel;
+    private Vector2 _panelStartPos;
+    private bool _isHidden;
+    private bool _sliding;
+
+    private bool _running;
+    private float _elapsed;
+
+    // ── 추가: MapManager 이벤트 구독 관리 ──
+    private bool _hookedBaseEvent = false;
 
     private void Awake()
     {
@@ -50,25 +57,71 @@ public class TimerPanelUI : MonoBehaviour
             _toggleButton.onClick.AddListener(OnToggleButton);
         }
 
-
-        // 초기화
         if (_barFill) _barFill.fillAmount = 0f;
-
-        SetCountdown(_durationSeconds);          // 120부터 시작 보이게
-        PositionCountdownAlongBar(0f);          // 시작 위치로 이동
+        SetCountdown(_durationSeconds);
+        PositionCountdownAlongBar(0f);
     }
-
 
     private void OnEnable()
     {
         _current = this;
         ResetProgress();
-        if (_autoStart) _running = true;
+
+        if (_startOnlyWhenBasePlaced)
+        {
+            _running = false;                 // 설치 전에는 멈춤
+            HookBaseEvent();
+            // 이미 설치돼 있으면 즉시 시작
+            if (MapManager.Instance != null && MapManager.Instance.HasPlayerBase)
+                _running = true;
+        }
+        else
+        {
+            if (_autoStart) _running = true;  // 기존 동작 유지
+        }
     }
 
     private void OnDisable()
     {
         if (_current == this) _current = null;
+        UnhookBaseEvent();
+    }
+
+    private void HookBaseEvent()
+    {
+        if (_hookedBaseEvent) return;
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.OnPlayerBasePlaced += OnBasePlaced;
+            _hookedBaseEvent = true;
+        }
+        else
+        {
+            StartCoroutine(CoWaitMapAndHook());
+        }
+    }
+
+    private IEnumerator CoWaitMapAndHook()
+    {
+        yield return null;
+        while (MapManager.Instance == null) yield return null;
+        MapManager.Instance.OnPlayerBasePlaced += OnBasePlaced;
+        _hookedBaseEvent = true;
+    }
+
+    private void UnhookBaseEvent()
+    {
+        if (!_hookedBaseEvent) return;
+        var map = MapManager.Instance;
+        if (map != null) map.OnPlayerBasePlaced -= OnBasePlaced;
+        _hookedBaseEvent = false;
+    }
+
+    private void OnBasePlaced(Vector3Int _)
+    {
+        _running = true;            // 설치되면 카운트 시작
+        // 한 번만 필요하면 구독 해제
+        UnhookBaseEvent();
     }
 
 

@@ -24,11 +24,11 @@ public class GameStartButton : BaseButton
             //무한의 탑으로 넘기기
             return;
         }
-        //else if (!_isSelect)
-        //{
-        //    UIManager.Instance.OpenPopUp(PopUpStatus.NoChoiceStageAlret);
-        //    return;
-        //}
+        else if (!_isSelect)
+        {
+            UIManager.Instance.OpenPopUp(PopUpStatus.NoChoiceStageAlret);
+            return;
+        }
         if (_isClick) return;
 
 
