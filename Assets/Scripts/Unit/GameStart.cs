@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Utils;
@@ -6,37 +5,17 @@ using Utils;
 public class GameStart : MonoBehaviour
 {
     PrefabManager _prefabManager;
-    async void Start()
+
+    void Start()
     {
         if(_prefabManager == null)
             _prefabManager = SimpleSingleton<PrefabManager>.Instance;
-        // 임시 (로비 연결 후 삭제)
-        //-------
-        if (!_prefabManager.CheckLoadPrefab())
-            await _prefabManager.LoadPrefab();
-        //-------
 
         SimpleSingleton<FactoryManager>.Instance.Init();
         MonoSingleton<GameStateManager>.Instance.SetState();
 
         CreateCamera();
         CreateUI();
-    }
-
-    // 임시
-    void ReadJson()
-    {
-        LoadData<UnitDataList>(EDataType.UnitData);
-        LoadData<FusionDataList>(EDataType.FusionUnitData);
-    }
-
-    // 임시
-    void LoadData<T>(EDataType type) where T : new()
-    {
-        TextAsset data = _prefabManager.GetPrefabLoad(EPrefabType.Data).GetPrefabTextAsset(type);
-        string json = data.text;
-        T target = SimpleSingleton<T>.Instance;
-        JsonUtility.FromJsonOverwrite(json, target);
     }
 
     private void CreateUI()
