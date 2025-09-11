@@ -21,5 +21,6 @@ public class StageButton : BaseButton
     protected override void OnClick()
     {
         EventManager.Instance.Invoke<NormalStageData>("SelectStage", _data);
+        EventManager.Instance.Invoke<bool>("IsStageSelect",true);
     }
 }

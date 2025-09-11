@@ -7,16 +7,14 @@ public sealed class RangeHeal : ITowerSkillHandler, ISkillTargetingSpecProvider
     // === È¿°ú(Å¸¿ö Èú) ===
     public void Apply(GameObject towerObject, in SkillManager.SelectedSkill skill)
     {
-        Debug.Log("Use");
-        int healAmount = Mathf.RoundToInt(skill.Effect.Value);
+        if (!SkillManager.Instance.TryGetSkillDef(skill.Id, out var def)) return;
+
+        int healAmount = Mathf.RoundToInt(def.Value);
         if (healAmount <= 0) return;
 
-        Unit unit;
-        if (towerObject.TryGetComponent<Unit>(out unit))
+        if (towerObject.TryGetComponent<Unit>(out var unit))
         {
-            if (unit.IsDie) return;
             unit.Heal(healAmount);
-            return;
         }
     }
 

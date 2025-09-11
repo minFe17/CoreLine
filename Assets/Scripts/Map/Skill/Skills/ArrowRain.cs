@@ -7,8 +7,9 @@ public sealed class ArrowRain : IMonsterSkillHandler, ISkillTargetingSpecProvide
     // === 효과(타워 힐) ===
     public void Apply(GameObject towerObject, in SkillManager.SelectedSkill skill)
     {
-        Debug.Log("Use");
-        int damageAmount = Mathf.RoundToInt(skill.Effect.Value);
+        if (!SkillManager.Instance.TryGetSkillDef(skill.Id, out var def)) return;
+
+        int damageAmount = Mathf.RoundToInt(def.Value);
         if (damageAmount <= 0) return;
 
         Monster monster;
@@ -17,6 +18,8 @@ public sealed class ArrowRain : IMonsterSkillHandler, ISkillTargetingSpecProvide
             monster.TakeDamage(damageAmount);
             return;
         }
+
+        Debug.Log(def.Value);
     }
 
     // === 타게팅 스펙(3x3, 타워만) ===

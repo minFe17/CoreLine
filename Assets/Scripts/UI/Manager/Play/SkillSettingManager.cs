@@ -70,7 +70,7 @@ public class SkillSettingManager : MonoBehaviour
         {
             SkillSelectButton btn = _buttons[false].Pop().GetComponent<SkillSelectButton>();
             btn.Data = button.Data;
-            SkillManager.Instance.RemoveAtLoadout(btn.Data);
+            SkillManager.Instance.RemoveFromLoadout(btn.Data);
             btn.IsSetting = false;
         }
         else

@@ -1,0 +1,4 @@
+Id,Cost,Value,Cooltime,Duration
+ArrowRain,10,10,10,0
+RangeHeal,10,50,10,0
+MonsterSlow,10,3,20,4

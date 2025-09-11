@@ -4,8 +4,11 @@ public sealed class IncomeMoneyHandler : IIncomeSkillHandler
 
     public void Apply(in SkillManager.SelectedSkill skill)
     {
+        if (!SkillManager.Instance.TryGetSkillDef(skill.Id, out var def)) return;
+
         if (CostManager.Instance == null) return;
-        CostManager.Instance.SetGainRate(CostManager.CostType.Unit,skill.Effect.Value);   // À¯´Ö Áö°© +Value
+
+        CostManager.Instance.SetGainRate(CostManager.CostType.Unit,def.Value);   // À¯´Ö Áö°© +Value
         float timer = 0;
         
         CostManager.Instance.SetAutoGain(CostManager.CostType.Unit, false);
@@ -18,7 +21,9 @@ public sealed class IncomeSkillHandler : IIncomeSkillHandler
 
     public void Apply(in SkillManager.SelectedSkill skill)
     {
+        if (!SkillManager.Instance.TryGetSkillDef(skill.Id, out var def)) return;
+
         if (CostManager.Instance == null) return;
-        CostManager.Instance.AddSkillFraction(skill.Effect.Value);  // ½ºÅ³ Áö°© +Value
+        CostManager.Instance.AddUnitFraction(def.Value);  // ½ºÅ³ Áö°© +Value
     }
 }
