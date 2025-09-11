@@ -3,6 +3,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Monster))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(AudioSource))]
 public sealed class SpecialExploder : MonoBehaviour
 {
     [Header("References")]
@@ -20,18 +21,25 @@ public sealed class SpecialExploder : MonoBehaviour
     [SerializeField] private float _fxLifetime = 1.5f;
     [SerializeField] private string _fxSortingLayer = "Effects";
     [SerializeField] private int _fxOrderInLayer = 200;
-    [SerializeField] private AudioSource _sfx;
+    [SerializeField] private AudioClip _sfx;
+    [Range(0f, 1f)]
+    [SerializeField] private float _sfxVolume = 1f;
 
     private Animator _animator;
     private HealthComponent _stats;
     private bool _armed = false;
     private bool _exploded = false;
+    private AudioSource _audio;
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
         _stats = GetComponent<HealthComponent>();
         if (_map == null) { _map = FindAnyObjectByType<TestMap>(); }
+
+        _audio = GetComponent<AudioSource>();
+        _audio.playOnAwake = false;
+        _audio.spatialBlend = 0f;
     }
 
     private void OnEnable()
@@ -74,7 +82,7 @@ public sealed class SpecialExploder : MonoBehaviour
         }
 
         Vector2Int center = _map.WorldToCell(transform.position);
-        int damage = GetAttackDamage(); 
+        int damage = GetAttackDamage();
 
         for (int dr = -_rangeCell; dr <= _rangeCell; dr++)
         {
@@ -121,9 +129,10 @@ public sealed class SpecialExploder : MonoBehaviour
             Destroy(fx.gameObject, _fxLifetime);
         }
 
+        //오브젝트 비활성화해도 끊기지 않도록, 독립 one-shot로 재생
         if (_sfx != null)
         {
-            _sfx.Play();
+            AudioSource.PlayClipAtPoint(_sfx, transform.position, _sfxVolume);
         }
 
         gameObject.SetActive(false);

@@ -9,6 +9,13 @@ public abstract class BossSkillBase : MonoBehaviour
     [SerializeField] private float _cooldown = 6f;
     [SerializeField] private float _castTime = 0.6f;
     [SerializeField] private float _postDelay = 0.2f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip _sfx;
+    [Range(0f, 1f)]
+    [SerializeField] private float _sfxVolume = 1f;
+    protected AudioSource _audio;
+
     private bool _lastCastSucceeded = false;
     public bool LastCastSucceeded { get { return _lastCastSucceeded; } }
     public void ResetCastOutcome() { _lastCastSucceeded = false; }
@@ -34,6 +41,12 @@ public abstract class BossSkillBase : MonoBehaviour
         _boss = controller ? controller.Boss : null;
         _map = controller ? controller.Map : null;
         _monsterManager = controller ? controller.MonsterManager : null;
+
+        _audio = GetComponent<AudioSource>();
+        if (_audio == null)
+            _audio = gameObject.AddComponent<AudioSource>();
+        _audio.playOnAwake = false;
+        _audio.spatialBlend = 0f;
     }
 
     public virtual bool CanCast(BossController controller)
@@ -59,6 +72,8 @@ public abstract class BossSkillBase : MonoBehaviour
             yield return new WaitForSeconds(_castTime);
         }
 
+        PlaySfx();
+
         // 3) 실제 수행(스킬 내부에서 MarkCastSuccess()를 호출해야 '성공'으로 인정됨)
         Perform(controller);
 
@@ -82,6 +97,12 @@ public abstract class BossSkillBase : MonoBehaviour
     protected void ArmCooldown()
     {
         _readyAt = Time.time + _cooldown;
+    }
+
+    protected void PlaySfx()
+    {
+        if (_sfx != null && _audio != null)
+            _audio.PlayOneShot(_sfx, _sfxVolume);
     }
 
     protected abstract void Perform(BossController controller);

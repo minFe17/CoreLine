@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 5915600854711595613}
   - component: {fileID: -4323036268612981715}
   - component: {fileID: -7034190304420870939}
+  - component: {fileID: 6957698563949242755}
   m_Layer: 3
   m_Name: BossDragon
   m_TagString: Untagged
@@ -174,6 +175,9 @@ MonoBehaviour:
   _attackStateName: Attack
   _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
   _hpBarOffset: {x: 0, y: 1.4}
+  _attackSfx: {fileID: 8300000, guid: a72b3b44d73d93349a18fc2c13077df0, type: 3}
+  _attackSfxVolume: 1
+  _attackSfxNormalizedTime: 0
 --- !u!114 &8479632299606697579
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,11 +218,12 @@ MonoBehaviour:
   _cooldown: 6
   _castTime: 0.6
   _postDelay: 0.2
+  _sfx: {fileID: 8300000, guid: 60d00f86d836d4446864f8accd920eeb, type: 3}
+  _sfxVolume: 1
   _fxPrefab: {fileID: 4877924698052598717, guid: 57dab199213584444b6e19d336a040ec, type: 3}
   _fxLifetimeOverride: 2
   _fxSortingLayer: Effects
   _fxSortingOrder: 120
-  _sfx: {fileID: 0}
 --- !u!114 &5915600854711595613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -235,7 +240,9 @@ MonoBehaviour:
   _cooldown: 6
   _castTime: 0.6
   _postDelay: 0.2
-  _minionPrefab: {fileID: 3766572586392643809, guid: 9533204747915df40bd73e7706fc5165, type: 3}
+  _sfx: {fileID: 8300000, guid: fb919a44827b03549b6e59dfd5a17034, type: 3}
+  _sfxVolume: 1
+  _minionPrefab: {fileID: 1909458294828153678, guid: 86940134f51dc8943884d78bf17a9929, type: 3}
   _count: 1
   _maxTrialsPerSpawn: 40
   _minDistFromBoss: 1
@@ -261,6 +268,8 @@ MonoBehaviour:
   _cooldown: 6
   _castTime: 0.6
   _postDelay: 0.2
+  _sfx: {fileID: 8300000, guid: feb72cbe886742346a12460f10b95a21, type: 3}
+  _sfxVolume: 1
   _stunDuration: 3
   _stunVfxPrefab: {fileID: 570138280303093793, guid: 77db2aa7a4b200645aef2a9d8bdf29b1, type: 3}
   _worldOffset: {x: 0, y: 0.98, z: 1}
@@ -297,3 +306,100 @@ MonoBehaviour:
   _despawnVfxOffset2: {x: 0, y: 0, z: 0}
   _despawnVfxLifetime2: 3
   _despawnVfxAdvance: 3
+--- !u!82 &6957698563949242755
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756996183535018546}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

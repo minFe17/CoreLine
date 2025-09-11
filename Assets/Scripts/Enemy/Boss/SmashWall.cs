@@ -7,7 +7,7 @@ public sealed class SmashWall : BossSkillBase
     [SerializeField] private float _fxLifetimeOverride = 0f;
     [SerializeField] private string _fxSortingLayer = "Effects";
     [SerializeField] private int _fxSortingOrder = 120;
-    [SerializeField] private AudioSource _sfx;
+
 
     private Vector2Int _cachedTarget;
     private bool _hasTarget = false;
@@ -78,11 +78,6 @@ public sealed class SmashWall : BossSkillBase
                 Object.Destroy(fx.gameObject, life);
             }
 
-            // 3-2) »ç¿îµå
-            if (_sfx != null)
-            {
-                _sfx.Play();
-            }
         }
 
         _hasTarget = false;

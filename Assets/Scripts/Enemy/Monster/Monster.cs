@@ -185,6 +185,9 @@ public sealed class Monster : MonoBehaviour
             _hitFlash.TriggerHitEffect();
         }
 
+        MonsterAudio audio = GetComponent<MonsterAudio>();
+        if (audio != null) audio.OnDamaged(damage, false);
+
         if (_health != null)
         {
             _health.Damage(damage);
