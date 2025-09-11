@@ -48,5 +48,11 @@ TagManager:
   - name: Unit
     uniqueID: 1016584573
     locked: 0
+  - name: Monster
+    uniqueID: 1498819223
+    locked: 0
+  - name: New Layer 3
+    uniqueID: 1634374829
+    locked: 0
   m_RenderingLayers:
   - Default

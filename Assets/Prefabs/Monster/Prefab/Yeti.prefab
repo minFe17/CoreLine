@@ -75,7 +75,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: b804f677e94a4b846a411792eac12fcc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -95,7 +95,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 9
+  m_SortingOrder: 7
   m_Sprite: {fileID: 435176900, guid: 9f85528d6d7eb614687677863742e9a8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -212,7 +212,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _panelTag: BarPanel
-  _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
+  _hpBarAddress: Assets/Prefabs/Monster/Prefab/MonsterHpBar.prefab
   _screenOffset: {x: 0, y: 1.2}
 --- !u!114 &-5661333595136111862
 MonoBehaviour:

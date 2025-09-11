@@ -75,6 +75,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - Monster
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f206d49975acc9a4584f2a11246b4cd3
+    m_Address: Assets/Prefabs/Monster/Prefab/MonsterHpBar.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f327e3577e9f6714daa4f4ad90256381
     m_Address: Assets/Prefabs/Monster/Prefab/Yeti.prefab
     m_ReadOnly: 0

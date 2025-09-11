@@ -197,7 +197,7 @@ MonoBehaviour:
   - {fileID: -4323036268612981715}
   - {fileID: 5915600854711595613}
   _lockWhileCasting: 1
-  _globalNoCastSeconds: 5
+  _globalNoCastSeconds: 10
 --- !u!114 &4865067138427358555
 MonoBehaviour:
   m_ObjectHideFlags: 0

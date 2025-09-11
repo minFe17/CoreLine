@@ -35,7 +35,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.12, y: 2.2, z: 0}
-  m_LocalScale: {x: 0.87, y: 0.87, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -120,7 +120,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 7
+  m_SortingOrder: 10
   m_Sprite: {fileID: 265501526, guid: e0980cb9d0e75754e8f3b93a5a7a87b0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -230,6 +230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxHp: 100
+  _baseAttack: 10
 --- !u!114 &2740560422060146659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,5 +244,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _panelTag: BarPanel
-  _hpBarPrefabPath: Monster/Prefab/MonsterHpBar
+  _hpBarAddress: Assets/Prefabs/Monster/Prefab/MonsterHpBar.prefab
   _screenOffset: {x: 0, y: 1.2}
