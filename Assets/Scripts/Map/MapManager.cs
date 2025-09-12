@@ -45,12 +45,6 @@ public class MapManager : MonoBehaviour
     // ───────────────────────────────────────────────────────────────────────
     private void Update()
     {
-        if (Input.GetMouseButtonDown(2)) // 중클릭 테스트
-        {
-            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mouseWorld.z = 0f; // 2D니까 z 고정
-            DebugCheckTowerPlace(mouseWorld);
-        }
     }
 
     public void LoadStage(GameObject stagePrefab)
@@ -218,6 +212,7 @@ public class MapManager : MonoBehaviour
     {
         if (_tmKing == null) return false;
         if (!_tmKing.HasTile(selectedCell)) return false;
+        if (PauseControl.IsPaused) return false;
 
         List<Vector3Int> kings = GetAllKingCells();
         if (kings.Count == 0) return false;
