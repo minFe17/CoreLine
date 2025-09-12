@@ -22,8 +22,8 @@ public class GameManager : MonoSingleton<GameManager>
     // 튜토리얼 스테이지 부팅 설정
     [Header("Tutorial Stage Boot")]
     [SerializeField] private bool useTutorialStage = true;          // 튜토리얼을 별도 스테이지로 운용할지
-    [SerializeField] private string TutorialStageId = "Tutorial1"; // 데이터/어드레서블 ID
-    [SerializeField] private string FirstNormalStageId = "Stage1-1";
+    [SerializeField] private string TutorialStageId = "Stage1-0";   // 데이터/어드레서블 ID (튜토리얼)
+    [SerializeField] private string FirstNormalStageId = "Stage1-1"; // 튜토리얼 다음 메인 스테이지
 
     // 씬에 존재한다고 가정(없으면 기능 일부 생략)
     private Camera _cam;
@@ -102,7 +102,7 @@ public class GameManager : MonoSingleton<GameManager>
         _invalidToast = FindFirstObjectByType<InvalidPlacementToast>(FindObjectsInactive.Include);
         _clearPanelRef = FindFirstObjectByType<ClearPanelControl>(FindObjectsInactive.Include);
 
-        // ★ 선택이 비어있다면 튜토리얼/1-1 중 하나로 자동 선택
+        // ★ 선택이 비어있다면 튜토리얼/1-1 중 하나로 자동 선택 (튜토리얼은 3★ 완료 전까지 강제)
         EnsureInitialSelection();
 
         // 선택된 스테이지 기준으로 로드
@@ -125,6 +125,7 @@ public class GameManager : MonoSingleton<GameManager>
             world.z = 0f;
             Vector3Int cell = map.WorldToCell(world);
 
+            // 파괴
             if (map.IsDestructible(cell))
             {
                 if (_panel != null)
@@ -137,8 +138,8 @@ public class GameManager : MonoSingleton<GameManager>
                 return;
             }
 
+            // 빌드 위치 유효성
             if (_buildUI == null) return;
-
             var infoAtClick = map.GetPlaceInfo(cell);
             if (!infoAtClick.Placeable || infoAtClick.Occupied)
             {
@@ -148,7 +149,7 @@ public class GameManager : MonoSingleton<GameManager>
         }
     }
 
-    // 초기 선택 보정: 비어있으면 튜토리얼 우선
+    // ───────── 튜토리얼 선택 보정(3★ 전까지 강제) ─────────
     private void EnsureInitialSelection()
     {
         var nsm = NormalStageManager.Instance;
@@ -157,36 +158,28 @@ public class GameManager : MonoSingleton<GameManager>
         // 이미 외부에서 SelectStage로 골라져 있다면 건드리지 않음
         if (!string.IsNullOrEmpty(nsm.SelectedStage.Id)) return;
 
-        // 튜토리얼 사용 안 하면 1-1로
         if (!useTutorialStage)
         {
             SelectByIdIfFound(FirstNormalStageId);
             return;
         }
 
-        bool tutorialCleared = IsStageCleared(TutorialStageId); // ClearStage에 기록돼 있으면 true
-        if (!tutorialCleared)
-        {
-            // 튜토리얼 먼저
-            SelectByIdIfFound(TutorialStageId);
-        }
-        else
-        {
-            // 이미 클리어했으면 1-1
-            SelectByIdIfFound(FirstNormalStageId);
-        }
+        bool tutorialDone = IsStageThreeStar(TutorialStageId);
+        if (!tutorialDone) SelectByIdIfFound(TutorialStageId);
+        else SelectByIdIfFound(FirstNormalStageId);
     }
 
-    private bool IsStageCleared(string stageId)
+    private bool IsStageThreeStar(string stageId)
     {
-        var nsm = NormalStageManager.Instance;
-        if (nsm == null || string.IsNullOrEmpty(stageId)) return false;
+        var gd = DataManager.Instance?.GameData;
+        if (gd?.ClearStage == null) return false;
 
-        var cs = nsm.GetClearStageOrNull(stageId);
-        if (cs == null) return false;
-        // 별 1개 이상이면 클리어로 간주
-        return cs.MaxStarNum > 0
-               || (cs.Star != null && (cs.Star.FirstStar || cs.Star.SecondStar || cs.Star.ThirdStar));
+        for (int i = 0; i < gd.ClearStage.Count; i++)
+        {
+            var cs = gd.ClearStage[i];
+            if (cs.StageId == stageId && cs.MaxStarNum >= 3) return true;
+        }
+        return false;
     }
 
     private void SelectByIdIfFound(string stageId)
@@ -329,8 +322,7 @@ public class GameManager : MonoSingleton<GameManager>
 
         var stage = nsm.SelectedStage;
         var snap = ConditionControl.BuildFor(stage);
-
-        nsm.CompleteStageSuccess(snap); // → OnStageCleared에서 승리 패널
+        nsm.CompleteStageSuccess(snap); // → OnStageCleared에서 승리 패널 표시
     }
 
     // ───────── 버튼 동작 ─────────
@@ -347,8 +339,9 @@ public class GameManager : MonoSingleton<GameManager>
         var mgr = NormalStageManager.Instance;
         if (mgr == null) return;
 
-        // 튜토리얼을 끝냈으면 다음은 무조건 1-1로 보냄
-        if (useTutorialStage && !string.IsNullOrEmpty(mgr.SelectedStage.Id) &&
+        // 튜토리얼이면 무조건 FirstNormalStageId로
+        if (useTutorialStage &&
+            !string.IsNullOrEmpty(mgr.SelectedStage.Id) &&
             string.Equals(mgr.SelectedStage.Id, TutorialStageId, System.StringComparison.OrdinalIgnoreCase))
         {
             if (mgr.TryFindStageById(FirstNormalStageId, out var first, out _))
