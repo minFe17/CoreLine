@@ -88,7 +88,7 @@ public sealed class BossMonster : MonoBehaviour
     {
         if (_animator != null) _animator.SetBool(_moveBool, false);
 
-        // 공격 상태 추적 + 정규화 시간에 맞춰 SFX 1회 재생
+        // 공격 상태 추적 및 시간에 맞춰 SFX 1회 재생
         if (_animator != null && !_animator.IsInTransition(0))
         {
             AnimatorStateInfo st = _animator.GetCurrentAnimatorStateInfo(0);

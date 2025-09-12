@@ -983,6 +983,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Stage1
       objectReference: {fileID: 0}
+    - target: {fileID: 5533714576939652036, guid: 648af1f6160dda147bb0e94b9aa44320, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6437064012439220735, guid: 648af1f6160dda147bb0e94b9aa44320, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.7

@@ -616,14 +616,14 @@ public sealed class MonsterManager : MonoBehaviour
      * ========================= */
     private void TrySpawnBossAtBase()
     {
-        if (_bossSpawned) { return; }
-        if (!_spawnBossOnBase) { return; }
-        if (_bossPrefab == null || _map == null) { return; }
+        if (_bossSpawned) return;
+        if (!_spawnBossOnBase) return;
+        if (_bossPrefab == null || _map == null) return;
 
-        Vector2Int rc = _map.HasBossSpawnCell ? _map.BossSpawnCellRC
-                     : _map.HasSpawnCell ? _map.SpawnCellRC
-                     : new Vector2Int(0, 0);
+        if (!_map.HasBossSpawnCell)
+            return;
 
+        Vector2Int rc = _map.BossSpawnCellRC; 
         Vector3 world = _map.CellToWorld(rc.x, rc.y);
         world.z = 0f;
 

@@ -15,8 +15,32 @@ MonoBehaviour:
   m_GroupName: Monster
   m_GUID: c5f10482ee27cc548bdd6248b324dfeb
   m_SerializeEntries:
+  - m_GUID: 0495cad4d68b5fb4fb90977f7c6fdcfb
+    m_Address: Assets/Prefabs/Monster/Prefab/EYeti.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1137acf658712024e863f91de4f1bae8
+    m_Address: Assets/Prefabs/Monster/Prefab/ETree.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1303a5a44d165454a8b13f616af6030e
+    m_Address: Assets/Prefabs/Monster/Prefab/EPlanet.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 22812e06959cac44eb92cc68c2c7345d
     m_Address: Assets/Prefabs/Monster/Prefab/Wolf.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3be3dc754c6d06049b3a5386c7c2603c
+    m_Address: Assets/Prefabs/Monster/Prefab/ESlime.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - Monster
@@ -51,8 +75,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Monster
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a58523ab279e2664e8fa81bfadd06d81
+    m_Address: Assets/Prefabs/Monster/Prefab/EGolem.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ba24fff2c13f10a4d82e6fab6a4765d9
     m_Address: Assets/Prefabs/Monster/Prefab/Ghost.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bb44d1cdd20b9684aa852863fc1641fc
+    m_Address: Assets/Prefabs/Monster/Prefab/EGhost.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - Monster
@@ -69,8 +105,26 @@ MonoBehaviour:
     m_SerializedLabels:
     - Monster
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7e2873f38f96ae4c88a340b39134773
+    m_Address: Assets/Prefabs/Monster/Prefab/EBlock.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db1e3eb2c7dae604bb0d93811a63a175
+    m_Address: Assets/Prefabs/Monster/Prefab/EWolf.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e6a66e2bbb055884fb9e753ce8225a85
     m_Address: Assets/Prefabs/Monster/Prefab/Dragon.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Monster
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef813a92bcf626443a574981c5e5fcb4
+    m_Address: Assets/Prefabs/Monster/Prefab/ESkeleton.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - Monster

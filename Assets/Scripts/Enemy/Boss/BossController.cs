@@ -53,17 +53,17 @@ public sealed class BossController : MonoBehaviour
 
     private void Start()
     {
-        Vector2Int rc = _fallbackRC;
+        if (_map == null) { return; }
 
-        if (_map != null)
+        if (_map.HasBossSpawnCell)
         {
-            if (_map.HasBossSpawnCell) { rc = _map.BossSpawnCellRC; }
-            else if (_map.HasSpawnCell) { rc = _map.SpawnCellRC; }
-        }
-
-        if (_map != null)
-        {
+            Vector2Int rc = _map.BossSpawnCellRC;
             transform.position = _map.CellToWorld(rc.x, rc.y);
+        }
+        else
+        {
+            gameObject.SetActive(false);
+            return;
         }
 
         for (int i = 0; i < _skills.Count; i++)
