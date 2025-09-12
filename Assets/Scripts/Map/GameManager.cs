@@ -13,19 +13,7 @@ public class GameManager : MonoSingleton<GameManager>
     // ─────────────────────────────────────────────────────────────
     // 외부에서 쓰기 편하도록 공개 상수/플래그
     // ─────────────────────────────────────────────────────────────
-/*private void SendDefeat()
-{
-    if (_defeatSent) return;
-    _defeatSent = true;
-
-    var nsm = NormalStageManager.Instance;
-    if (nsm == null) return;
-
-    var stage = nsm.SelectedStage;
-    var snap  = ConditionControl.BuildFor(stage);
-
-    nsm.CompleteStageDefeat(snap); //GameManager가 받아서 패배패널 띄움
-}*/
+    
 public const string EVT_STAGE_LOADED = "StageLoaded"; // EventManager 키
 public static bool IsStageLoaded { get; private set; } // 현재 스테이지 로드 완료 여부
 public static string LastLoadedStageId { get; private set; } // 마지막 로드된 스테이지 ID

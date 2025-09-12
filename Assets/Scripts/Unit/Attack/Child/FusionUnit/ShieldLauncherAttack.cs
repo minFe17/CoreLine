@@ -17,6 +17,7 @@ public class ShieldLauncherAttack : AttackBase
         temp.transform.position = _shieldPosition.position;
         temp.transform.rotation = transform.rotation;
         temp.GetComponent<Shield>().Init(SetTargetMonster(), _unit.UnitStateData.AttackDamage);
+        PlaySFX(ESFXType.ShieldAttack);
     }
 
     List<Monster> SetTargetMonster()

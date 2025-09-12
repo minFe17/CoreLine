@@ -26,6 +26,7 @@ public class OutlawAttack : AttackBase
         temp.transform.position = _bulletPosition.position;
         temp.transform.rotation = transform.rotation;
         temp.GetComponent<Bullet>().Init(_unit.TargetList[0], _unit.UnitStateData.AttackDamage);
+        PlaySFX(ESFXType.Gun);
     }
 
     void SpawnCannonball()
@@ -50,6 +51,7 @@ public class OutlawAttack : AttackBase
             int random = Random.Range(0, MonsterManager.Instance.Monsters.Count);
             Monster monster = MonsterManager.Instance.Monsters[random].GetComponent<Monster>();
             temp.GetComponent<Cannonball>().Init(monster, _unit.UnitStateData.AttackDamage);
+            PlaySFX(ESFXType.Attack);
         }
     }
 

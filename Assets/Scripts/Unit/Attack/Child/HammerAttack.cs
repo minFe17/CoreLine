@@ -11,5 +11,6 @@ public class HammerAttack : AttackBase
         for(int i=0; i< _unit.TargetList.Count; i++)
             _unit.TargetList[i].TakeDamage(_unit.UnitStateData.AttackDamage);
         _attackEffect.Play();
+        PlaySFX(ESFXType.Attack);
     }
 }

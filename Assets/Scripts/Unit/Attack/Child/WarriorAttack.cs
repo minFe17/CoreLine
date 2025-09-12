@@ -10,5 +10,6 @@ public class WarriorAttack : AttackBase
             return;
         _unit.TargetList[0].TakeDamage(_unit.UnitStateData.AttackDamage);
         _attackEffect.Play();
+        PlaySFX(ESFXType.SwordAttack);
     }
 }

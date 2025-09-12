@@ -15,14 +15,20 @@ public class ChefBomb : MonoBehaviour
         _damage = damage;
         _atlas = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.SpriteAtlas).GetPrefabAtlas(EAtlasPrefabType.ChefBombAtlas);
         _spriteRenderer.sprite = _atlas.GetSprite(((EChefBombType)level).ToString());
+        SimpleSingleton<BombManager>.Instance.AddBomb(this);
+    }
+
+    public void Remove()
+    {
+        MonoSingleton<ObjectPoolManager>.Instance.Push(EBulletType.ChefBomb, gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.TryGetComponent<Monster>(out Monster monster))
+        if(collision.TryGetComponent(out Monster monster))
         {
             monster.TakeDamage(_damage);
-            MonoSingleton<ObjectPoolManager>.Instance.Push(EBulletType.ChefBomb, gameObject);
+            Remove();
         }
     }
 }

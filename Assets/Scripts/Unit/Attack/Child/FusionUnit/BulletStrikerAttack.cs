@@ -20,6 +20,8 @@ public class BulletStrikerAttack : AttackBase
     {
         _bulletCount++;
         CreateBullet(EBulletType.Bullet);
+        PlaySFX(ESFXType.Gun);
+
 
         if (_bulletCount >= _maxBullet)
         {
@@ -32,6 +34,7 @@ public class BulletStrikerAttack : AttackBase
     {
         _explosionBulletCount++;
         CreateBullet(EBulletType.ExplosionBullet);
+        PlaySFX(ESFXType.Attack);
 
         if (_explosionBulletCount >= _maxaExplosionBullet)
         {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Utils;
 
 public abstract class AttackBase : MonoBehaviour
 {
@@ -48,6 +49,11 @@ public abstract class AttackBase : MonoBehaviour
             _attackTimer = 0;
             PlayAttackAnimation();
         }
+    }
+
+    protected void PlaySFX(ESFXType type)
+    {
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.PlayAudio, type);
     }
 
     void HandleUpgrade()

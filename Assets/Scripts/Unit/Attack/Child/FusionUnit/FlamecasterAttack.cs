@@ -13,5 +13,6 @@ public class FlamecasterAttack : AttackBase
         temp.transform.position = _meteorPosition.position;
         temp.transform.rotation = transform.rotation;
         temp.GetComponent<Bullet>().Init(_unit.TargetList[0], _unit.UnitStateData.AttackDamage);
+        PlaySFX(ESFXType.FireAttack);
     }
 }

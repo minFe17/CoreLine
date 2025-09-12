@@ -45,6 +45,8 @@ public class ChefAttack : AttackBase
             {
                 GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.ChefBomb);
                 temp.transform.position = randomPos;
+                PlaySFX(ESFXType.Attack);
+
                 if (_unit is TowerUnit unit)
                     temp.GetComponent<ChefBomb>().Init(unit.UnitStateData.AttackDamage, unit.Level);
                 return;

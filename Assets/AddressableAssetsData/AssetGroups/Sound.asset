@@ -15,8 +15,68 @@ MonoBehaviour:
   m_GroupName: Sound
   m_GUID: b6828986cf92f9e4fafa4c8eb57d07c1
   m_SerializeEntries:
+  - m_GUID: 185019f828234be44a490b4b9d94ccce
+    m_Address: Gun
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c378909f5e4217429b6f486561c2106
+    m_Address: KingHit
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e13e7edf0869254092284aa29cf0454
+    m_Address: Attack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3ce97093d7b826846a6e69a7bb3c2efe
+    m_Address: WizardAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4caf39cfea74dc74eaabb541ce50ab37
+    m_Address: ThorAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6657b36ba0b962849bcec316f8dc25b1
+    m_Address: ShieldAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85963ddc021b92b4cb4bea367d2c7421
     m_Address: SoundController
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86ffbda73238f3f4690e2092f9ad8aea
+    m_Address: SwordAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a09c0419212bacb4dbbe958b3f9f5ea4
+    m_Address: Heal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bc79c22674d4a8b4a835dccbbcc21d3f
+    m_Address: FireAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf6dd2a4afc70b24eb56a1bb66ee457f
+    m_Address: NinjaAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cdd96e7b0dc780248819b81e91acafd4
+    m_Address: ThunderAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cea436c8764bdbb46947ca65d45305fd
+    m_Address: ArrowAttack
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

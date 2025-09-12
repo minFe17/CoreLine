@@ -17,5 +17,6 @@ public class NinjaAttack : AttackBase
             temp.transform.rotation = transform.rotation;
             temp.GetComponent<Bullet>().Init(_unit.TargetList[i], _unit.UnitStateData.AttackDamage);
         }
+        PlaySFX(ESFXType.NinjaAttack);
     }
 }

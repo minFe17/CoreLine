@@ -42,6 +42,23 @@ public class Unit : MonoBehaviour
             SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
     }
 
+    public virtual void TakeDamage(int damage)
+    {
+        if (_isDie)
+            return;
+
+        _currentHp -= damage;
+        _hpBar.ChangeHp((float)_currentHp / _unitStateData.HP);
+
+        if (_currentHp <= 0)
+        {
+            _isDie = true;
+            _animator.SetTrigger("doDie");
+        }
+        else
+            _animator.SetTrigger("doHit");
+    }
+
     public virtual void Die()
     {
         Remove();
@@ -120,23 +137,6 @@ public class Unit : MonoBehaviour
             LookMonsterSpawn();
     }
 
-    public void TakeDamage(int damage)
-    {
-        if (_isDie)
-            return;
-
-        _currentHp -= damage;
-        _hpBar.ChangeHp((float)_currentHp / _unitStateData.HP);
-
-        if (_currentHp <= 0)
-        {
-            _isDie = true;
-            _animator.SetTrigger("doDie");
-        }
-        else
-            _animator.SetTrigger("doHit");
-    }
-
     public void UnregisterCell()
     {
         MapManager.Instance.UnregisterTower(_cell);
@@ -165,5 +165,6 @@ public class Unit : MonoBehaviour
         GameObject temp = MonoSingleton<ObjectPoolManager>.Instance.Pull(EBulletType.Health_Up);
         temp.transform.position = transform.position;
         _hpBar.ChangeHp((float)_currentHp/_unitStateData.HP);
+        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.PlayAudio, ESFXType.Heal);
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Utils;
 
 public class MapUnitManager
 {
@@ -40,6 +41,7 @@ public class MapUnitManager
     public void RestartGame()
     {
         _unitDieCount = 0;
+        SimpleSingleton<BombManager>.Instance.RemoveBomb();
 
         foreach (Unit unit in _unitDict.Values.ToList())
             unit.Remove();
@@ -49,5 +51,6 @@ public class MapUnitManager
             return;
         _king.Remove();
         _king = null;
+
     }
 }

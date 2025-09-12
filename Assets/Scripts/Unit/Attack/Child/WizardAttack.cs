@@ -10,5 +10,6 @@ public class WizardAttack : AttackBase
             return;
         temp.transform.position = _unit.TargetList[0].transform.position;
         _unit.TargetList[0].TakeDamage(_unit.UnitStateData.AttackDamage);
+        PlaySFX(ESFXType.WizardAttack);
     }
 }

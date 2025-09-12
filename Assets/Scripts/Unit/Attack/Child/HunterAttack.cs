@@ -8,7 +8,7 @@ public class HunterAttack : AttackBase
     public override void Attack()
     {
         int count = _unit.TargetList.Count > 3 ? 3 : _unit.TargetList.Count;
-        for(int i=0; i< count; i++)
+        for (int i = 0; i < count; i++)
         {
             if (_unit.TargetList[i] == null)
                 continue;
@@ -16,6 +16,7 @@ public class HunterAttack : AttackBase
             temp.transform.position = _arrowPosition.position;
             temp.transform.rotation = transform.rotation;
             temp.GetComponent<Bullet>().Init(_unit.TargetList[i], _unit.UnitStateData.AttackDamage);
+            PlaySFX(ESFXType.ArrowAttack);
         }
     }
 }
