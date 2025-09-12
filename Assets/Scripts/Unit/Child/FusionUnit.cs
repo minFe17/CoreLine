@@ -16,8 +16,6 @@ public class FusionUnit : Unit
     void Update()
     {
         LookTarget();
-        if(Input.GetKeyDown(KeyCode.Alpha4))
-            TakeDamage(30);
     }
 
     public override void Die()

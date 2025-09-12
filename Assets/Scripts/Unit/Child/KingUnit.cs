@@ -26,8 +26,6 @@ public class KingUnit : Unit
     public override void ClickUnit()
     {
         SimpleSingleton<AttackRangeManager>.Instance.HideAttackRange();
-
-        SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.PlayAudio, ESFXType.Heal);
     }
 
     public override void TakeDamage(int damage)
@@ -55,7 +53,8 @@ public class KingUnit : Unit
         _defeatSent = true;
 
         NormalStageManager nsm = NormalStageManager.Instance;
-        if (nsm == null) return;
+        if (nsm == null) 
+            return;
 
         NormalStageData stage = nsm.SelectedStage;
         NormalStageManager.StageEndSnapshot snap = ConditionControl.BuildFor(stage);
