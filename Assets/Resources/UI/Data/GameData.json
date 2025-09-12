@@ -9,7 +9,7 @@
             "AttackSpeedLevel":1
         }
     ],
-    "UnlockedLaboratoryId" : ["Attack_Num1","Defense_Skill"],
+    "UnlockedLaboratoryId" : ["Attack_Num1"],
     "PlayerMoney":10000,
     "PlayerGem":10000,
     "PlayerInfinityKey":0,
@@ -22,7 +22,7 @@
             {
                 "FirstStar":true,
                 "SecondStar":true,
-                "ThirdStar":true,
+                "ThirdStar":true
             }
         }
     ]

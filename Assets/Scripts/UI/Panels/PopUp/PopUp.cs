@@ -17,6 +17,10 @@ public abstract class PopUp : MonoBehaviour
         gameObject.SetActive(false);
         UIManager.Instance.RegisterPopUp(_status, this);
     }
+    protected virtual void OnDestroy()
+    {
+        UIManager.Instance.UnregisterPopUp(_status);
+    }
     protected abstract void SetStatus();
 
 }

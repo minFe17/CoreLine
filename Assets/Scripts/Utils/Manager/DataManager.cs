@@ -48,7 +48,7 @@ public class DataManager : SimpleSingleton<DataManager>
         LoadInventoryDatas();
         LoadLaboratoryDatas();
         LoadUpgradeDatas();
-        LoadUpgradeData();
+        LoadGameData();
         LoadNormalStageData();
         LoadStoreData();
         LoadSkillData();
@@ -91,7 +91,7 @@ public class DataManager : SimpleSingleton<DataManager>
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/UpgradeData");
         _upgradeDatas = JsonConvert.DeserializeObject<List<UpgradeData>>(jsonFile.text);
     }
-    private void LoadUpgradeData()
+    private void LoadGameData()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("UI/Data/GameData");
         _gameData = JsonConvert.DeserializeObject<GameData>(jsonFile.text);

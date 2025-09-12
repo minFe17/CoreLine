@@ -6,7 +6,7 @@ using static UnityEngine.Rendering.DebugUI;
 public enum PanelStatus
 {
     LobbyPanel,InventoryPanel, UpgradePanel, LaboratoryPanel, PlayPanel, SettingPanel,
-    StorePanel
+    StorePanel,LogInSelectPanel, LogInEmailPanel
 }
 public enum PopUpStatus
 {
@@ -26,6 +26,14 @@ public class UIManager : SimpleSingleton<UIManager>
     public void RegisterPopUp(PopUpStatus status , PopUp popUP)
     {
         _popUpDictionary[status] = popUP;
+    }
+    public void UnregisterPanel(PanelStatus status)
+    {
+        _panelDictionary.Remove(status);
+    }
+    public void UnregisterPopUp(PopUpStatus status)
+    {
+        _popUpDictionary.Remove(status);
     }
     public void ClearPanelStack()
     {
@@ -77,4 +85,5 @@ public class UIManager : SimpleSingleton<UIManager>
         _popUp.gameObject.SetActive(false);
         _popUp = null;
     }
+
 }

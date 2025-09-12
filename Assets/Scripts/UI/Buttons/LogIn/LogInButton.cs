@@ -9,6 +9,6 @@ public class LogInButton : BaseButton
     private TMP_InputField _password;
     protected override void OnClick()
     {
-        //FireBaseAuthManager.Instance.LogInToEmail(_email.text, _password.text);
+        FireBaseAuthManager.Instance.LogInToEmail(_email.text, _password.text);
     }
 }
