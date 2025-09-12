@@ -1477,7 +1477,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseColor: {r: 0, g: 1, b: 0.6, a: 0.55}
-  _baseWidth: 0.03
   _hoverColor: {r: 0.2, g: 1, b: 0.9, a: 1}
   _hoverWidth: 0.05
   _hoverPulse: 1
@@ -2834,7 +2833,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 35be6488b4ccc4b39ad6bdd45cb222c5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 33fba5339c586438bbcb850ddeb9c05d, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3195,7 +3194,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &795073107
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3498,7 +3497,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &841713641
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5330,7 +5329,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1504811221
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5409,7 +5408,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1565558901
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6826,7 +6825,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1986474516
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7092,7 +7091,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2106277765
 RectTransform:
   m_ObjectHideFlags: 0

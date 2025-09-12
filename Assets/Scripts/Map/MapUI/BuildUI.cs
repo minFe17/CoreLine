@@ -5,10 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Utils;
 
-/// <summary>
-/// 빌드 옵션 1개에 대한 데이터(아이콘/프리팹/비용 등).
-/// 파일 분리해도 되지만, 데모 편의를 위해 같은 파일에 둡니다.
-/// </summary>
+/// 빌드 옵션 1개에 대한 데이터
 public struct TowerOption
 {
     public string Id;
@@ -20,212 +17,145 @@ public struct TowerOption
     { Id = id; Icon = icon; Prefab = prefab; Cost = cost; }
 }
 
-/// <summary>
-/// 타일을 클릭했을 때, 클릭한 타일의 **정중앙**을 기준으로
-/// 좌/우에 각각 2×2 그리드를 붙여 보여주는 빌드 UI 컨트롤러.
-///
-/// - BuildPanel 이름의 RectTransform을 '기준 사각형'으로 사용(좌표 변환 오차 방지)
-/// - BuildPanel을 코드에서 전체화면 stretch 보증(앵커/오프셋 강제)
-/// - 템플릿(ButtonTemplate)은 절대 파괴하지 않고, 숨김 복제본(ghost)으로만 인스턴스화
-/// - 화면 가장자리에서는 한쪽 그리드만 노출(자동 보정)
-/// </summary>
+/// BuildUI: 타일 기준 원형 배치 (원형 우선 → 화면 부족시 한쪽 반원 2줄 폴백)
 public class BuildUI : MonoBehaviour
 {
     // ─────────────────────────────────────────────────────────────────────
-    // 레이아웃: 좌/우 각각 2×2 = 총 8칸 (인스펙터 무시, 코드 고정)
+    // 레이아웃(간격 2.5배 느낌)
     // ─────────────────────────────────────────────────────────────────────
-    private const int COLS = 2;
-    private const int ROWS = 2;
+    private const float BUTTON_SPACING = 60f;   // 버튼들 사이 여유(호 길이 기준)
+    private const float ROW_GAP = 120f;  // 반원 2줄일 때 안쪽/바깥쪽 간격
+    private const float SCREEN_PADDING = 36f;   // 화면 가장자리 여유
 
-    private const float SPACING_PX = 20f;      // 버튼 간격
-    private const float GAP_FROM_TILE_PX = 20f;// 타일 중심과 그리드 사이 거리
-    private const float CLUSTER_GAP_PX = 20f;  // 같은 편 묶음 사이 간격
+    [SerializeField] bool closeOnBackground = true;
 
-    private static readonly Vector2 FALLBACK_CELL = new(80f, 120f); // 프리팹 크기 없으면 기본
-
-    private Vector2 _cellSizePx;               // 버튼 크기(프리팹→기본 80×120)
-    private Vector2 _lastGridSize;             // 2×2 하나의 실제 픽셀 크기
-    [SerializeField] bool closeOnBackground = true;    // Dimmer 클릭 시 닫기
-    // 캔버스/필수 노드
     private Canvas _canvas;
-    private RectTransform _root;        // BuildPanel(기준 사각형)
-    private RectTransform _dimmer;      // 배경(클릭 시 닫기)
-    private RectTransform _anchor;      // 타일 중앙을 가리키는 빈 RT
-    private RectTransform _leftGrid;    // 좌측 2×2 그리드
-    private RectTransform _rightGrid;   // 우측 2×2 그리드
+    private RectTransform _root;         // BuildPanel
+    private RectTransform _dimmer;       // Dimmer(눌러서 닫기)
+    private RectTransform _anchor;       // 타일 중심
+    private RectTransform _buttonsRoot;  // 버튼 컨테이너
 
     private Vector3Int _currentCell;
     private bool _hasCurrentCell;
-    private Action<TowerOption, Vector3Int> _onPickCell;
-    // 버튼 프리팹 (TowerPlaceButton은 BaseButton 상속받은 전용 버튼 클래스)
+
     [Header("Prefabs")]
-    [SerializeField] private TowerPlaceButton buttonPrefab; // 인스펙터에서 드래그해두면 바로 사용 가능
-    private TowerPlaceButton _runtimeButtonPrefab;          // 실제 Instantiate할 원본
+    [SerializeField] private TowerPlaceButton buttonPrefab;
+    private TowerPlaceButton _runtimeButtonPrefab;
 
-    // 현재 세션의 선택 콜백
     private Action<TowerOption> _onPick;
+    private Action<TowerOption, Vector3Int> _onPickCell;
 
-    private bool _wired; // 배선 완료 여부
+    private bool _wired;
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Unity Lifecycle
     // ─────────────────────────────────────────────────────────────────────
     private void Awake()
     {
-        Wire();         // 필요한 참조/프리팹 배선
-        LogWireState(); // 에디터에서 확인용
-        if (_root) _root.gameObject.SetActive(false); // 시작 시 닫힘
+        Wire();
+        if (_root) _root.gameObject.SetActive(false);
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    // 외부 API: 타일(월드) 위치 기준으로 열기
+    // 외부 API (시그니처 동일)
     // ─────────────────────────────────────────────────────────────────────
-    /// <summary>
-    /// 월드 좌표 기준으로 열기 (콜백 없음)
-    /// </summary>
     public void OpenAtWorld(Vector3 worldPos, List<TowerOption> options)
         => OpenAtWorld(worldPos, options, null);
 
-    /// <summary>
-    /// 셀 좌표 기준으로 열기 (콜백 없음)
-    /// </summary>
     public void OpenAtCell(Vector3Int cell, List<TowerOption> options)
         => OpenAtCell(cell, options, null);
 
     public void OpenAtCell(Vector3Int cell, List<EUnitType> options)
         => OpenAtCell(cell, options, null);
 
-    /// <summary>
-    /// 월드 좌표 기준으로 열기 (선택 시 실행할 콜백 전달 가능)
-    /// </summary>
     public void OpenAtWorld(Vector3 worldPos, List<TowerOption> options, Action<TowerOption> onPick)
     {
         if (PauseControl.IsPaused) return;
 
         _onPick = onPick;
+        _onPickCell = null;
+        _hasCurrentCell = false;
 
-        _onPickCell = null;            // <- 셀 없는 콜백 모드
-        _hasCurrentCell = false;       // <- 셀 정보 초기화
-        if (!_wired) { Wire(); LogWireState(); }
-        if (!_wired || !_root || !_anchor || !_leftGrid || !_rightGrid) return;
+        if (!_wired) Wire();
+        if (!_wired || !_root || !_anchor || !_buttonsRoot) return;
 
-        // 1) 타일 중앙으로 스냅
-        MapManager map = MapManager.Instance;
+        var map = MapManager.Instance;
         if (map && map.IsReady)
         {
-            Vector3Int cell = map.WorldToCell(worldPos);
+            var cell = map.WorldToCell(worldPos);
             worldPos = map.CellCenterWorld(cell);
-            _currentCell = cell;       // <- 현재 셀 저장
+            _currentCell = cell;
             _hasCurrentCell = true;
         }
 
-        // 2) 월드→스크린→로컬 변환
-        Camera uiCam = GetUiCamera();
-        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
+        var uiCam = GetUiCamera();
+        var screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out var local);
         _anchor.anchoredPosition = local;
 
-        // 3) 기존 버튼들 정리
-        ClearChildrenExceptTemplate(_leftGrid, null);
-        ClearChildrenExceptTemplate(_rightGrid, null);
-
-        // 4) 버튼 생성
-        FillGrids(options);
-
-        // 5) 레이아웃/보정
-        LayoutGrids();
-        AutoKeepInside();
-
-        // 6) 표시
+        ClearChildren(_buttonsRoot);
+        BuildRadialCircleFirst(options);
         _root.gameObject.SetActive(true);
     }
+
     public void OpenAtWorld(Vector3 worldPos, List<EUnitType> options, Action<TowerOption> onPick)
     {
         if (PauseControl.IsPaused) return;
 
         _onPick = onPick;
+        _onPickCell = null;
+        _hasCurrentCell = false;
 
-        _onPickCell = null;            // <- 셀 없는 콜백 모드
-        _hasCurrentCell = false;       // <- 셀 정보 초기화
-        if (!_wired) { Wire(); LogWireState(); }
-        if (!_wired || !_root || !_anchor || !_leftGrid || !_rightGrid) return;
+        if (!_wired) Wire();
+        if (!_wired || !_root || !_anchor || !_buttonsRoot) return;
 
-        // 1) 타일 중앙으로 스냅
-        MapManager map = MapManager.Instance;
+        var map = MapManager.Instance;
         if (map && map.IsReady)
         {
-            Vector3Int cell = map.WorldToCell(worldPos);
+            var cell = map.WorldToCell(worldPos);
             worldPos = map.CellCenterWorld(cell);
-            _currentCell = cell;       // <- 현재 셀 저장
+            _currentCell = cell;
             _hasCurrentCell = true;
         }
 
-        // 2) 월드→스크린→로컬 변환
-        Camera uiCam = GetUiCamera();
-        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out Vector2 local);
+        var uiCam = GetUiCamera();
+        var screen = RectTransformUtility.WorldToScreenPoint(uiCam ?? Camera.main, worldPos);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, screen, uiCam, out var local);
         _anchor.anchoredPosition = local;
 
-        // 3) 기존 버튼들 정리
-        ClearChildrenExceptTemplate(_leftGrid, null);
-        ClearChildrenExceptTemplate(_rightGrid, null);
-
-        // 4) 버튼 생성
-        FillGrids(options);
-
-        // 5) 레이아웃/보정
-        LayoutGrids();
-        AutoKeepInside();
-
-        // 6) 표시
+        ClearChildren(_buttonsRoot);
+        BuildRadialCircleFirst(options);
         _root.gameObject.SetActive(true);
     }
 
-
-    /// <summary>
-    /// 셀(그리드 좌표)을 바로 전달하고 싶은 경우의 헬퍼.
-    /// </summary>
     public void OpenAtCell(Vector3Int cell, List<TowerOption> options, Action<TowerOption, Vector3Int> onPickCell)
     {
         if (PauseControl.IsPaused) return;
 
-        _onPick = null;          // 셀 없는 콜백은 안 씀
-        _onPickCell = null;      // ← 필드에 저장하지 않고
+        _onPick = null;
+        _onPickCell = null; // 캡처로 전달
         _currentCell = cell;
         _hasCurrentCell = true;
 
-        MapManager map = MapManager.Instance;
-        Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
+        var map = MapManager.Instance;
+        var world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
 
-        // 셀(capture) 포함 onPick 람다로 위임
-        OpenAtWorld(world, options, picked =>
-        {
-            onPickCell?.Invoke(picked, cell);
-        });
+        OpenAtWorld(world, options, picked => onPickCell?.Invoke(picked, cell));
     }
 
     public void OpenAtCell(Vector3Int cell, List<EUnitType> options, Action<TowerOption, Vector3Int> onPickCell)
     {
         if (PauseControl.IsPaused) return;
 
-        _onPick = null;          // 셀 없는 콜백은 안 씀
-        _onPickCell = null;      // ← 필드에 저장하지 않고
+        _onPick = null;
+        _onPickCell = null;
         _currentCell = cell;
         _hasCurrentCell = true;
 
-        MapManager map = MapManager.Instance;
-        Vector3 world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
+        var map = MapManager.Instance;
+        var world = map && map.IsReady ? map.CellCenterWorld(cell) : (Vector3)cell;
 
-        // 셀(capture) 포함 onPick 람다로 위임
-        OpenAtWorld(world, options, picked =>
-        {
-            onPickCell?.Invoke(picked, cell);
-        });
+        OpenAtWorld(world, options, picked => onPickCell?.Invoke(picked, cell));
     }
 
-    /// <summary>
-    /// 닫기(애니메이션 훅을 붙이고 싶으면 여기서 처리)
-    /// </summary>
     public void Close()
     {
         _onPick = null;
@@ -235,251 +165,346 @@ public class BuildUI : MonoBehaviour
         SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.EndSelectTile);
     }
 
-
     // ─────────────────────────────────────────────────────────────────────
-    // 레이아웃 계산 (좌/우 2×2)
+    // 원형 우선 → 한쪽 반원 2줄 폴백
     // ─────────────────────────────────────────────────────────────────────
-    // 파괴 가능 벽 눌렀을때 레이아웃
-
-    private void LayoutGrids()
+    private void BuildRadialCircleFirst(List<TowerOption> options)
     {
-        // 2×2 고정
-        void Apply(GridLayoutGroup grid)
+        options ??= new List<TowerOption>();
+
+        Vector2 cellSize = GetPrefabButtonSize(_runtimeButtonPrefab, new Vector2(80f, 120f));
+        float btnRadius = 0.5f * Mathf.Max(cellSize.x, cellSize.y);
+        float baseRadius = btnRadius + BUTTON_SPACING + 10f;
+
+        var positions = ComputeCircleFirstPositions(options.Count, baseRadius, cellSize);
+
+        for (int i = 0; i < positions.Count; i++)
         {
-            grid.cellSize = _cellSizePx;                       // ← 프리팹(또는 80×120)
-            grid.spacing = new Vector2(SPACING_PX, SPACING_PX);
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = COLS;
-            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
-            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
-            grid.childAlignment = TextAnchor.UpperLeft;
+            var b = Instantiate(_runtimeButtonPrefab, _buttonsRoot);
+            b.gameObject.SetActive(true);
+
+            var rt = (RectTransform)b.transform;
+            rt.sizeDelta = cellSize;
+            rt.anchoredPosition = _anchor.anchoredPosition + positions[i];
+
+            if (i < options.Count)
+            {
+                var opt = options[i];
+                b.Bind(opt, picked =>
+                {
+                    if (_onPickCell != null && _hasCurrentCell)
+                        _onPickCell.Invoke(picked, _currentCell);
+                    else
+                        _onPick?.Invoke(picked);
+                    Close();
+                });
+            }
+            else b.Bind(default(TowerOption), null);
         }
-        Apply(_leftGrid.GetComponent<GridLayoutGroup>());
-        Apply(_rightGrid.GetComponent<GridLayoutGroup>());
-
-        // 2×2 그리드 박스 크기
-        Vector2 gridSize = new(
-            COLS * _cellSizePx.x + (COLS - 1) * SPACING_PX,
-            ROWS * _cellSizePx.y + (ROWS - 1) * SPACING_PX
-        );
-        _lastGridSize = gridSize;
-
-        // 기본 배치: 왼쪽/오른쪽
-        _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
-        _leftGrid.pivot = new Vector2(1f, 0.5f);
-        _leftGrid.sizeDelta = gridSize;
-        _leftGrid.anchoredPosition = new Vector2(-GAP_FROM_TILE_PX, 0f);
-
-        _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
-        _rightGrid.pivot = new Vector2(0f, 0.5f);
-        _rightGrid.sizeDelta = gridSize;
-        _rightGrid.anchoredPosition = new Vector2(+GAP_FROM_TILE_PX, 0f);
     }
 
-
-
-    // ─────────────────────────────────────────────────────────────────────
-    // 화면 가장자리 보정(좌/우 공간이 너무 없으면 한쪽만)
-    // ─────────────────────────────────────────────────────────────────────
-    private void AutoKeepInside()
-{
-    Camera uiCam = GetUiCamera();
-    Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam, _anchor.position);
-    float left = screen.x;
-    float right = Screen.width - screen.x;
-    const float edge = 80f;
-
-    _leftGrid.gameObject.SetActive(true);
-    _rightGrid.gameObject.SetActive(true);
-
-    if (left < edge && right >= edge)
+    private void BuildRadialCircleFirst(List<EUnitType> options)
     {
-        _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
-        _rightGrid.pivot = new Vector2(0f, 0.5f);
-        _rightGrid.anchoredPosition = new Vector2(+GAP_FROM_TILE_PX, 0f);
+        options ??= new List<EUnitType>();
 
-        _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
-        _leftGrid.pivot = new Vector2(0f, 0.5f);
-        _leftGrid.anchoredPosition = new Vector2(+GAP_FROM_TILE_PX + _lastGridSize.x + CLUSTER_GAP_PX, 0f);
-        return;
+        Vector2 cellSize = GetPrefabButtonSize(_runtimeButtonPrefab, new Vector2(80f, 120f));
+        float btnRadius = 0.5f * Mathf.Max(cellSize.x, cellSize.y);
+        float baseRadius = btnRadius + BUTTON_SPACING + 10f;
+
+        var positions = ComputeCircleFirstPositions(options.Count, baseRadius, cellSize);
+
+        for (int i = 0; i < positions.Count; i++)
+        {
+            var b = Instantiate(_runtimeButtonPrefab, _buttonsRoot);
+            b.gameObject.SetActive(true);
+
+            var rt = (RectTransform)b.transform;
+            rt.sizeDelta = cellSize;
+            rt.anchoredPosition = _anchor.anchoredPosition + positions[i];
+
+            if (i < options.Count)
+            {
+                var opt = options[i];
+                b.Bind(opt, picked =>
+                {
+                    if (_onPickCell != null && _hasCurrentCell)
+                        _onPickCell.Invoke(picked, _currentCell);
+                    else
+                        _onPick?.Invoke(picked);
+                    Close();
+                });
+            }
+            else b.Bind(default(EUnitType), null);
+        }
     }
-    else if (right < edge && left >= edge)
+
+    private enum SemiMode { Left, Right, Up, Down }
+
+    // 기본: 정원형(12시 시작, 시계방향). 화면에서 안 맞으면 한쪽 반원 2줄.
+    private List<Vector2> ComputeCircleFirstPositions(int count, float baseRadius, Vector2 cellSize)
     {
-        _leftGrid.anchorMin = _leftGrid.anchorMax = new Vector2(0.5f, 0.5f);
-        _leftGrid.pivot = new Vector2(1f, 0.5f);
-        _leftGrid.anchoredPosition = new Vector2(-GAP_FROM_TILE_PX, 0f);
+        var candidates = new List<(List<Vector2> pts, float scale)>(5);
 
-        _rightGrid.anchorMin = _rightGrid.anchorMax = new Vector2(0.5f, 0.5f);
-        _rightGrid.pivot = new Vector2(1f, 0.5f);
-        _rightGrid.anchoredPosition = new Vector2(-GAP_FROM_TILE_PX - _lastGridSize.x - CLUSTER_GAP_PX, 0f);
-        return;
+        // 1) 원형도 후보로 넣고, 평행이동/스케일 적용
+        var circle = CirclePositions(count, baseRadius, cellSize);
+        candidates.Add(FitLayout(circle, cellSize));
+
+        // 2) 4방향 반원 후보들
+        foreach (var mode in new[] { SemiMode.Left, SemiMode.Right, SemiMode.Up, SemiMode.Down })
+        {
+            var semi = TwoRowsOnSemi(count, mode, baseRadius, baseRadius + ROW_GAP);
+            candidates.Add(FitLayout(semi, cellSize));
+        }
+
+        // 3) 가장 덜 줄여도 되는(=scale 값이 가장 큰) 후보 선택
+        (List<Vector2> bestPts, float bestS) = candidates[0];
+        for (int i = 1; i < candidates.Count; i++)
+            if (candidates[i].scale > bestS) (bestPts, bestS) = candidates[i];
+
+        return bestPts;
     }
-}
 
+    // 12시(-90°) 시작, 시계방향. 인접 호길이 ≥ 버튼폭+여유가 되도록 반지름 보정.
+    private List<Vector2> CirclePositions(int n, float baseRadius, Vector2 cellSize)
+    {
+        var pts = new List<Vector2>(n);
+        if (n <= 0) return pts;
 
+        float cell = Mathf.Max(cellSize.x, cellSize.y);
+        float delta = 2f * Mathf.PI / n;
+        float rNeed = (cell + BUTTON_SPACING * 0.8f) / Mathf.Max(0.001f, delta);
+        float r = Mathf.Max(baseRadius, rNeed);
+
+        for (int i = 0; i < n; i++)
+        {
+            float ang = -90f + (360f / n) * i;       // 12시부터 시계방향
+            float rad = ang * Mathf.Deg2Rad;
+            pts.Add(new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * r);
+        }
+        return pts;
+    }
+
+    // 한쪽(좌/우) 반원에 2줄(안쪽+바깥쪽). 최대 8개면 4+4 느낌.
+    private List<Vector2> TwoRowsOnSemi(int count, SemiMode mode, float rInner, float rOuter)
+    {
+        var list = new List<Vector2>(count);
+        if (count <= 0) return list;
+
+        int inner = Mathf.Min(4, Mathf.CeilToInt(count / 2f));
+        int outer = count - inner;
+
+        float start, end;
+        switch (mode)
+        {
+            case SemiMode.Right: start = -90f; end = 90f; break;
+            case SemiMode.Left: start = 90f; end = 270f; break;
+            case SemiMode.Up: start = 0f; end = 180f; break;
+            default: start = 180f; end = 360f; break; // Down
+        }
+
+        list.AddRange(PositionsOnArc(inner, start, end, rInner));
+
+        if (outer > 0)
+        {
+            float shift = (end - start) / (inner + outer + 1f);
+            list.AddRange(PositionsOnArc(outer, start + shift, end + shift, rOuter));
+        }
+        return list;
+    }
+
+    // start~end(도) 사이 n개 균등
+    private List<Vector2> PositionsOnArc(int n, float startDeg, float endDeg, float r)
+    {
+        var pts = new List<Vector2>(n);
+        if (n <= 0) return pts;
+
+        float d2r = Mathf.Deg2Rad;
+        for (int i = 0; i < n; i++)
+        {
+            float t = (n == 1) ? 0.5f : (i / (n - 1f));
+            float ang = Mathf.Lerp(startDeg, endDeg, t);
+            pts.Add(new Vector2(Mathf.Cos(ang * d2r), Mathf.Sin(ang * d2r)) * r);
+        }
+        return pts;
+    }
+
+    // 화면 체크
+    private bool FitsPositions(List<Vector2> localOffsets, Vector2 cellSize)
+    {
+        for (int i = 0; i < localOffsets.Count; i++)
+        {
+            Vector2 local = _anchor.anchoredPosition + localOffsets[i];
+            if (!IsInsideScreen(local, cellSize)) return false;
+        }
+        return true;
+    }
+    private (List<Vector2> pts, float scale) FitLayout(List<Vector2> pts, Vector2 cellSize)
+    {
+        // 1) 화면 안으로 먼저 평행이동
+        pts = TranslateIntoScreen(new List<Vector2>(pts), cellSize);
+
+        // 2) 그래도 남는 경우에만 동일비율 축소
+        float s = EstimateUniformScaleToFit(pts, cellSize); // 1=무축소
+        if (s < 1f)
+            for (int i = 0; i < pts.Count; i++)
+                pts[i] *= s;
+
+        return (pts, s);
+    }
+    private List<Vector2> TranslateIntoScreen(List<Vector2> points, Vector2 cellSize)
+    {
+        if (points == null || points.Count == 0) return points;
+
+        float halfW = cellSize.x * 0.5f, halfH = cellSize.y * 0.5f;
+        float minX = float.PositiveInfinity, maxX = float.NegativeInfinity;
+        float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
+
+        Camera uiCam = GetUiCamera();
+        for (int i = 0; i < points.Count; i++)
+        {
+            Vector3 world = _root.TransformPoint(_anchor.anchoredPosition + points[i]);
+            Vector2 sp = RectTransformUtility.WorldToScreenPoint(uiCam, world);
+            minX = Mathf.Min(minX, sp.x - halfW);
+            maxX = Mathf.Max(maxX, sp.x + halfW);
+            minY = Mathf.Min(minY, sp.y - halfH);
+            maxY = Mathf.Max(maxY, sp.y + halfH);
+        }
+
+        float dx = 0f, dy = 0f;
+        if (minX < SCREEN_PADDING) dx += SCREEN_PADDING - minX;
+        if (maxX > Screen.width - SCREEN_PADDING) dx -= maxX - (Screen.width - SCREEN_PADDING);
+        if (minY < SCREEN_PADDING) dy += SCREEN_PADDING - minY;
+        if (maxY > Screen.height - SCREEN_PADDING) dy -= maxY - (Screen.height - SCREEN_PADDING);
+
+        if (dx != 0f || dy != 0f)
+        {
+            float sf = _canvas ? _canvas.scaleFactor : 1f;
+            Vector2 localDelta = new Vector2(dx / Mathf.Max(0.0001f, sf), dy / Mathf.Max(0.0001f, sf));
+            for (int i = 0; i < points.Count; i++)
+                points[i] += localDelta;
+        }
+        return points;
+    }
+    // 모서리 걸리면 반지름만 조금 줄여 안전영역에 맞추기
+    private List<Vector2> FinalShrinkToFit(List<Vector2> points, Vector2 cellSize)
+    {
+        if (points == null || points.Count == 0) return points;
+
+        float s = 1f;                 // 공통 스케일
+        const int MAX_ITER = 10;      // 안전 반복
+
+        // s를 점점 줄이면서 전부 화면 안으로 들어갈 때까지 반복
+        for (int it = 0; it < MAX_ITER; it++)
+        {
+            bool ok = true;
+            for (int i = 0; i < points.Count; i++)
+            {
+                Vector2 local = _anchor.anchoredPosition + points[i] * s;
+                if (!IsInsideScreen(local, cellSize)) { ok = false; break; }
+            }
+            if (ok) break;   // 다 들어갔으면 종료
+            s *= 0.9f;       // 공통으로 10% 축소
+        }
+
+        for (int i = 0; i < points.Count; i++)
+            points[i] *= s;
+
+        return points;
+    }
+
+    private (float left, float right, float up, float down) GetSideMargins()
+    {
+        Camera uiCam = GetUiCamera();
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(uiCam, _anchor.position);
+        float left = screen.x;
+        float right = Screen.width - screen.x;
+        float down = screen.y;
+        float up = Screen.height - screen.y;
+        return (left, right, up, down);
+    }
+
+    private bool IsInsideScreen(Vector2 localPoint, Vector2 cellSize)
+    {
+        Vector3 world = _root.TransformPoint(localPoint);
+        Camera uiCam = GetUiCamera();
+        Vector2 sp = RectTransformUtility.WorldToScreenPoint(uiCam, world);
+
+        float halfW = cellSize.x * 0.5f;
+        float halfH = cellSize.y * 0.5f;
+
+        return (sp.x - halfW) >= SCREEN_PADDING &&
+               (sp.x + halfW) <= (Screen.width - SCREEN_PADDING) &&
+               (sp.y - halfH) >= SCREEN_PADDING &&
+               (sp.y + halfH) <= (Screen.height - SCREEN_PADDING);
+    }
+    // points를 동일 비율 s(<=1)로 줄였을 때 전부 화면 안에 들어가게 만드는 최소 s를 근사 반환
+    private float EstimateUniformScaleToFit(List<Vector2> points, Vector2 cellSize)
+    {
+        if (points == null || points.Count == 0) return 1f;
+        float s = 1f;
+        const int MAX_ITER = 12;
+        for (int it = 0; it < MAX_ITER; it++)
+        {
+            bool ok = true;
+            for (int i = 0; i < points.Count; i++)
+            {
+                Vector2 local = _anchor.anchoredPosition + points[i] * s;
+                if (!IsInsideScreen(local, cellSize)) { ok = false; break; }
+            }
+            if (ok) break;
+            s *= 0.9f;          // 10%씩 줄이기
+        }
+        return s;
+    }
     // ─────────────────────────────────────────────────────────────────────
-    // 배선/탐색
+    // 배선/유틸
     // ─────────────────────────────────────────────────────────────────────
     private void Wire()
     {
         _wired = false;
+
         _canvas = GetComponentInParent<Canvas>(true);
         if (!_canvas) _canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
 
-        Debug.Log(transform.parent);
-        if(transform.parent != _canvas.transform)
-            transform.SetParent(_canvas.transform);
-
-        // 이름에 의존하지 말고, 자기 자신을 루트로
         _root = (RectTransform)transform;
+        if (_canvas && transform.parent != _canvas.transform)
+            transform.SetParent(_canvas.transform, worldPositionStays: false);
+        StretchToFullScreen(_root);
 
         _dimmer = FindChildRT(_root, "Dimmer");
         _anchor = FindChildRT(_root, "Anchor");
-        _leftGrid = FindChildRT(_root, "LeftGrid");
-        _rightGrid = FindChildRT(_root, "RightGrid");
 
-        StretchToFullScreen(_root);
+        _buttonsRoot = FindChildRT(_root, "Buttons");
+        if (_buttonsRoot == null)
+        {
+            var go = new GameObject("Buttons", typeof(RectTransform));
+            _buttonsRoot = go.GetComponent<RectTransform>();
+            _buttonsRoot.SetParent(_root, false);
+            _buttonsRoot.anchorMin = _buttonsRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            _buttonsRoot.pivot = new Vector2(0.5f, 0.5f);
+            _buttonsRoot.sizeDelta = Vector2.zero;
+            _buttonsRoot.anchoredPosition = Vector2.zero;
+        }
 
         if (_dimmer && closeOnBackground)
         {
-            Button backButton = _dimmer.GetComponent<Button>();
-            if (backButton)
+            var back = _dimmer.GetComponent<Button>();
+            if (back)
             {
-                backButton.onClick.RemoveAllListeners();
-                backButton.onClick.AddListener(Close);
+                back.onClick.RemoveAllListeners();
+                back.onClick.AddListener(Close);
             }
         }
 
-        // 버튼 프리팹 준비
-        _runtimeButtonPrefab = buttonPrefab;
-        if (_runtimeButtonPrefab == null)
-            _runtimeButtonPrefab = Resources.Load<TowerPlaceButton>("Map/TowerPlaceButton");
+        _runtimeButtonPrefab = buttonPrefab
+            ? buttonPrefab
+            : Resources.Load<TowerPlaceButton>("Map/TowerPlaceButton");
 
-        _wired = (_canvas && _root && _anchor && _leftGrid && _rightGrid && _runtimeButtonPrefab);
-
-        // 프리팹 RectTransform 사이즈 → 버튼 크기 결정(없으면 기본 80×120)
-        _cellSizePx = GetPrefabButtonSize(_runtimeButtonPrefab);
+        _wired = (_canvas && _root && _anchor && _buttonsRoot && _runtimeButtonPrefab);
     }
-    private Vector2 GetPrefabButtonSize(TowerPlaceButton prefab)
-    {
-        if (!prefab) return FALLBACK_CELL;
-        var rt = prefab.GetComponent<RectTransform>();
-        if (rt && rt.sizeDelta != Vector2.zero) return rt.sizeDelta;
-        return FALLBACK_CELL;
-    }
-    private void LogWireState()
-    {
-        Debug.Log(
-            $"[BuildUI] wired={_wired}\n" +
-            $" runtimePrefab={(_runtimeButtonPrefab ? _runtimeButtonPrefab.name : "NULL")}"
-        );
-    }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // 버튼 채우기 (최대 8칸: 좌4 + 우4)
-    // ─────────────────────────────────────────────────────────────────────
-    private void FillGrids(List<TowerOption> options)
-    {
-        if (_runtimeButtonPrefab == null)
-        { Debug.LogError("[BuildUI] No TowerPlaceButton prefab."); return; }
-
-        options ??= new List<TowerOption>();
-
-        // ▼ 버튼 크기: 프리팹 RT 기준, 없으면 80x120 기본
-        Vector2 cellSize = GetPrefabButtonSize(_runtimeButtonPrefab, new Vector2(80f, 120f));
-
-        // ▼ 2×2 고정
-        const int perSide = 4;   // 2x2
-        const int maxTotal = 8;  // 좌4 + 우4
-        int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
-
-        for (int i = 0; i < total; i++)
-        {
-            RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
-            TowerPlaceButton button = Instantiate(_runtimeButtonPrefab, parent);
-            button.gameObject.SetActive(true);
-
-            // ▼ 프리팹(또는 기본) 크기로 강제
-            RectTransform rect = (RectTransform)button.transform;
-            rect.sizeDelta = cellSize;
-
-            if (i < options.Count)
-            {
-                TowerOption opt = options[i];
-                button.Bind(opt, picked =>
-                {
-                    if (_onPickCell != null && _hasCurrentCell)
-                        _onPickCell.Invoke(picked, _currentCell);
-                    else
-                        _onPick?.Invoke(picked);
-                    Close();
-                });
-            }
-            else
-            {
-                button.Bind((TowerOption)default, null); // 빈 슬롯
-            }
-        }
-
-    }
-
-    private void FillGrids(List<EUnitType> options)
-    {
-        if (_runtimeButtonPrefab == null)
-        { Debug.LogError("[BuildUI] No TowerPlaceButton prefab."); return; }
-
-        options ??= new List<EUnitType>();
-
-        const int perSide = 4;   // 2x2
-        const int maxTotal = 8;  // 좌4 + 우4
-        int total = Mathf.Clamp(options.Count > 0 ? options.Count : maxTotal, 1, maxTotal);
-
-        Vector2 cellSize = GetPrefabButtonSize(_runtimeButtonPrefab, new Vector2(80f, 120f));
-        for (int i = 0; i < total; i++)
-        {
-            RectTransform parent = (i < perSide) ? _leftGrid : _rightGrid;
-            TowerPlaceButton button = Instantiate(_runtimeButtonPrefab, parent);
-            button.gameObject.SetActive(true);
-
-            // ▼ 프리팹(또는 기본) 크기로 강제
-            RectTransform rect = (RectTransform)button.transform;
-            rect.sizeDelta = cellSize;
-
-            if (i < options.Count)
-            {
-                EUnitType opt = options[i];
-                button.Bind(opt, picked =>
-                {
-                    if (_onPickCell != null && _hasCurrentCell)
-                        _onPickCell.Invoke(picked, _currentCell);
-                    else
-                        _onPick?.Invoke(picked);
-
-                    Close();
-                });
-            }
-            else
-            {
-                button.Bind((EUnitType)default, null); // 빈 슬롯
-            }
-        }
-    }
-
-    // --- 로컬 헬퍼 ---
-    static Vector2 GetPrefabButtonSize(TowerPlaceButton prefab, Vector2 fallback)
-    {
-        if (!prefab) return fallback;
-        var rt = prefab.GetComponent<RectTransform>();
-        if (rt && rt.sizeDelta != Vector2.zero) return rt.sizeDelta;
-        return fallback;
-    }
-    // ─────────────────────────────────────────────────────────────────────
-    // 내부 유틸
-    // ─────────────────────────────────────────────────────────────────────
 
     private Camera GetUiCamera()
     {
-        // Overlay → null, 그 외(스크린-카메라/월드) → canvas.worldCamera(없으면 Main)
         if (_canvas == null || _canvas.renderMode == RenderMode.ScreenSpaceOverlay) return null;
         return _canvas.worldCamera != null ? _canvas.worldCamera : Camera.main;
     }
@@ -502,30 +527,18 @@ public class BuildUI : MonoBehaviour
         return null;
     }
 
-    static T FindChild<T>(Transform root, string name, bool includeInactive = false) where T : Component
+    static void ClearChildren(Transform t)
     {
-        if (!root) return null;
-        foreach (var c in root.GetComponentsInChildren<T>(includeInactive))
-            if (c.name == name) return c;
-        return null;
+        if (!t) return;
+        for (int i = t.childCount - 1; i >= 0; --i)
+            UnityEngine.Object.Destroy(t.GetChild(i).gameObject);
     }
 
-    static void ClearChildrenExceptTemplate(Transform transform, Transform keep)
+    private static Vector2 GetPrefabButtonSize(TowerPlaceButton prefab, Vector2 fallback)
     {
-        if (!transform) return;
-        for (int i = transform.childCount - 1; i >= 0; --i)
-        {
-            var child = transform.GetChild(i);
-            if (keep && child == keep) continue; // 템플릿은 보존
-            UnityEngine.Object.Destroy(child.gameObject);
-        }
+        if (!prefab) return fallback;
+        var rt = prefab.GetComponent<RectTransform>();
+        if (rt && rt.sizeDelta != Vector2.zero) return rt.sizeDelta;
+        return fallback;
     }
 }
-//유닛에서 사용
-//buildUI.OpenAtCell(cell, options, (picked, selectedCell) =>
-//{
-//    MapManager map = MapManager.Instance;
-//    if (!map.GetPlaceInfo(selectedCell).Placeable) return;
-//
-//    Vector3 pos = map.CellCenterWorld(selectedCell); //정중앙
-//});
