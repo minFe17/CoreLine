@@ -26,7 +26,7 @@ public class StageSettingManager : MonoBehaviour
             return;
         }
             
-        DataManager.Instance.LoadData();
+        //DataManager.Instance.LoadData();
         SettingButtons();
         EventManager.Instance.Subscribe<NormalStageData>("SelectStage", UpdateText);
         ResetText();

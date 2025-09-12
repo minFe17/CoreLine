@@ -30,7 +30,7 @@ public class Panel : MonoBehaviour
     }
     protected virtual void Start()
     {
-        if (_status == PanelStatus.LobbyPanel || _status == PanelStatus.LogInSelectPanel) return;
+        if (_status == PanelStatus.LobbyPanel || _status == PanelStatus.LogInSelectPanel||_status == PanelStatus.StartPanel) return;
         GameObject exitButton = Resources.Load<GameObject>("UI/Prefabs/Button/Share/ExitButton");
         GameObject newButton = Instantiate(exitButton);
         newButton.transform.SetParent(this.transform, false);

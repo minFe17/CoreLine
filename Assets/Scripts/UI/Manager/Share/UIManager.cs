@@ -6,7 +6,7 @@ using static UnityEngine.Rendering.DebugUI;
 public enum PanelStatus
 {
     LobbyPanel,InventoryPanel, UpgradePanel, LaboratoryPanel, PlayPanel, SettingPanel,
-    StorePanel,LogInSelectPanel, LogInEmailPanel
+    StorePanel,LogInSelectPanel, LogInEmailPanel,StartPanel
 }
 public enum PopUpStatus
 {
@@ -60,6 +60,13 @@ public class UIManager : SimpleSingleton<UIManager>
         _panelDictionary[status].SwitchOnPanel();
         if(status != PanelStatus.UpgradePanel)
             EventManager.Instance.Invoke("Reset");
+    }
+    public void CloseAllPanel()
+    {
+        for(int i=0;i< _panelStack.Count;i++)
+        {
+            _panelStack.Pop().SwitchOffPanel();
+        }
     }
     public void CloseFrontPanel()
     {

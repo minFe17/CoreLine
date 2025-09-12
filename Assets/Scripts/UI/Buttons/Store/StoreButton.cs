@@ -22,7 +22,19 @@ public class StoreButton : BaseButton
     }
     protected override void OnClick()
     {
-        //인앱구매하고 돈 추가해주는거까지 추가해야됨.
+        switch(_data.StoreType)
+        {
+            case StoreType.Money:
+                DataManager.Instance.GameData.PlayerMoney += _data.Quantity;
+                break;
+            case StoreType.InfinityKey:
+                DataManager.Instance.GameData.PlayerInfinityKey += _data.Quantity;
+                break;
+            case StoreType.Gem:
+                DataManager.Instance.GameData.PlayerGem += _data.Quantity;
+                break;
+        }
+        EventManager.Instance.Invoke("UpdateMoneyText");
     }
     protected override void Awake()
     {

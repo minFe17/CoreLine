@@ -16,4 +16,8 @@ public class UIGameManager : MonoBehaviour
         _uiPanel = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.UIPanel);
         Instantiate(_uiPanel);
     }
+    private void OnApplicationQuit()
+    {
+        FireBaseManager.Instance.SaveGameData(DataManager.Instance.GameData);
+    }
 }

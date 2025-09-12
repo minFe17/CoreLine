@@ -41,6 +41,7 @@ public class DataManager : SimpleSingleton<DataManager>
     public GameData GameData
     {
         get { return _gameData; }
+        set { _gameData = value; }  
     }
 
     public void LoadData()
@@ -48,7 +49,7 @@ public class DataManager : SimpleSingleton<DataManager>
         LoadInventoryDatas();
         LoadLaboratoryDatas();
         LoadUpgradeDatas();
-        LoadGameData();
+        LoadGameData(); //로그인 씬 연결시 제거해야됨
         LoadNormalStageData();
         LoadStoreData();
         LoadSkillData();
@@ -74,7 +75,7 @@ public class DataManager : SimpleSingleton<DataManager>
 
     public void SaveData()
     {//데이터 세이브구현
-
+        FireBaseManager.Instance.SaveGameData(_gameData);
     }
     private void LoadInventoryDatas()
     {
