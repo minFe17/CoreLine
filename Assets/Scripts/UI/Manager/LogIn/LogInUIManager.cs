@@ -25,7 +25,7 @@ public class LogInUIManager : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.Escape))
         {
-            FireBaseAuthManager.Instance.LogOut();
+            FireBaseManager.Instance.LogOut();
             UIManager.Instance.AddPanelStack(PanelStatus.LogInSelectPanel);
         }
     }

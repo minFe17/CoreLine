@@ -9,6 +9,6 @@ public class CreateButton : BaseButton
     private TMP_InputField _password;
     protected override void OnClick()
     {
-        FireBaseAuthManager.Instance.CreateToEmail(_email.text, _password.text);
+        FireBaseManager.Instance.CreateToEmail(_email.text, _password.text);
     }
 }
