@@ -11,7 +11,7 @@ public class PauseUI : MonoBehaviour
     private const string NAME_RestartButton = "RestartButton";
     private const string NAME_QuitButton = "QuitButton";
 
-    private const string LOBBY_SCENE_NAME = "LobyScene";
+    private const string LOBBY_SCENE_NAME = "LobbyScene";
     private const KeyCode TOGGLE_KEY = KeyCode.Escape;
 
     private GameObject _pausePanel;

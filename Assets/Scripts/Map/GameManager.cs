@@ -17,7 +17,7 @@ public class GameManager : MonoSingleton<GameManager>
     public static bool IsStageLoaded { get; private set; } // 현재 스테이지 로드 완료 여부
     public static string LastLoadedStageId { get; private set; } // 마지막 로드된 스테이지 ID
 
-    private const string LobbySceneName = "LobyScene";
+    private const string LobbySceneName = "LobbyScene";
 
     // 튜토리얼 스테이지 부팅 설정
     [Header("Tutorial Stage Boot")]

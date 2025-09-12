@@ -15,7 +15,7 @@ public sealed class DefeatPanelControl : MonoBehaviour
     private Button _retryButton;
     private Button _lobbyButton;
 
-    [SerializeField] private string _lobbySceneName = "LobyScene";
+     private string _lobbySceneName = "LobbyScene";
     [SerializeField] private bool _pauseOnShow = true;
     [SerializeField] private bool _resumeOnExit = true;
 
