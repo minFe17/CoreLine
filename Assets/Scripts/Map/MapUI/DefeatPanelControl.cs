@@ -3,19 +3,21 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Utils;
 
 [DisallowMultipleComponent]
 public sealed class DefeatPanelControl : MonoBehaviour
 {
-    // 하이어라키 자동 배선
+    public event Action LobbyRequested;
+    public event Action RetryRequested;
+
     private TMP_Text _stageNameText;
     private Button _retryButton;
     private Button _lobbyButton;
 
-    // 옵션
-    [SerializeField] private string _lobbySceneName = "LobyScene"; // 빌드 세팅에 추가되어 있어야 함
-    [SerializeField] private bool _pauseOnShow = true;             // 패널 켤 때 일시정지
-    [SerializeField] private bool _resumeOnExit = true;            // 나갈 때 timeScale 복구
+    [SerializeField] private string _lobbySceneName = "LobyScene";
+    [SerializeField] private bool _pauseOnShow = true;
+    [SerializeField] private bool _resumeOnExit = true;
 
     private void Awake()
     {
@@ -45,54 +47,43 @@ public sealed class DefeatPanelControl : MonoBehaviour
     public void Show(string stageId)
     {
         if (_stageNameText) _stageNameText.text = stageId;
-
         if (_pauseOnShow)
         {
             Time.timeScale = 0f;
             PauseControl.SetPaused(true);
         }
-
         gameObject.SetActive(true);
     }
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
-
-    // ── 버튼 핸들러 ─────────────────────────────────────
+    public void Hide() => gameObject.SetActive(false);
 
     private void OnClickRetry()
     {
-        // 정지 해제
+        if (RetryRequested != null) { RetryRequested.Invoke(); return; }
+
         if (_resumeOnExit)
         {
             Time.timeScale = 1f;
             PauseControl.SetPaused(false);
         }
-
-        // 현재 씬 다시 로드
-        Scene current = SceneManager.GetActiveScene();
+        var current = SceneManager.GetActiveScene();
         SceneManager.LoadScene(current.buildIndex);
     }
 
     private void OnClickLobby()
     {
-        // 정지 해제
+        if (LobbyRequested != null) { LobbyRequested.Invoke(); return; }
+        GameManager.Instance.ResetRunState(resetCostToZero: false);
         if (_resumeOnExit)
         {
             Time.timeScale = 1f;
             PauseControl.SetPaused(false);
         }
-
-        GameManager.Instance?.ResetRunState(resetCostToZero: false);
-
         if (string.IsNullOrEmpty(_lobbySceneName))
         {
             Debug.LogError("[DefeatPanelControl] 로비 씬 이름이 비었습니다.");
             return;
         }
-
         SceneManager.LoadScene(_lobbySceneName);
     }
 }

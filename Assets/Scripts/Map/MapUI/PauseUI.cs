@@ -146,14 +146,16 @@ public class PauseUI : MonoBehaviour
         // 일시정지 패널만 숨기고(씬 전환/리셋 X)
         ForceHidePanelImmediate();
 
-        var mgr = NormalStageManager.Instance;
-        if (mgr == null) return;
+        var timer = FindFirstObjectByType<TimerPanelUI>(FindObjectsInactive.Include);
+        if (timer) timer.StopProgress();
 
-        var stage = mgr.SelectedStage;
+        // 3) 포기로 패배 마감 → GameManager.OnStageDefeated가 패널을 띄움
+        var nsm = NormalStageManager.Instance;
+        if (nsm == null) return;
+
+        var stage = nsm.SelectedStage;
         var snap = ConditionControl.BuildFor(stage);
-
-        // 패배(포기)로 마감 → GameManager.OnStageDefeated가 패널을 띄움
-        mgr.CompleteStageDefeat(snap);
+        nsm.CompleteStageDefeat(snap); // 씬 전환 없음!
     }
 
     private void BeginSceneChange()

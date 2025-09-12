@@ -36,10 +36,20 @@ public class GameManager : MonoSingleton<GameManager>
             nsm.StageCleared += OnStageCleared;
             nsm.StageDefeated += OnStageDefeated;
         }
+        _defeatPanelRef = FindFirstObjectByType<DefeatPanelControl>(FindObjectsInactive.Include);
+        if (_defeatPanelRef != null)
+        {
+            _defeatPanelRef.LobbyRequested -= OnClickLobbyFromDefeat;
+            _defeatPanelRef.LobbyRequested += OnClickLobbyFromDefeat;
+            _defeatPanelRef.RetryRequested -= OnClickRetryFromDefeat;
+            _defeatPanelRef.RetryRequested += OnClickRetryFromDefeat;
+        }
 
         _clearPanelRef = FindFirstObjectByType<ClearPanelControl>(FindObjectsInactive.Include);
         if (_clearPanelRef != null)
         {
+            _clearPanelRef.NextStageRequested -= OnClickNextStage;
+            _clearPanelRef.LobbyRequested -= OnClickLobbyFromClear;
             _clearPanelRef.NextStageRequested += OnClickNextStage;
             _clearPanelRef.LobbyRequested += OnClickLobbyFromClear;
         }
@@ -53,7 +63,11 @@ public class GameManager : MonoSingleton<GameManager>
             nsm.StageCleared -= OnStageCleared;
             nsm.StageDefeated -= OnStageDefeated;
         }
-
+        if (_defeatPanelRef != null)
+        {
+            _defeatPanelRef.LobbyRequested -= OnClickLobbyFromDefeat;
+            _defeatPanelRef.RetryRequested -= OnClickRetryFromDefeat;
+        }
         if (_clearPanelRef != null)
         {
             _clearPanelRef.NextStageRequested -= OnClickNextStage;
@@ -225,6 +239,12 @@ public class GameManager : MonoSingleton<GameManager>
         if (_endingShown) return;
         _endingShown = true;
 
+        var nsm = NormalStageManager.Instance;
+        if (nsm != null)
+        {
+            nsm.StageCleared -= OnStageCleared;
+            nsm.StageDefeated -= OnStageDefeated;
+        }
         // 1) 게임 정지(패널에서도 다시 한 번 처리하지만, 안전하게)
         Time.timeScale = 0f;
         PauseControl.SetPaused(true);
@@ -283,6 +303,25 @@ public class GameManager : MonoSingleton<GameManager>
         Time.timeScale = 1f;
         PauseControl.SetPaused(false);
         LoadStageWithEvent(prefab, next.Id);
+    }
+    private void OnClickLobbyFromDefeat()
+    {
+        Time.timeScale = 1f;
+        PauseControl.SetPaused(false);
+        ResetRunState(resetCostToZero: false);
+        if (!string.IsNullOrEmpty(LobbySceneName))
+            SceneManager.LoadScene(LobbySceneName);
+        else
+            SceneManager.LoadScene(0);
+    }
+
+    private void OnClickRetryFromDefeat()
+    {
+        Time.timeScale = 1f;
+        PauseControl.SetPaused(false);
+        ResetRunState(resetCostToZero: false);
+        var active = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(active.buildIndex);
     }
 
     // ───────── 유틸 ─────────
@@ -344,7 +383,7 @@ public class GameManager : MonoSingleton<GameManager>
         // 전투/중개 상태 정리
         SimpleSingleton<MapUnitManager>.Instance?.RestartGame();
         SimpleSingleton<MediatorManager>.Instance?.ClearAll();
-
+        MapManager.Instance?.UnloadStage();
         // 열려있는 패널/타겟팅/빌드UI 등 닫기(있으면)
         FindFirstObjectByType<BuildUI>(FindObjectsInactive.Include)?.Close();
         FindFirstObjectByType<TwoButtonUI>(FindObjectsInactive.Include)?.Close();

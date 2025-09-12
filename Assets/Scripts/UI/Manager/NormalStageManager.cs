@@ -128,7 +128,7 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
         var reward = new RewardResult(); // 패배 보상 없음
         SetLastResult(stage, snap, stars, reward);
 
-        var ev = StageCleared;           // 필요 시 StageDefeated로 분리 가능
+        var ev = StageDefeated;           
         if (ev != null) ev.Invoke(stage, snap, stars, reward);
     }
 
