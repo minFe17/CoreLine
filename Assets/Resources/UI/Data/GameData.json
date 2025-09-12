@@ -10,19 +10,19 @@
         }
     ],
     "UnlockedLaboratoryId" : ["Attack_Num1"],
-    "PlayerMoney":10000,
-    "PlayerGem":10000,
+    "PlayerMoney":100000,
+    "PlayerGem":100000,
     "PlayerInfinityKey":0,
     "ClearStage":
     [
         {
             "StageId" : "Stage1-1",
-            "MaxStarNum":3,
+            "MaxStarNum":0,
             "Star":
             {
-                "FirstStar":true,
-                "SecondStar":true,
-                "ThirdStar":true
+                "FirstStar":false,
+                "SecondStar":false,
+                "ThirdStar":false
             }
         }
     ]
