@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: MonsterSound
+  m_EditorClassIdentifier: 
+  m_GroupName: MonsterSound
+  m_GUID: c5f30bb9ebef6ee4ab2028db4cbbaeaf
+  m_SerializeEntries:
+  - m_GUID: 0100b777832432a48a9ebf486b8cba92
+    m_Address: Assets/Prefabs/Monster/Sound/DragonHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3015a07a83f42f94fa3f227157d01b2d
+    m_Address: Assets/Prefabs/Monster/Sound/BlockHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34909456725174a43a45153b8b07ff18
+    m_Address: Assets/Prefabs/Monster/Sound/TreeHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 366ff28bd6f8d0c40858416af1ac92fc
+    m_Address: Assets/Prefabs/Monster/Sound/GhostHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3b39925b1996dda4880af15f5d675dc6
+    m_Address: Assets/Prefabs/Monster/Sound/Explode.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e80f50dc45c94a4caf57bf6b179706a
+    m_Address: Assets/Prefabs/Monster/Sound/SkeletonHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 42f3cc50fde686c40b8b5c9946023ca3
+    m_Address: Assets/Prefabs/Monster/Sound/GolemHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 60d00f86d836d4446864f8accd920eeb
+    m_Address: Assets/Prefabs/Monster/Sound/SmashWall.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7cec33041d313f946b6de9a171222bde
+    m_Address: Assets/Prefabs/Monster/Sound/PlanetHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a72b3b44d73d93349a18fc2c13077df0
+    m_Address: Assets/Prefabs/Monster/Sound/DragonSkill.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c16724712c67d81429e78bcbc58d429f
+    m_Address: Assets/Prefabs/Monster/Sound/WolfHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dbd879735dd917948bce825198c77f49
+    m_Address: Assets/Prefabs/Monster/Sound/SlimeHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: deceb7351a252fc4193285e2c2ce86b2
+    m_Address: Assets/Prefabs/Monster/Sound/YetiHit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb919a44827b03549b6e59dfd5a17034
+    m_Address: Assets/Prefabs/Monster/Sound/SummonMinion.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: feb72cbe886742346a12460f10b95a21
+    m_Address: Assets/Prefabs/Monster/Sound/StunUnit.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: b4ea09713c0206c41bbd752ebba986c7, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 856891b88b0c9424ea47e8e842523547, type: 2}
+    - {fileID: 11400000, guid: eecb0eb0fd80c074da7117fd61612dbb, type: 2}

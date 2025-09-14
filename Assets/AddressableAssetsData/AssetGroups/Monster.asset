@@ -146,3 +146,4 @@ MonoBehaviour:
     m_Schemas:
     - {fileID: 11400000, guid: 757cc975e3343a944959c3d9f2dffc4d, type: 2}
     - {fileID: 11400000, guid: c1caa1b790caf62459b70bd8093e1f5b, type: 2}
+    - {fileID: 11400000, guid: 88f55b3185845a44e80bf9850c70f4b0, type: 2}

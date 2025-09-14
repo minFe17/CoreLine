@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 1887a92f39b5f214da2091ea8021adb3
   m_currentHash:
     serializedVersion: 2
-    Hash: 219d8265f2b075459cf75f95057a64df
+    Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_CatalogRequestsTimeout: 0
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_ContentStateBuildPathProfileVariableName: <default settings path>
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
-  m_BuildAddressablesWithPlayerBuild: 0
+  m_BuildAddressablesWithPlayerBuild: 2
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
   - {fileID: 11400000, guid: c6d4922facab2404684adb28e95e87a7, type: 2}
@@ -68,6 +68,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c233665ed9893fc4f95f9dab8a17176d, type: 2}
   - {fileID: 11400000, guid: e7b77e66c01427344bbc61e0da60dbe4, type: 2}
   - {fileID: 11400000, guid: 90a8d70237c710644a919166abb3b088, type: 2}
+  - {fileID: 11400000, guid: 8255fad04992d7144a99d71cf2413cd0, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
     m_BundleBuildPath: Temp/com.unity.addressables/AssetBundles
@@ -113,15 +114,18 @@ MonoBehaviour:
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 69407bafe823f644b8073b3724c2c5f8, type: 2}
-  m_InitializationObjects: []
+  - {fileID: 11400000, guid: 074e1a9651e93f243a41c4a15a24da00, type: 2}
+  m_InitializationObjects:
+  - {fileID: 11400000, guid: bd8020ae192fe084ebb403de33582055, type: 2}
   m_CertificateHandlerType:
     m_AssemblyName: 
     m_ClassName: 
-  m_ActivePlayerDataBuilderIndex: 2
+  m_ActivePlayerDataBuilderIndex: 3
   m_DataBuilders:
   - {fileID: 11400000, guid: b31676519d0c2cb4fa275600ac18fb93, type: 2}
   - {fileID: 11400000, guid: da5564ff1f83ee4408cbc05a6bd8b14c, type: 2}
   - {fileID: 11400000, guid: ca6cf7c1a0477054d820e9dcf55a45c1, type: 2}
+  - {fileID: 11400000, guid: 4b8ea68f993909c419700047e6931d98, type: 2}
   m_ActiveProfileId: 4d3c9a0c379e0004eaf2cd97da645cd6
   m_CcdManagedData:
     EnvironmentId: 
