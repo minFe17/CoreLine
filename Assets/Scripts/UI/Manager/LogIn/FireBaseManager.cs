@@ -3,221 +3,219 @@
 //using Firebase.Database;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
+//using System.Collections.Generic;
+//using UnityEngine;
 using Utils;
 //using Firebase;
 //using Newtonsoft.Json.Converters;
-//using UnityEngine.SceneManagement;
 
 public class FireBaseManager : SimpleSingleton<FireBaseManager>
 {
-   // private string _databaseURL = "https://coreline-4f199-default-rtdb.firebaseio.com/";
-   // private FirebaseAuth _auth;
-   // private FirebaseUser _user;
-   // private FirebaseDatabase _database;
+    //private string _databaseURL = "https://coreline-4f199-default-rtdb.firebaseio.com/";
+    //private FirebaseAuth _auth;
+    //private FirebaseUser _user;
+    //private FirebaseDatabase _database;
 
-    public FireBaseManager()
-    {
+    //public FireBaseManager()
+    //{
     //    FirebaseApp.DefaultInstance.Options.DatabaseUrl = new Uri(_databaseURL);
-    //    Debug.Log("¼³Á¤µÊ");
+    //    Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
     //    _auth = FirebaseAuth.DefaultInstance;
     //    _database = FirebaseDatabase.DefaultInstance;
-    }
+    //}
 
     public void CreateToEmail(string email, string password)
     {
-    //
-    //    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-    //    {
-    //        Debug.LogWarning("ÀÌ¸ÞÀÏ°ú ºñ¹Ð¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä.");
-    //        return;
-    //    }
-    //   
-    //    _auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith(task =>
-    //    {
-    //        if (task.IsCanceled)
-    //        {
-    //            Debug.LogWarning("È¸¿ø°¡ÀÔ ÀÛ¾÷ÀÌ Ãë¼ÒµÇ¾ú½À´Ï´Ù.");
-    //            return;
-    //        }
-    //        if (task.IsFaulted)
-    //        {
-    //            Debug.LogError("È¸¿ø°¡ÀÔ ½ÇÆÐ: " + task.Exception);
-    //            return;
-    //        }
-    //   
-    //        Firebase.Auth.AuthResult authResult = task.Result;
-    //        Firebase.Auth.FirebaseUser newUser = authResult.User;
-    //        Debug.Log("È¸¿ø°¡ÀÔ ¼º°ø! UID: " + newUser.UserId);
-    //        SetDataBase(newUser.UserId);
-    //
-    //    });
+    
+        //if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+        //{
+        //    Debug.LogWarning("ï¿½Ì¸ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½.");
+        //    return;
+        //}
+        //
+        //_auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith(task =>
+        //{
+        //    if (task.IsCanceled)
+        //    {
+        //        Debug.LogWarning("È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½ï¿½ÒµÇ¾ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
+        //        return;
+        //    }
+        //    if (task.IsFaulted)
+        //    {
+        //        Debug.LogError("È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: " + task.Exception);
+        //        return;
+        //    }
+        //
+        //    Firebase.Auth.AuthResult authResult = task.Result;
+        //    Firebase.Auth.FirebaseUser newUser = authResult.User;
+        //    Debug.Log("È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½! UID: " + newUser.UserId);
+        //    SetDataBase(newUser.UserId);
+        //
+        //});
     }
     public void LogInToEmail(string email, string password, Action<bool> onComplete = null)
-    {//¸ÖÆ¼½º·¹µå ÀÌ¿ëÇÏ´ÂÁß
-    //    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-    //    {
-    //        Debug.LogWarning("ÀÌ¸ÞÀÏ°ú ºñ¹Ð¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä.");
-    //        return;
-    //    }
-    //
-    //    _auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
-    //    {
-    //        if (task.IsCanceled)
-    //        {
-    //            Debug.LogWarning("·Î±×ÀÎ Ãë¼Ò");
-    //            onComplete?.Invoke(false);
-    //            return;
-    //        }
-    //
-    //        if (task.IsFaulted)
-    //        {
-    //            Debug.LogError("·Î±×ÀÎ ½ÇÆÐ: " + task.Exception);
-    //            onComplete?.Invoke(false);
-    //            return;
-    //        }
-    //
-    //        Firebase.Auth.AuthResult authResult = task.Result;
-    //        Firebase.Auth.FirebaseUser newUser = authResult.User;
-    //        Debug.Log("·Î±×ÀÎ ¼º°ø! UID: " + newUser.UserId);
-    //
-    //        LoadGameData((loadedData) =>
-    //        {
-    //            if (loadedData != null)
-    //            {
-    //                DataManager.Instance.GameData = loadedData;
-    //                Debug.Log("µ¥ÀÌÅÍ ·Îµå ¼º°ø");
-    //                onComplete?.Invoke(true); // ¿©±â¼­ ¾À ÀÌµ¿ È£Ãâ °¡´É
-    //            }
-    //            else
-    //            {
-    //                Debug.LogWarning("µ¥ÀÌÅÍ ·Îµå ½ÇÆÐ");
-    //                onComplete?.Invoke(false);
-    //            }
-    //        });
-    //    });
+    {//ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½Ï´ï¿½ï¿½ï¿½
+       // if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+       // {
+       //     Debug.LogWarning("ï¿½Ì¸ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½Ð¹ï¿½È£ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½.");
+       //     return;
+       // }
+       //
+       // _auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
+       // {
+       //     if (task.IsCanceled)
+       //     {
+       //         Debug.LogWarning("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½");
+       //         onComplete?.Invoke(false);
+       //         return;
+       //     }
+       //
+       //     if (task.IsFaulted)
+       //     {
+       //         Debug.LogError("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: " + task.Exception);
+       //         onComplete?.Invoke(false);
+       //         return;
+       //     }
+       //
+       //     Firebase.Auth.AuthResult authResult = task.Result;
+       //     Firebase.Auth.FirebaseUser newUser = authResult.User;
+       //     Debug.Log("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½! UID: " + newUser.UserId);
+       //
+       //     LoadGameData((loadedData) =>
+       //     {
+       //         if (loadedData != null)
+       //         {
+       //             DataManager.Instance.GameData = loadedData;
+       //             Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½");
+       //             onComplete?.Invoke(true); // ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ ï¿½Ìµï¿½ È£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+       //         }
+       //         else
+       //         {
+       //             Debug.LogWarning("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½");
+       //             onComplete?.Invoke(false);
+       //         }
+       //     });
+       // });
     }
 
     public void LogOut()
     {
-     //   FirebaseAuth.DefaultInstance.SignOut();
+        //FirebaseAuth.DefaultInstance.SignOut();
 
     }
     public void SaveGameData(GameData data)
     {
-    //    // null, enum µîÀ» Æ÷ÇÔÇÑ ÀüÃ¼ µ¥ÀÌÅÍ Á÷·ÄÈ­
-    //    string json = JsonConvert.SerializeObject(data, new JsonSerializerSettings
-    //    {
-    //        Formatting = Formatting.Indented,
-    //        Converters = new List<JsonConverter> { new StringEnumConverter() },
-    //        NullValueHandling = NullValueHandling.Include // Áß¿ä: null °ªµµ Æ÷ÇÔ
-    //    });
-    //
-    //    DatabaseReference reference = _database.GetReference("users").Child(_auth.CurrentUser.UserId);
-    //    reference.SetRawJsonValueAsync(json).ContinueWith(task =>
-    //    {
-    //        if (task.IsCompletedSuccessfully)
-    //            Debug.Log("¼¼ÀÌºê ¿Ï·á");
-    //        else
-    //            Debug.LogWarning("¼¼ÀÌºê ½ÇÆÐ: " + task.Exception);
-    //    });
+        // null, enum ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
+       // string json = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+       // {
+       //     Formatting = Formatting.Indented,
+       //     Converters = new List<JsonConverter> { new StringEnumConverter() },
+       //     NullValueHandling = NullValueHandling.Include // ï¿½ß¿ï¿½: null ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+       // });
+       //
+       // DatabaseReference reference = _database.GetReference("users").Child(_auth.CurrentUser.UserId);
+       // reference.SetRawJsonValueAsync(json).ContinueWith(task =>
+       // {
+       //     if (task.IsCompletedSuccessfully)
+       //         Debug.Log("ï¿½ï¿½ï¿½Ìºï¿½ ï¿½Ï·ï¿½");
+       //     else
+       //         Debug.LogWarning("ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½: " + task.Exception);
+       // });
     }
     public void LoadGameData( Action<GameData> onLoaded)
     {
-      //  DatabaseReference reference = _database.GetReference("users").Child(_auth.CurrentUser.UserId);
-      //  reference.GetValueAsync().ContinueWith(task =>
-      //  {
-      //      if (task.IsFaulted || task.IsCanceled)
-      //      {
-      //          Debug.LogWarning("·Îµå ½ÇÆÐ: " + task.Exception);
-      //          onLoaded?.Invoke(null);
-      //          return;
-      //      }
-      //
-      //      if (task.Result.Exists)
-      //      {
-      //          string json = task.Result.GetRawJsonValue();
-      //          GameData data = JsonConvert.DeserializeObject<GameData>(json);
-      //          Debug.Log("·Îµå ¿Ï·á");
-      //          onLoaded?.Invoke(data);
-      //      }
-      //      else
-      //      {
-      //          Debug.LogWarning("µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù.");
-      //          onLoaded?.Invoke(null);
-      //      }
-      //  });
-    }
-    public void LoadGameData()
-    {
-       // LoadGameData((loadedData) =>
+       // DatabaseReference reference = _database.GetReference("users").Child(_auth.CurrentUser.UserId);
+       // reference.GetValueAsync().ContinueWith(task =>
        // {
-       //     if (loadedData != null)
+       //     if (task.IsFaulted || task.IsCanceled)
        //     {
-       //         if (loadedData.UnlockedLaboratoryId == null)
-       //             loadedData.UnlockedLaboratoryId = new List<string>();
+       //         Debug.LogWarning("ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½: " + task.Exception);
+       //         onLoaded?.Invoke(null);
+       //         return;
+       //     }
        //
-       //         if (loadedData.ClearStage == null)
-       //             loadedData.ClearStage = new List<ClearStage>();
-       //         DataManager.Instance.GameData = loadedData;
-       //
-       //         Debug.Log("µ¥ÀÌÅÍ ¼ÂÆÃ¿Ï·á~");
+       //     if (task.Result.Exists)
+       //     {
+       //         string json = task.Result.GetRawJsonValue();
+       //         GameData data = JsonConvert.DeserializeObject<GameData>(json);
+       //         Debug.Log("ï¿½Îµï¿½ ï¿½Ï·ï¿½");
+       //         onLoaded?.Invoke(data);
        //     }
        //     else
        //     {
-       //         Debug.Log("µ¥ÀÌÅÍ ·Îµå ½ÇÆÐ");
+       //         Debug.LogWarning("ï¿½ï¿½ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
+       //         onLoaded?.Invoke(null);
        //     }
        // });
     }
-    //private void SetDataBase(string uid)
-    //{
-    //    GameData testData = new GameData
-    //    {
-    //        PlayerMoney = 0,
-    //        PlayerGem = 0,
-    //        PlayerInfinityKey = 0,
-    //
-    //        UnlockedUnit = new List<UnlockedUnit>
-    //    {
-    //        new UnlockedUnit
-    //        {
-    //            UnitType = EUnitType.Archer,
-    //            AttackDamageLevel = 1,
-    //            HealthPointLevel = 1,
-    //            AttackRangeLevel = 1,
-    //            AttackSpeedLevel = 1
-    //        }
-    //    },
-    //
-    //        UnlockedLaboratoryId = new List<string>(),
-    //
-    //        ClearStage = new List<ClearStage>
-    //    {
-    //    }
-    //    };
-    //
-    //    string json = JsonConvert.SerializeObject(testData, new JsonSerializerSettings
-    //    {
-    //        Formatting = Formatting.Indented,
-    //        Converters = new List<JsonConverter> { new Newtonsoft.Json.Converters.StringEnumConverter() }
-    //    });
-    //
-    //    DatabaseReference reference = _database.GetReference("users").Child(uid);
-    //    reference.SetRawJsonValueAsync(json).ContinueWith(task =>
-    //    {
-    //        if (task.IsCompleted)
-    //        {
-    //            Debug.Log("GameData ÃÊ±âÈ­ ¹× ¾÷·Îµå ¿Ï·á");
-    //        }
-    //        else
-    //        {
-    //            Debug.LogWarning("¾÷·Îµå ½ÇÆÐ: " + task.Exception);
-    //        }
-    //    });
-    //}
+    public void LoadGameData()
+    {
+      //  LoadGameData((loadedData) =>
+      //  {
+      //      if (loadedData != null)
+      //      {
+      //          if (loadedData.UnlockedLaboratoryId == null)
+      //              loadedData.UnlockedLaboratoryId = new List<string>();
+      // 
+      //          if (loadedData.ClearStage == null)
+      //              loadedData.ClearStage = new List<ClearStage>();
+      //          DataManager.Instance.GameData = loadedData;
+      // 
+      //          Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ã¿Ï·ï¿½~");
+      //      }
+      //      else
+      //      {
+      //          Debug.Log("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½");
+      //      }
+      //  });
+    }
+    private void SetDataBase(string uid)
+    {
+     //   GameData testData = new GameData
+     //   {
+     //       PlayerMoney = 0,
+     //       PlayerGem = 0,
+     //       PlayerInfinityKey = 0,
+     //
+     //       UnlockedUnit = new List<UnlockedUnit>
+     //   {
+     //       new UnlockedUnit
+     //       {
+     //           UnitType = EUnitType.Archer,
+     //           AttackDamageLevel = 1,
+     //           HealthPointLevel = 1,
+     //           AttackRangeLevel = 1,
+     //           AttackSpeedLevel = 1
+     //       }
+     //   },
+     //
+     //       UnlockedLaboratoryId = new List<string>(),
+     //
+     //       ClearStage = new List<ClearStage>
+     //   {
+     //   }
+     //   };
+     //
+     //   string json = JsonConvert.SerializeObject(testData, new JsonSerializerSettings
+     //   {
+     //       Formatting = Formatting.Indented,
+     //       Converters = new List<JsonConverter> { new Newtonsoft.Json.Converters.StringEnumConverter() }
+     //   });
+     //
+     //   DatabaseReference reference = _database.GetReference("users").Child(uid);
+     //   reference.SetRawJsonValueAsync(json).ContinueWith(task =>
+     //   {
+     //       if (task.IsCompleted)
+     //       {
+     //           Debug.Log("GameData ï¿½Ê±ï¿½È­ ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½ ï¿½Ï·ï¿½");
+     //       }
+     //       else
+     //       {
+     //           Debug.LogWarning("ï¿½ï¿½ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½: " + task.Exception);
+     //       }
+     //   });
+    }
 
 }

@@ -84,5 +84,6 @@ public class ShowUnitController : MonoBehaviour
         TurnOffTheUnit();
         _turnOntheUnitType = UnitManager.Instance.ChoiceUnit.UnitType;
         TurnOnTheUnit(_turnOntheUnitType);
+
     }
 }

@@ -1,7 +1,8 @@
 using NUnit.Framework;
-using UnityEngine;
-using Utils;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using Utils;
 
 public class UIGameManager : MonoBehaviour
 {

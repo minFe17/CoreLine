@@ -2,10 +2,14 @@ using UnityEngine;
 
 public class UIController : MonoBehaviour
 {
-    void Start()
+    private void Start()
     {
-        UIManager.Instance.ClearPanelStack();
-        UIManager.Instance.AddPanelStack(PanelStatus.LobbyPanel);
+       UIManager.Instance.AddPanelStack(PanelStatus.LobbyPanel);
     }
 
+    private void OnDestroy()
+    {
+        UIManager.Instance.ClearPanel();
+        UIManager.Instance.ClearPopUp();
+    }
 }

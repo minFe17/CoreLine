@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Utils;
 using static UnityEngine.Rendering.DebugUI;
@@ -21,10 +22,12 @@ public class UIManager : SimpleSingleton<UIManager>
 
     public void RegisterPanel(PanelStatus status, Panel panel)
     {
+        if (_panelDictionary.ContainsKey(status)) return;
         _panelDictionary[status] = panel;
     }
     public void RegisterPopUp(PopUpStatus status , PopUp popUP)
     {
+        if (_popUpDictionary.ContainsKey(status)) return;
         _popUpDictionary[status] = popUP;
     }
     public void UnregisterPanel(PanelStatus status)
@@ -35,9 +38,20 @@ public class UIManager : SimpleSingleton<UIManager>
     {
         _popUpDictionary.Remove(status);
     }
-    public void ClearPanelStack()
+    public void ClearPopUp()
     {
-        _panelStack.Clear();
+        foreach (var key in _popUpDictionary.Keys.ToList())
+        {
+            UnregisterPopUp(key);
+        }
+    }
+    public void ClearPanel()
+    {
+        CloseAllPanel();
+        foreach (var key in _panelDictionary.Keys.ToList())
+        {
+            UnregisterPanel(key);
+        }
     }
     public void AddPanelStack(PanelStatus status)
     {
@@ -63,9 +77,11 @@ public class UIManager : SimpleSingleton<UIManager>
     }
     public void CloseAllPanel()
     {
-        for(int i=0;i< _panelStack.Count;i++)
+        while (_panelStack.Count > 0)
         {
-            _panelStack.Pop().SwitchOffPanel();
+            var panel = _panelStack.Pop();
+            if (panel != null)
+                panel.SwitchOffPanel();
         }
     }
     public void CloseFrontPanel()
