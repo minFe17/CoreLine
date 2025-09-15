@@ -241,7 +241,17 @@ public class TimerPanelUI : MonoBehaviour
         Vector2 to = _panelStartPos + new Vector2(0f, _isHidden ? _slideDistance : 0f);
         StartCoroutine(CoSlide(from, to, _slideDuration));
     }
+    public void SetDuration(float seconds, bool restartToFull = true)
+    {
+        _durationSeconds = Mathf.Max(1f, seconds);
 
+        if (restartToFull)
+        {
+            // 남은 시간을 총시간으로 리셋(게이지 0부터 시작, 진행은 멈춘 상태)
+            RestartProgress(_durationSeconds);
+            StopProgress();
+        }
+    }
     private IEnumerator CoSlide(Vector2 startAnchoredPos, Vector2 targetAnchoredPos, float durationSeconds)
     {
         _sliding = true;

@@ -280,10 +280,15 @@ public class GameManager : MonoSingleton<GameManager>
     }
 
     private void OnStageDefeated(NormalStageData stage,
-                                 NormalStageManager.StageEndSnapshot snap,
-                                 int stars,
-                                 NormalStageManager.RewardResult reward)
+                              NormalStageManager.StageEndSnapshot snap,
+                              int stars,
+                              NormalStageManager.RewardResult reward)
     {
+        //튜토리얼(1-0)이라면, 설명 패널을 띄운 뒤 승리로 변환하도록 TutorialManager에 위임
+        var tman = FindFirstObjectByType<TutorialManager>(FindObjectsInactive.Include);
+        if (tman != null && tman.TryHandleDefeatAndConvertToWin(stage))
+            return;
+
         if (_endingShown) return;
         _endingShown = true;
 
@@ -311,6 +316,7 @@ public class GameManager : MonoSingleton<GameManager>
             Debug.LogWarning("[GameManager] DefeatPanelControl을 찾지 못했습니다.");
         }
     }
+
 
     // ───────── 보스 사망 알림(유닛/보스 스크립트에서 호출) ─────────
     public void NotifyBossDead()
