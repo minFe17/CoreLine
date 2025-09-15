@@ -50,7 +50,6 @@ public class SelectKingTileState : IState
 
     void IState.Enter()
     {
-        Debug.Log(123);
         SimpleSingleton<MediatorManager>.Instance.Notify(EMediatorType.PlayAudio, EBGMType.BGM);
     }
 

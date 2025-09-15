@@ -235,12 +235,16 @@ public class GameManager : MonoSingleton<GameManager>
         yield return null;
         yield return new WaitUntil(() => MapManager.Instance != null && MapManager.Instance.IsReady);
 
+        //시작하자마자 못 쓰게: CSV 쿨타임으로 채움
+        SkillManager.Instance?.StartAllCooldownsFromDefs(useCsvCooltime: true);
+
         IsStageLoaded = true;
         LastLoadedStageId = stageId;
         _endingShown = false;
 
         EventManager.Instance?.Invoke<string>(EVT_STAGE_LOADED, stageId);
     }
+
 
     // ───────── 클리어/패배 UI 처리 ─────────
     private void OnStageCleared(NormalStageData stage,

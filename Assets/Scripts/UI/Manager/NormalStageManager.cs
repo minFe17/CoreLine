@@ -98,6 +98,8 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     /// <summary>성공 클리어: 별 계산, 보상 지급/저장, 이벤트 발행.</summary>
     public void CompleteStageSuccess(in StageEndSnapshot snap)
     {
+        MonoSingleton<AudioClipManager>.Instance.StopBGM();
+
         // 현재 선택된 스테이지 기준
         NormalStageData stage = _selectedStage;
         if (string.IsNullOrEmpty(stage.Id))
@@ -121,6 +123,8 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
     /// <summary>패배 처리(원하면 별=0, 보상 없음으로 발행).</summary>
     public void CompleteStageDefeat(in StageEndSnapshot snap)
     {
+        MonoSingleton<AudioClipManager>.Instance.StopBGM();
+
         NormalStageData stage = _selectedStage;
         if (string.IsNullOrEmpty(stage.Id)) return;
 

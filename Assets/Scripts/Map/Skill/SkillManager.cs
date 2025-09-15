@@ -440,5 +440,65 @@ public class SkillManager : MonoSingleton<SkillManager>
         return true;
     }
 
+    public bool CanAfford(in SelectedSkill sel)
+    {
+        if (!TryGetDef(sel.Id, out var def)) return false;
+        if (CostManager.Instance == null) return true;
+        return CostManager.Instance.CurrentSkill >= def.Cost;
+    }
+    public bool TryGetCooldownInfo(int slotIndex, out float remain, out float total, out float ratio)
+    {
+        remain = 0f; total = 0f; ratio = 0f;
 
+        if (slotIndex < 0 || slotIndex >= _loadout.Count) return false;
+        if (!TryGetDef(_loadout[slotIndex].Id, out var def)) return false;
+
+        total = Mathf.Max(0f, def.Cooltime);
+
+        if (_slotCooldownEnd.TryGetValue(slotIndex, out var end))
+            remain = Mathf.Max(0f, end - Time.time);  // (unscaledTime을 쓰면 일시정지 중에도 감소)
+        else
+            remain = 0f;
+
+        ratio = (total > 0f) ? (remain / total) : 0f; // 1→0으로 내려감
+        return true;
+    }
+
+    public bool IsCoolingDown(int slotIndex)
+    {
+        return TryGetCooldownInfo(slotIndex, out var remain, out _, out _) && remain > 0.001f;
+    }
+    public void ResetAllCooldowns()
+    {
+        // 쿨다운 정보 전부 제거 → 모두 즉시 사용 가능 상태
+        _slotCooldownEnd.Clear();
+    }
+
+    // (선택) 특정 슬롯만 준비 상태로 만들고 싶을 때
+    public void ResetCooldownOfSlot(int slotIndex)
+    {
+        _slotCooldownEnd.Remove(slotIndex);
+    }
+    public void StartAllCooldownsFromDefs(bool useCsvCooltime = true, float fixedSeconds = 0f)
+    {
+        _slotCooldownEnd.Clear(); // 이전 스테이지 흔적 제거
+
+        for (int i = 0; i < _loadout.Count; i++)
+        {
+            float cd = 0f;
+
+            if (useCsvCooltime)
+            {
+                if (TryGetDef(_loadout[i].Id, out var def))
+                    cd = Mathf.Max(0f, def.Cooltime);
+            }
+            else
+            {
+                cd = Mathf.Max(0f, fixedSeconds);
+            }
+
+            if (cd > 0f)
+                _slotCooldownEnd[i] = Time.time + cd; // 시작하자마자 쿨다운 ON
+        }
+    }
 }

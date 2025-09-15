@@ -117,7 +117,7 @@
           "_unitState": {
             "_hp": 90,
             "_attackDamage": 20,
-            "_attackSpeed": 2.5,
+            "_attackSpeed": 4.0,
             "_attackRange": 2.2
           }
         },
@@ -126,7 +126,7 @@
           "_unitState": {
             "_hp": 100,
             "_attackDamage": 23,
-            "_attackSpeed": 2.5,
+            "_attackSpeed": 4.0,
             "_attackRange": 2.2
           }
         },
@@ -135,7 +135,7 @@
           "_unitState": {
             "_hp": 115,
             "_attackDamage": 25,
-            "_attackSpeed": 2.3,
+            "_attackSpeed": 3.5,
             "_attackRange": 2.6
           }
         }
