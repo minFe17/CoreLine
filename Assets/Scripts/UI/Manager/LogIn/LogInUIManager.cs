@@ -5,7 +5,7 @@ using System;
 
 public class LogInUIManager : MonoBehaviour
 {
-    //private FirebaseAuth _auth;
+   // private FirebaseAuth _auth;
 
     private bool _isLogin = false;
 
@@ -19,21 +19,25 @@ public class LogInUIManager : MonoBehaviour
         DataManager.Instance.LoadData();
         SceneManager.LoadScene("LobbyScene");
     }
+    private void OnDestroy()
+    {
+        UIManager.Instance.ClearPanel();
+    }
     private void Start()
     {
-        //_auth = FirebaseAuth.DefaultInstance;
-        //
-        //if (_auth.CurrentUser != null)
-        //{
-        //    //이미 로그인이 된 상태
-        //    Debug.Log("자동 로그인: " + _auth.CurrentUser.Email);
-        //    FireBaseManager.Instance.LoadGameData();
-        //    UIManager.Instance.AddPanelStack(PanelStatus.StartPanel);
-        //}
-        //else
-        //{
-        //    UIManager.Instance.AddPanelStack(PanelStatus.LogInSelectPanel);
-        //}
+      //  _auth = FirebaseAuth.DefaultInstance;
+      //  
+      //  if (_auth.CurrentUser != null)
+      //  {
+      //      //이미 로그인이 된 상태
+      //      Debug.Log("자동 로그인: " + _auth.CurrentUser.Email);
+      //      FireBaseManager.Instance.LoadGameData();
+      //      UIManager.Instance.AddPanelStack(PanelStatus.StartPanel);
+      //  }
+      //  else
+      //  {
+      //      UIManager.Instance.AddPanelStack(PanelStatus.LogInSelectPanel);
+      //  }
     }
 
     private void Update()

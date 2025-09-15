@@ -21,4 +21,5 @@ public class UIGameManager : MonoBehaviour
     {
         FireBaseManager.Instance.SaveGameData(DataManager.Instance.GameData);
     }
+
 }

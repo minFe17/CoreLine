@@ -15,10 +15,15 @@ public class ShowUnitController : MonoBehaviour
         FindAndAddController();
         SettingUnits();
     }
-    private void Start()
+    private void OnEnable()
     {
         EventManager.Instance.Subscribe<EUnitType>("ChangeChoiceUnitData", TurnOnTheUnit);
         EventManager.Instance.Subscribe("Reset", ResetUnit);
+    }
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe("ChangeChoiceUnitData", (Action<EUnitType>)TurnOnTheUnit);
+        EventManager.Instance.UnSubscribe("Reset", (Action)ResetUnit);
     }
     private void FindAndAddController()
     {
