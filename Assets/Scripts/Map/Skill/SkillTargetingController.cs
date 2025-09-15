@@ -22,32 +22,17 @@ public class SkillTargetingController : MonoBehaviour
 
     private bool _dragDriven = false;
 
-    // ─────────────────────────────────────────────────────────────────────
-    // 진입점 1) 키보드/마우스
-    // ─────────────────────────────────────────────────────────────────────
-    public void StartTargeting(int skillSlotIndex, in SkillManager.SelectedSkill skill, in SkillTargetingSpec targetingSpec)
-    {
-        if (PauseControl.IsPaused) return;
-
-        _dragDriven = false;
-        _slotIndex = skillSlotIndex;
-        _selectedSkill = skill;
-        _spec = targetingSpec;
-
-        if (_worldCam == null) _worldCam = Camera.main;
-
-        CreatePreview();
-        UpdatePreviewToMouse();
-        UpdateAffordabilityTint();
-
-        enabled = true;
-        gameObject.SetActive(true);
-    }
+    // 공유 머티리얼(런타임 생성 최소화)
+    private static Material sLineMat;
 
     // ─────────────────────────────────────────────────────────────────────
-    // 진입점 2) UI 드래그
+    // 진입점: UI 드래그
     // ─────────────────────────────────────────────────────────────────────
-    public void StartTargetingDrag(int skillSlotIndex, in SkillManager.SelectedSkill skill, in SkillTargetingSpec targetingSpec)
+    public void StartTargetingDrag(int skillSlotIndex,
+    in SkillManager.SelectedSkill skill,
+    in SkillTargetingSpec targetingSpec,
+    Vector2 initialScreenPos, 
+    Camera eventCamera = null)
     {
         if (PauseControl.IsPaused) return;
 
@@ -58,11 +43,16 @@ public class SkillTargetingController : MonoBehaviour
 
         if (_worldCam == null) _worldCam = Camera.main;
 
+        // 컨트롤러를 먼저 활성화
+        gameObject.SetActive(true);
+
         CreatePreview();
         UpdateAffordabilityTint();
 
-        enabled = false; // 위치는 외부에서 밀어넣음
-        gameObject.SetActive(true);
+        // 첫 위치를 즉시 반영
+        UpdateDragScreenPosition(initialScreenPos, eventCamera);
+
+        enabled = false; // 드래그 구동 모드
     }
 
     public void UpdateDragScreenPosition(Vector2 screenPos, Camera eventCamera = null)
@@ -101,34 +91,6 @@ public class SkillTargetingController : MonoBehaviour
     {
         CleanupPreview();
         _dragDriven = false;
-    }
-
-    private void Update()
-    {
-        if (_dragDriven) return;
-        if (PauseControl.IsPaused) { Cancel(); return; }
-        if (_previewInstance == null) return;
-
-        if (_worldCam == null)
-        {
-            _worldCam = Camera.main;
-            if (_worldCam == null) return;
-        }
-
-        UpdatePreviewToMouse();
-        UpdateAffordabilityTint();
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            Vector3 world = _worldCam.ScreenToWorldPoint(Input.mousePosition);
-            world.z = 0f;
-            CommitAtWorld(world);
-            Cancel();
-        }
-        else if (Input.GetMouseButtonUp(1) || Input.GetKeyUp(KeyCode.Escape))
-        {
-            Cancel();
-        }
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -201,6 +163,17 @@ public class SkillTargetingController : MonoBehaviour
         {
             _previewInstance = new GameObject("PointPreviewRuntime");
         }
+
+        // ▼ UI 드래그 방해 금지: 프리뷰 & 모든 자식을 Ignore Raycast 레이어로
+        if (_previewInstance != null)
+        {
+            int ignore = LayerMask.NameToLayer("Ignore Raycast");
+            if (ignore >= 0)
+            {
+                foreach (var tr in _previewInstance.GetComponentsInChildren<Transform>(true))
+                    tr.gameObject.layer = ignore;
+            }
+        }
     }
 
     private void CleanupPreview()
@@ -215,27 +188,27 @@ public class SkillTargetingController : MonoBehaviour
     {
         lr.useWorldSpace = false;
         lr.widthMultiplier = _lineWidth;
-        lr.material = new Material(Shader.Find("Sprites/Default"));
+
+        if (sLineMat == null)
+            sLineMat = new Material(Shader.Find("Sprites/Default"));
+        lr.material = sLineMat;
+
         lr.startColor = new Color(0f, 1f, 0f, 0.9f);
         lr.endColor = lr.startColor;
+
         if (!string.IsNullOrEmpty(_sortingLayerName))
         {
             lr.sortingLayerName = _sortingLayerName;
             lr.sortingOrder = 1000;
         }
+
+        int ignore = LayerMask.NameToLayer("Ignore Raycast");
+        if (ignore >= 0) lr.gameObject.layer = ignore;
     }
 
     // ─────────────────────────────────────────────────────────────────────
     // 위치/색상 갱신
     // ─────────────────────────────────────────────────────────────────────
-    private void UpdatePreviewToMouse()
-    {
-        if (_worldCam == null) return;
-        Vector3 world = _worldCam.ScreenToWorldPoint(Input.mousePosition);
-        world.z = 0f;
-        ApplyPreviewWorldPosition(world);
-    }
-
     private void ApplyPreviewWorldPosition(Vector3 world)
     {
         if (_previewInstance == null) return;
@@ -253,17 +226,19 @@ public class SkillTargetingController : MonoBehaviour
         }
     }
 
-    private void UpdateAffordabilityTint()
+    private bool CanAfford()
     {
-        // CSV에서 Cost 읽어서 현재 스킬 통화와 비교
-        float cost = 0;
         if (SkillManager.Instance != null &&
             SkillManager.Instance.TryGetDef(_selectedSkill.Id, out var def))
         {
-            cost = def.Cost;
+            return CostManager.Instance == null || (CostManager.Instance.CurrentSkill >= def.Cost);
         }
+        return true;
+    }
 
-        bool affordable = CostManager.Instance == null || (CostManager.Instance.CurrentSkill >= cost);
+    private void UpdateAffordabilityTint()
+    {
+        bool affordable = CanAfford();
 
         if (_line != null)
         {
@@ -286,6 +261,7 @@ public class SkillTargetingController : MonoBehaviour
     private void CommitAtWorld(Vector3 world)
     {
         if (PauseControl.IsPaused) return;
+        if (!CanAfford()) return; // 코스트 부족하면 무시
 
         if (_spec.Mode == TargetingMode.RectCells)
         {
