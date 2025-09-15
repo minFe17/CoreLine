@@ -12,11 +12,11 @@ public class GameStart : MonoBehaviour
             _prefabManager = SimpleSingleton<PrefabManager>.Instance;
 
         SimpleSingleton<FactoryManager>.Instance.Init();
+        MonoSingleton<AudioClipManager>.Instance.Init();
         MonoSingleton<GameStateManager>.Instance.SetState();
 
         CreateCamera();
         CreateUI();
-        MonoSingleton<AudioClipManager>.Instance.Init();
     }
 
     private void CreateUI()

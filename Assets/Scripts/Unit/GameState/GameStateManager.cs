@@ -35,6 +35,7 @@ public class GameStateManager : MonoBehaviour
 
         if (_currentState != null)
             _currentState.Exit();
+
         _currentState = _gameStateDict[key];
         _currentState.Enter();
     }

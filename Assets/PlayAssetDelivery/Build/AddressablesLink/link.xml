@@ -103,6 +103,7 @@
     <type fullname="TimerPanelUI" preserve="all" />
     <type fullname="TowerPlaceButton" preserve="all" />
     <type fullname="TowerUnit" preserve="all" />
+    <type fullname="TutorialManager" preserve="all" />
     <type fullname="TwoButtonUI" preserve="all" />
     <type fullname="UIColorApplier" preserve="all" />
     <type fullname="UIController" preserve="all" />

@@ -60,5 +60,6 @@ public class KingUnit : Unit
         NormalStageManager.StageEndSnapshot snap = ConditionControl.BuildFor(stage);
 
         nsm.CompleteStageDefeat(snap); //GameManager가 받아서 패배패널 띄움
+        MonoSingleton<AudioClipManager>.Instance.StopBGM();
     }
 }

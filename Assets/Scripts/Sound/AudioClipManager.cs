@@ -39,6 +39,11 @@ public class AudioClipManager :MonoBehaviour ,IMediatorEvent
         _soundController.StopSFXAudio();
     }
 
+    public void StopBGM()
+    {
+        _soundController.StopBGM();
+    }
+
     void IMediatorEvent.HandleEvent(object data)
     {
         if (data is ESFXType sfxType)

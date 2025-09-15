@@ -8,9 +8,6 @@ public class SoundController : MonoBehaviour
 
     int _index;
 
-    public AudioSource BGM { get { return _bgm; } }
-    public List<AudioSource> SFXAudio { get { return _sfxAudio; } }
-
     public void PlaySFXAudio(AudioClip audio)
     {
         _sfxAudio[_index].clip = audio;
