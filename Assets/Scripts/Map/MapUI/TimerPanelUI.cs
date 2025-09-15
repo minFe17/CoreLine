@@ -199,16 +199,10 @@ public class TimerPanelUI : MonoBehaviour
 
             UpdateBarFromElapsed();
 
-            if (Mathf.Approximately(_elapsed, _durationSeconds))
+            if (_elapsed >= _durationSeconds)
             {
                 _running = false;
-
-                // 여기서 승리 한 번만 발동
-                if (!_victoryFired)
-                {
-                    _victoryFired = true;
-                    OnTimerFinished();
-                }
+                OnTimerFinished();
             }
         }
     }

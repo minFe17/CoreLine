@@ -5485,7 +5485,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa4e0c2b132f1284ab93e4f5fd434d7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lobbySceneName: LobyScene
   _pauseOnShow: 1
   _resumeOnExit: 1
 --- !u!1 &1587685863
