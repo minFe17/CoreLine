@@ -464,7 +464,7 @@ public class GameManager : MonoSingleton<GameManager>
             SceneManager.LoadScene(LobbySceneName);
     }
 
-    private async void OnClickNextStage()
+    private void OnClickNextStage()
     {
         Debug.Log("[GameManager] OnClickNextStage 진입");
 
@@ -613,16 +613,11 @@ public class GameManager : MonoSingleton<GameManager>
     public void ResetRunState(bool resetCostToZero = true)
     {
         Debug.Log("[GM] ResetRunState 호출");
-        StopWaveSystems();
-        ForceClearUnits();
 
         Time.timeScale = 1f;
         PauseControl.SetPaused(false);
 
         MapManager.Instance?.UnloadStage();
-
-        TryInvokeResetOnSingleton("EnemySpawner", new[] { "StopAll", "Abort", "ResetAll", "ClearAll" });
-        TryInvokeResetOnSingleton("MonsterManager", new[] { "ClearAll", "DespawnAll", "ResetAll", "StopAndClear" });
 
         SimpleSingleton<MapUnitManager>.Instance?.RestartGame();
         SimpleSingleton<MediatorManager>.Instance?.ClearAll();
@@ -658,96 +653,6 @@ public class GameManager : MonoSingleton<GameManager>
             return true;
         return IsStageThreeStar(TutorialStageId);
     }
-
-    // 웨이브/몬스터 정지 보조 --------------------------
-    private void StopWaveSystems()
-    {
-        TryCallNoArg("EnemySpawner", "StopAll", "Abort", "ResetAll", "ClearAll");
-        TryCallNoArg("WaveManager", "StopAll", "ResetAll", "ClearAll");
-    }
-    private void ForceClearUnits()
-    {
-        var units = FindObjectsByType<Unit>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        for (int i = 0; i < units.Length; i++)
-        {
-            try { units[i].Remove(); } catch { }
-        }
-    }
-
-    // 리플렉션 유틸 --------------------------
-    private void TryInvokeResetOnSingleton(string typeSimpleName, string[] candidateMethods)
-    {
-        try
-        {
-            var t = FindTypeBySimpleName(typeSimpleName);
-            if (t == null) return;
-
-            object instance = null;
-            var p1 = t.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (p1 != null) instance = p1.GetValue(null, null);
-
-            if (instance == null)
-            {
-                var unityObj = UnityEngine.Object.FindFirstObjectByType(t) as UnityEngine.Object;
-                if (unityObj != null) instance = unityObj;
-            }
-            if (instance == null) return;
-
-            foreach (var m in candidateMethods)
-            {
-                var mi = t.GetMethod(m, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (mi != null && mi.GetParameters().Length == 0)
-                {
-                    mi.Invoke(instance, null);
-                    Debug.Log($"[GM] {typeSimpleName}.{m}() 호출");
-                    return;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning("[GM] TryInvokeResetOnSingleton 예외: " + ex.Message);
-        }
-    }
-
-    private Type FindTypeBySimpleName(string name)
-    {
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            Type[] types;
-            try { types = asm.GetTypes(); } catch { continue; }
-            for (int i = 0; i < types.Length; i++)
-                if (types[i].Name == name) return types[i];
-        }
-        return null;
-    }
-
-    private void TryCallNoArg(string typeSimple, params string[] methods)
-    {
-        var t = FindTypeBySimpleName(typeSimple);
-        if (t == null) return;
-
-        object inst = null;
-        var p = t.GetProperty("Instance", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-        if (p != null) inst = p.GetValue(null, null);
-        if (inst == null)
-        {
-            var obj = FindFirstObjectByType(t) as UnityEngine.Object;
-            if (obj != null) inst = obj;
-        }
-        if (inst == null) return;
-
-        foreach (var m in methods)
-        {
-            var mi = t.GetMethod(m, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (mi != null && mi.GetParameters().Length == 0)
-            {
-                try { mi.Invoke(inst, null); Debug.Log($"[GM] {typeSimple}.{m}() 호출"); }
-                catch { }
-            }
-        }
-    }
-
     // 프리팹 로더 --------------------------
     public static class StagePrefabResolver
     {
