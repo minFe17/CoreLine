@@ -23,9 +23,9 @@ public class CostManager : MonoSingleton<CostManager>
     private WalletSettings unitSettings = new WalletSettings
     {
         autoGain = true,
-        gainPerSecond = 2f,
+        gainPerSecond = 8f,
         useUnscaledTime = false,
-        startValue = 1000
+        startValue = 0
     };
 
     [Header("Skill Budget")]
@@ -33,9 +33,9 @@ public class CostManager : MonoSingleton<CostManager>
     private WalletSettings skillSettings = new WalletSettings
     {
         autoGain = true,
-        gainPerSecond = 2f,
+        gainPerSecond = 8f,
         useUnscaledTime = false,
-        startValue = 1000
+        startValue = 0
     };
 
     [Header("Gate By Player Base")]

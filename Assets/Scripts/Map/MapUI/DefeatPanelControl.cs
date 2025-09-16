@@ -66,7 +66,7 @@ public sealed class DefeatPanelControl : MonoBehaviour
             Time.timeScale = 1f;
             PauseControl.SetPaused(false);
         }
-        GameManager.Instance.ResetRunState();
+        GameManager.Instance.ResetRunState(resetCostToZero: false);
         var current = SceneManager.GetActiveScene();
         SceneManager.LoadScene(current.buildIndex);
     }
