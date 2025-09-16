@@ -33,8 +33,16 @@ public class SoundController : MonoBehaviour
         _bgm.Stop();
     }
 
-    public void GameOverSound()
+    public void ChangeBGMVolume(float value)
     {
-        StopBGM();
+        _bgm.volume = value;
+    }
+
+    public void ChangeSFXVolume(float value)
+    {
+        for (int i = 0; i < _sfxAudio.Count; i++)
+        {
+            _sfxAudio[i].volume = value;
+        }
     }
 }

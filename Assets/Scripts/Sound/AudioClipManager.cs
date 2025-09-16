@@ -44,6 +44,16 @@ public class AudioClipManager :MonoBehaviour ,IMediatorEvent
         _soundController.StopBGM();
     }
 
+    public void ChangeBGMVolume(float value)
+    {
+        _soundController.ChangeBGMVolume(value);
+    }
+
+    public void ChangeSFXVolume(float value)
+    {
+        _soundController.ChangeSFXVolume(value);
+    }
+
     void IMediatorEvent.HandleEvent(object data)
     {
         if (data is ESFXType sfxType)

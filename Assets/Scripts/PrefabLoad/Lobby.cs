@@ -19,11 +19,11 @@ public class Lobby : MonoBehaviour
 
     void ReadJson()
     {
-        LoadData<UnitDataList>(EDataType.UnitData);
-        LoadData<FusionDataList>(EDataType.FusionUnitData);
+        ReadData<UnitDataList>(EDataType.UnitData);
+        ReadData<FusionDataList>(EDataType.FusionUnitData);
     }
 
-    void LoadData<T>(EDataType type) where T : new()
+    void ReadData<T>(EDataType type) where T : new()
     {
         TextAsset data = _prefabManager.GetPrefabLoad(EPrefabType.Data).GetPrefabTextAsset(type);
         string json = data.text;
