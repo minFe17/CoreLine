@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 6957698563949242755}
   m_Layer: 3
   m_Name: BossDragon
-  m_TagString: Untagged
+  m_TagString: Boss
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

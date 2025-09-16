@@ -30,6 +30,12 @@ public sealed class MonsterAudio : MonoBehaviour
 
         _source.PlayOneShot(_hitClip, _volume);
 
+        Debug.Log("[MonsterAudio] " + name +
+          " PlayOneShot clip=" + (_hitClip != null ? _hitClip.name : "null") +
+          " sourceVol=" + _source.volume.ToString("F2") +
+          " scale=" + _volume.ToString("F2") +
+          " final=" + (_source.volume * _volume).ToString("F2"));
+
         _source.pitch = originalPitch;
     }
 }

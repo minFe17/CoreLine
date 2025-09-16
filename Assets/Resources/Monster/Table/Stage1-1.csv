@@ -1,10 +1,6 @@
 ﻿MonsterId,Prefab,Count,Interval,Delay
-Golem,Assets/Prefabs/Monster/Prefab/Golem.prefab,1,0,10
-Block,Assets/Prefabs/Monster/Prefab/Block.prefab,1,0,10
-Slime,Assets/Prefabs/Monster/Prefab/Slime.prefab,1,0,10
-Ghost,Assets/Prefabs/Monster/Prefab/Ghost.prefab,1,0,10
-Planet,Assets/Prefabs/Monster/Prefab/Planet.prefab,1,0,10
-Tree,Assets/Prefabs/Monster/Prefab/Tree.prefab,1,0,10
-Wolf,Assets/Prefabs/Monster/Prefab/Wolf.prefab,1,0,10
-Yeti,Assets/Prefabs/Monster/Prefab/Yeti.prefab,1,0,10
-Skeleton,Assets/Prefabs/Monster/Prefab/Skeleton.prefab,1,0,10
+Block,Assets/Prefabs/Monster/Prefab/Block.prefab,6,2.2,3
+Slime,Assets/Prefabs/Monster/Prefab/Slime.prefab,7,2,6
+Skeleton,Assets/Prefabs/Monster/Prefab/Skeleton.prefab,9,1.5,4
+Wolf,Assets/Prefabs/Monster/Prefab/Wolf.prefab,5,0.9,4
+Tree,Assets/Prefabs/Monster/Prefab/Tree.prefab,4,2,3
