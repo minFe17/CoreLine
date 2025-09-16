@@ -167,4 +167,9 @@ public class FusionManager
         _isFusionMode = false;
         _cost += _costIncrease;
     }
+
+    public void ResetCost()
+    {
+        _cost = 100;
+    }
 }

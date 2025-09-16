@@ -51,6 +51,6 @@ public class MapUnitManager
             return;
         _king.Remove();
         _king = null;
-
+        SimpleSingleton<FusionManager>.Instance.ResetCost();
     }
 }
