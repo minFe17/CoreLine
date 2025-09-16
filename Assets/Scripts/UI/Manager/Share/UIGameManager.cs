@@ -7,6 +7,7 @@ using Utils;
 public class UIGameManager : MonoBehaviour
 {
     private GameObject _uiPanel;
+    private GameObject _unitAnimation;
 
     private async void Awake()
     {
@@ -15,7 +16,9 @@ public class UIGameManager : MonoBehaviour
         Lobby lobby = GetComponent<Lobby>();
         await lobby.InitializeAsync();
         _uiPanel = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.UIPanel);
+        _unitAnimation = SimpleSingleton<PrefabManager>.Instance.GetPrefabLoad(EPrefabType.UI).GetPrefab(EUIPrefabType.UnitAnimations);
         Instantiate(_uiPanel);
+        Instantiate(_unitAnimation);
     }
     private void OnApplicationQuit()
     {

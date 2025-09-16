@@ -11,8 +11,5 @@ public class NoMoneyAlret : PopUp
         UIManager.Instance.AddPanelStack(PanelStatus.StorePanel);
         UIManager.Instance.ClosePopUp();
     }
-    protected override void SetStatus()
-    {
-        _status = PopUpStatus.NoMoneyAlret;
-    }
 }
+

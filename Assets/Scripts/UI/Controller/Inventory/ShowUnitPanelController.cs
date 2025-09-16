@@ -1,6 +1,8 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
-using System;
+using Utils;
+using static UnityEngine.Analytics.IAnalytic;
 
 public class ShowUnitPanelController: MonoBehaviour
 {
@@ -54,14 +56,29 @@ public class ShowUnitPanelController: MonoBehaviour
     private void ChangeText(EUnitType param)
     {
         if (_text == null) return;
+
+        InventoryData data = UnitManager.Instance.GetInventoryData(param);
+        string text = data.UnlockPrice + " 코인\nHealthPoint : " + SimpleSingleton<UnitDataList>.Instance.GetUnitData(param).LevelData[0].UnitState.HP
+    + "\nAttackDamage : " + SimpleSingleton<UnitDataList>.Instance.GetUnitData(param).LevelData[0].UnitState.AttackDamage
+    + "\nAttackRange : " + SimpleSingleton<UnitDataList>.Instance.GetUnitData(param).LevelData[0].UnitState.AttackRange
+    + "\nAttackSpeed : " + SimpleSingleton<UnitDataList>.Instance.GetUnitData(param).LevelData[0].UnitState.AttackSpeed;
+        //여기 해야됨(해제조건있는지없는지)
         if (!_isBuyUnit)
         {
-            InventoryData uData = UnitManager.Instance.GetInventoryData(param);
-            _text.text = uData.UnlockPrice.ToString();
+            _text.text = text;
             return;
         }
-        InventoryData data = UnitManager.Instance.GetInventoryData(param);
-        _text.text = data.Information;
+        GameData udata = DataManager.Instance.GameData;
+        foreach (var unit in udata.UnlockedUnit)
+        {
+            if (unit.UnitType == param)
+            {
+                text = data.Information+"\nHP Level. " + unit.HealthPointLevel + "\nAttackDamageLevel. " + unit.AttackDamageLevel
+                    + "\nAttackRangeLevel. " + unit.AttackRangeLevel + "\nAttackSpeedLevel. " + unit.AttackSpeedLevel;
+            }
+
+        }
+        _text.text = text;
         _isBuyUnit = true;
     }
 }

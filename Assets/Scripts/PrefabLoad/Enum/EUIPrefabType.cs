@@ -6,5 +6,6 @@ public enum EUIPrefabType
     UnitUI,
     InGameUI,
     UIPanel,
+    UnitAnimations,
     Max,
 }

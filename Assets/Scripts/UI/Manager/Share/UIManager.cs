@@ -11,7 +11,8 @@ public enum PanelStatus
 }
 public enum PopUpStatus
 {
-    NoMoneyAlret, NoChoiceUnitAlret, NoChoiceStageAlret, SettingPopUp
+    NoMoneyAlret, NoChoiceUnitAlret, NoChoiceStageAlret, SettingPopUp,
+    NoWriteAlret, NoLogInAlret, NoCreateAlret,SuccessCreateAlret
 }
 public class UIManager : SimpleSingleton<UIManager>
 {

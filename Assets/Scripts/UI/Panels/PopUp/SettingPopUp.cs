@@ -12,10 +12,5 @@ public class SettingPopUp : PopUp
         _bgmSlider = transform.Find("Panel/BGM/BGMSound").GetComponent<Slider>();
         _effectSlider = transform.Find("Panel/Effect/EffectSound").GetComponent<Slider>();
     }
-    protected override void SetStatus()
-    {
-        _status = PopUpStatus.SettingPopUp;
-    }
-
     
 }

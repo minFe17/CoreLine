@@ -4,6 +4,7 @@ public class StageButton : BaseButton
 {
     private NormalStageData _data;
 
+    private UIColorApplier _color;
     public NormalStageData Data
     {
         get { return _data; }
@@ -13,7 +14,18 @@ public class StageButton : BaseButton
             SettingText();
         }
     }
-
+    protected override void Awake()
+    {
+        base.Awake();
+        _color = GetComponent<UIColorApplier>();
+    }
+    protected void Update()
+    {
+        if(NormalStageManager.Instance.SelectedStage.Id == _data.Id)
+            _color.MyColorType = ColorType.Normal;
+        else
+            _color.MyColorType = ColorType.Light;
+    }
     protected void SettingText()
     {
         _buttonText.text = _data.Id;

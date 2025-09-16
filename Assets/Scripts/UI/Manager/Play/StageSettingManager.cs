@@ -37,6 +37,7 @@ public class StageSettingManager : MonoBehaviour
         DisableButtons();
         EventManager.Instance.UnSubscribe("SelectStage", (Action<NormalStageData>)UpdateText);
     }
+
     private void CreateButtons()
     {
         string prefabsPath = "UI/Prefabs/Button/Play/StageButton";

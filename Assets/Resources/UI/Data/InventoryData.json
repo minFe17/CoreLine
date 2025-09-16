@@ -2,71 +2,71 @@
     {
         "UnitType" : "Archer",
         "UnlockPrice":500,
-        "Information":"궁수입니다요"
+        "Information":"궁수 입니다"
     },
     {
         "UnitType" : "Warrior",
         "UnlockPrice":1000,
-        "Information":"전사입니다요"
+        "Information":"전사 입니다"
     },
     {
         "UnitType" : "Wizard",
         "UnlockPrice":1500,
-        "Information":"마술사입니다요"
+        "Information":"마술사 입니다"
     },
     {
         "UnitType" : "Chef",
         "UnlockPrice":2000,
-        "Information":"요리사입니다요"
+        "Information":"요리사 입니다"
     },
     {
         "UnitType" : "Pirate",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"도둑 입니다"
     },
     {
         "UnitType" : "ThunderWizard",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"번개 마술사 입니다"
     },
     {
         "UnitType" : "ShieldSoldier",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"방패병 입니다."
     },
     {
         "UnitType" : "Priest",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"성직자 입니다."
     },
     {
         "UnitType" : "Hunter",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"사냥꾼 입니다."
     },
     {
         "UnitType" : "Hammer",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"토르 입니다."
     },
     {
         "UnitType" : "FireWizard",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"불 마법사 입니다."
     },
     {
         "UnitType" : "Dwarf",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"드워프 입니다."
     },
     {
         "UnitType" : "Assassin",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"어쌔신 입니다."
     },
     {
         "UnitType" : "Gunner",
         "UnlockPrice":3000,
-        "Information":"도둑입니다요"
+        "Information":"거너 입니다."
     }
 ]

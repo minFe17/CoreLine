@@ -13,6 +13,7 @@ public class RawImageController : MonoBehaviour
 
     private void Start()
     {
-        //¿©±â Â¥
+        _screen = GetComponent<RawImage>();
+        _screen.texture = Resources.Load<RenderTexture>("UI/Textures/" + _type.ToString());
     }
 }

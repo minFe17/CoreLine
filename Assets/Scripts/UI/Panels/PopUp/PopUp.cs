@@ -3,8 +3,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public abstract class PopUp : MonoBehaviour
+public  class PopUp : MonoBehaviour
 {
+    [SerializeField]
     protected PopUpStatus _status;
 
     public PopUpStatus Status
@@ -13,7 +14,6 @@ public abstract class PopUp : MonoBehaviour
     }
     protected virtual void Awake()
     {
-        SetStatus();
         gameObject.SetActive(false);
         UIManager.Instance.RegisterPopUp(_status, this);
     }
@@ -21,6 +21,4 @@ public abstract class PopUp : MonoBehaviour
     {
         UIManager.Instance.UnregisterPopUp(_status);
     }
-    protected abstract void SetStatus();
-
 }

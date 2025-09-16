@@ -1,7 +1,7 @@
-//using Firebase.Auth;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+//using Firebase.Auth;
 
 public class LogInUIManager : MonoBehaviour
 {
@@ -22,22 +22,23 @@ public class LogInUIManager : MonoBehaviour
     private void OnDestroy()
     {
         UIManager.Instance.ClearPanel();
+        UIManager.Instance.ClearPopUp();
     }
     private void Start()
     {
-      //  _auth = FirebaseAuth.DefaultInstance;
-      //  
-      //  if (_auth.CurrentUser != null)
-      //  {
-      //      //이미 로그인이 된 상태
-      //      Debug.Log("자동 로그인: " + _auth.CurrentUser.Email);
-      //      FireBaseManager.Instance.LoadGameData();
-      //      UIManager.Instance.AddPanelStack(PanelStatus.StartPanel);
-      //  }
-      //  else
-      //  {
-      //      UIManager.Instance.AddPanelStack(PanelStatus.LogInSelectPanel);
-      //  }
+        //_auth = FirebaseAuth.DefaultInstance;
+        //
+        //if (_auth.CurrentUser != null)
+        //{
+        //    //이미 로그인이 된 상태
+        //    Debug.Log("자동 로그인: " + _auth.CurrentUser.Email);
+        //    FireBaseManager.Instance.LoadGameData();
+        //    UIManager.Instance.AddPanelStack(PanelStatus.StartPanel);
+        //}
+        //else
+        //{
+        //    UIManager.Instance.AddPanelStack(PanelStatus.LogInSelectPanel);
+        //}
     }
 
     private void Update()
