@@ -52,6 +52,7 @@ public class InventoryUnitButton : UnitButton
     }
     protected override void OnClick()
     {
+        base.OnClick();
         EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", _data.UnitType);
         EventManager.Instance.Invoke<bool,EUnitType>("IsBuyUnit", _isBuy,_data.UnitType);
         EventManager.Instance.Invoke<GameObject>("ChangeColorTypeToInventoryUnitButton", this.gameObject);

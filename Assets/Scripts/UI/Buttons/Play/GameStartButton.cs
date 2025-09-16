@@ -18,7 +18,8 @@ public class GameStartButton : BaseButton
     }
     protected override void OnClick()
     {
-        if(NormalStageManager.Instance.StageType==StageType.Infinity)
+        base.OnClick();
+        if (NormalStageManager.Instance.StageType==StageType.Infinity)
         {
             //SceneManager.LoadScene("MonsterScene");
             //무한의 탑으로 넘기기

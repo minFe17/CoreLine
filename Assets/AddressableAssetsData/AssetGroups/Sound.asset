@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d3d0d4e9c665b747a0248e065c4ce3f
+    m_Address: UI_BGM2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2e13e7edf0869254092284aa29cf0454
     m_Address: Attack
     m_ReadOnly: 0
@@ -40,8 +45,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5137e9b029f5880448dc71e33c35780c
+    m_Address: UI_BGM3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6657b36ba0b962849bcec316f8dc25b1
     m_Address: ShieldAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6740713c4f1c2854185cdc36fcd61c76
+    m_Address: UI_PopUp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 82b58bea26d152e43bdef035e7d3c809
+    m_Address: UI_ButtonClick
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -77,6 +97,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cea436c8764bdbb46947ca65d45305fd
     m_Address: ArrowAttack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d79c7a48bbe0e9c468e3c71a5e5eeebe
+    m_Address: UI_BGM
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

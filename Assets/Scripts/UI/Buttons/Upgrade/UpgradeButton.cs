@@ -24,16 +24,20 @@ public class UpgradeButton : BaseButton
     }
     protected override void OnClick()
     {
+        base.OnClick();
         int money = 0;
         bool isMaxLevel = false;
-        if (!CheckMoney(out money, isMaxLevel))
-        {
-            UIManager.Instance.OpenPopUp(PopUpStatus.NoMoneyAlret);
-            return;
-        }
-        else if (isMaxLevel)
+        bool checkMoney = CheckMoney(out money,out isMaxLevel);
+        if (isMaxLevel)
         {
             print("MAxLevel");
+            UIManager.Instance.OpenPopUp(PopUpStatus.MaxLevelAlret);
+            return;
+           
+        }
+        else if (!checkMoney)
+        {
+            UIManager.Instance.OpenPopUp(PopUpStatus.NoMoneyAlret);
             return;
         }
         DataManager.Instance.GameData.PlayerMoney -= money;
@@ -48,7 +52,7 @@ public class UpgradeButton : BaseButton
         ChangeText();
         ChangeColor();
     }
-    private bool CheckMoney(out int money, bool isMaxLevel)
+    private bool CheckMoney(out int money, out bool isMaxLevel)
     {
         UnlockedUnit unit = UnitManager.Instance.GetUnlockedUnit(UnitManager.Instance.ChoiceUnit.UnitType);
         money = 0;
@@ -57,8 +61,11 @@ public class UpgradeButton : BaseButton
         {
             case UpgradeType.HealthPoint:
                 {
-                    if (unit.HealthPointLevel >= _data.MaxLevel) 
+                    if (unit.HealthPointLevel >= _data.MaxLevel)
+                    {
                         isMaxLevel = true;
+                        return false;
+                    }
                     money = _data.Cost[unit.HealthPointLevel-1];
                     if (DataManager.Instance.GameData.PlayerMoney < money)
                         return false;
@@ -67,7 +74,10 @@ public class UpgradeButton : BaseButton
             case UpgradeType.AttackDamage:
                 {
                     if (unit.AttackDamageLevel >= _data.MaxLevel)
+                    {
                         isMaxLevel = true;
+                        return false;
+                    }
                     money = _data.Cost[unit.AttackDamageLevel - 1];
                     if (DataManager.Instance.GameData.PlayerMoney < money)
                         return false;
@@ -76,7 +86,10 @@ public class UpgradeButton : BaseButton
             case UpgradeType.AttackSpeed:
                 {
                     if (unit.AttackSpeedLevel >= _data.MaxLevel)
+                    {
                         isMaxLevel = true;
+                        return false;
+                    }
                     money = _data.Cost[unit.AttackSpeedLevel - 1];
                     if (DataManager.Instance.GameData.PlayerMoney < money)
                         return false;
@@ -85,7 +98,10 @@ public class UpgradeButton : BaseButton
             case UpgradeType.AttackRange:
                 {
                     if (unit.AttackRangeLevel >= _data.MaxLevel)
+                    {
                         isMaxLevel = true;
+                        return false;
+                    }
                     money = _data.Cost[unit.AttackRangeLevel - 1];
                     if (DataManager.Instance.GameData.PlayerMoney < money)
                         return false;
@@ -124,22 +140,34 @@ public class UpgradeButton : BaseButton
         switch(_status)
         {
             case UpgradeType.HealthPoint:
-                _texts["PriceText"].text = _data.Cost[unit.HealthPointLevel-1].ToString();
+                if (unit.HealthPointLevel < _data.MaxLevel)
+                    _texts["PriceText"].text = _data.Cost[unit.HealthPointLevel - 1].ToString();
+                else
+                    _texts["PriceText"].text = "최대강화";
                 _texts["LevelText"].text = "+" + unit.HealthPointLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
             case UpgradeType.AttackDamage:
-                _texts["PriceText"].text = _data.Cost[unit.AttackDamageLevel-1].ToString();
+                if (unit.AttackDamageLevel < _data.MaxLevel)
+                    _texts["PriceText"].text = _data.Cost[unit.AttackDamageLevel - 1].ToString();
+                else
+                    _texts["PriceText"].text = "최대강화";
                 _texts["LevelText"].text = "+" + unit.AttackDamageLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
             case UpgradeType.AttackSpeed:
-                _texts["PriceText"].text = _data.Cost[unit.AttackSpeedLevel - 1].ToString();
+                if (unit.AttackSpeedLevel < _data.MaxLevel)
+                    _texts["PriceText"].text = _data.Cost[unit.AttackSpeedLevel - 1].ToString();
+                else
+                    _texts["PriceText"].text = "최대강화";
                 _texts["LevelText"].text = "+" + unit.AttackSpeedLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;
             case UpgradeType.AttackRange:
-                _texts["PriceText"].text = _data.Cost[unit.AttackRangeLevel - 1].ToString();
+                if (unit.AttackRangeLevel < _data.MaxLevel)
+                    _texts["PriceText"].text = _data.Cost[unit.AttackDamageLevel - 1].ToString();
+                else
+                    _texts["PriceText"].text = "최대강화";
                 _texts["LevelText"].text = "+"+unit.AttackRangeLevel.ToString();
                 _texts["InfoText"].text = _status.ToString();
                 break;

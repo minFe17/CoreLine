@@ -12,5 +12,7 @@ public enum ESFXType
     ShieldAttack,
     SwordAttack,
     KingHit,
+    UI_ButtonClick,
+    UI_PopUp,
     Max,
 }

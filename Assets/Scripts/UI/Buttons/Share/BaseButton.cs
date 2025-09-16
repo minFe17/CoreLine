@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using Utils;
 
 public abstract class BaseButton : MonoBehaviour
 {
@@ -9,7 +10,10 @@ public abstract class BaseButton : MonoBehaviour
     protected TextMeshProUGUI _buttonText;
     protected Button _button;
 
-    protected abstract void OnClick();
+    protected virtual void OnClick()
+    {
+        MonoSingleton<AudioClipManager>.Instance.PlaySFX(ESFXType.UI_ButtonClick);
+    }
     protected virtual void Awake()
     {
         SettingComponent();

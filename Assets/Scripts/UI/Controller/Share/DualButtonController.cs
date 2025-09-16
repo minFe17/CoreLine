@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Utils;
 
 public abstract class DualButtonController<T> : MonoBehaviour
 {
@@ -15,11 +16,13 @@ public abstract class DualButtonController<T> : MonoBehaviour
     {
          _index--;
         ChangeButtonStatus();
+        MonoSingleton<AudioClipManager>.Instance.PlaySFX(ESFXType.UI_ButtonClick);
     }   
     public virtual void OnClickNextButton()
     {
          _index++;
         ChangeButtonStatus();
+        MonoSingleton<AudioClipManager>.Instance.PlaySFX(ESFXType.UI_ButtonClick);
     }
     protected abstract void SettingList();
 

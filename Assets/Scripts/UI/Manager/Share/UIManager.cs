@@ -12,7 +12,8 @@ public enum PanelStatus
 public enum PopUpStatus
 {
     NoMoneyAlret, NoChoiceUnitAlret, NoChoiceStageAlret, SettingPopUp,
-    NoWriteAlret, NoLogInAlret, NoCreateAlret,SuccessCreateAlret
+    NoWriteAlret, NoLogInAlret, NoCreateAlret,SuccessCreateAlret,
+    NoClearStageAlret, WaitAlret, MaxLevelAlret
 }
 public class UIManager : SimpleSingleton<UIManager>
 {
@@ -97,16 +98,16 @@ public class UIManager : SimpleSingleton<UIManager>
     {
         if(_popUp != null)
         {
-            _popUp.gameObject.SetActive(false);
+            _popUp.SwitchOff();
         }
         _popUp = _popUpDictionary[status];
-        _popUp.gameObject.SetActive(true);
+        _popUp.SwitchOn();
     }
     public void ClosePopUp()
     {
         if (_popUp == null) return;
 
-        _popUp.gameObject.SetActive(false);
+        _popUp.SwitchOff();
         _popUp = null;
     }
 

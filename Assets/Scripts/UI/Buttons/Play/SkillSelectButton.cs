@@ -29,6 +29,7 @@ public class SkillSelectButton : BaseButton
     }
     protected override void OnClick()
     {
+        base.OnClick();
         EventManager.Instance.Invoke<SkillSelectButton>("ChoiceSkillButton", this);
     }
     private void SettingButton()

@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 public class Lobby : MonoBehaviour
 {
     PrefabManager _prefabManager;
+    private bool _isSetting = false;
 
+    public bool IsSetting
+    { get { return _isSetting; } }
     public async Task InitializeAsync()
     {
         if (_prefabManager == null)
@@ -21,6 +24,8 @@ public class Lobby : MonoBehaviour
     {
         ReadData<UnitDataList>(EDataType.UnitData);
         ReadData<FusionDataList>(EDataType.FusionUnitData);
+
+        _isSetting = true;
     }
 
     void ReadData<T>(EDataType type) where T : new()

@@ -9,5 +9,6 @@ public enum EPrefabType
     Camera,
     Data,
     Sound,
+    UISound,
     Max,
 }

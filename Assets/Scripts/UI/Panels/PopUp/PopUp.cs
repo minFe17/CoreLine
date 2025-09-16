@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Utils;
 
 public  class PopUp : MonoBehaviour
 {
@@ -11,6 +12,17 @@ public  class PopUp : MonoBehaviour
     public PopUpStatus Status
     {
         get { return _status; }
+    }
+    public void SwitchOn()
+    {
+        gameObject.SetActive(true);
+        //MonoSingleton<AudioClipManager>.Instance.StopSFX();
+        MonoSingleton<AudioClipManager>.Instance.PlaySFX(ESFXType.UI_PopUp);
+    }
+    public void SwitchOff()
+    {
+        //MonoSingleton<AudioClipManager>.Instance.StopSFX();
+        gameObject.SetActive(false);
     }
     protected virtual void Awake()
     {

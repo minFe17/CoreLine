@@ -5,7 +5,8 @@ public class LaboratoryBuyButton : BaseButton
 {
     protected override void OnClick()
     {
-        if(DataManager.Instance.GameData.PlayerGem < LaboratoryManager.Instance.ChoiceLaboratory.Cost)
+        base.OnClick();
+        if (DataManager.Instance.GameData.PlayerGem < LaboratoryManager.Instance.ChoiceLaboratory.Cost)
         {
             UIManager.Instance.OpenPopUp(PopUpStatus.NoMoneyAlret);
             return;

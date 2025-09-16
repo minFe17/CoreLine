@@ -65,6 +65,7 @@ public class LaboratoryNode : BaseButton
     }
     protected override void OnClick()
     {
+        base.OnClick();
         if (!CheckParent())
         {
             EventManager.Instance.Invoke<LaboratoryData>("ChangeChoiceLaboratory", Data);

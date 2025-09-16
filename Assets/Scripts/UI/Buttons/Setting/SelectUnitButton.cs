@@ -9,6 +9,7 @@ public class SelectUnitButton : UnitButton
 
     protected override void OnClick()
     {
+        base.OnClick();
         EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", _data.UnitType);
         _isSetting = UnitManager.Instance.SettingUnits.ContainsKey(_data.UnitType);
         if (UnitManager.Instance.SettingUnits.Count == 8 && !_isSetting)

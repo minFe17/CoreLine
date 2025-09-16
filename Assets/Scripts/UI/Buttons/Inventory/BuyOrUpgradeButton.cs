@@ -8,6 +8,7 @@ public class BuyOrUpgradeButton : BaseButton
     private TextMeshProUGUI _text;
     protected override void OnClick()
     {
+        base.OnClick();
         if(_isGetUnit)
         {
             UpgradeUnit();

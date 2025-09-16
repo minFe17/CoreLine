@@ -1,7 +1,9 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class StageButton : BaseButton
 {
+    private string _preStage;
     private NormalStageData _data;
 
     private UIColorApplier _color;
@@ -14,6 +16,11 @@ public class StageButton : BaseButton
             SettingText();
         }
     }
+    public string PreStage
+    {
+        get { return _preStage; }
+        set { _preStage = value; }
+    }
     protected override void Awake()
     {
         base.Awake();
@@ -23,8 +30,10 @@ public class StageButton : BaseButton
     {
         if(NormalStageManager.Instance.SelectedStage.Id == _data.Id)
             _color.MyColorType = ColorType.Normal;
-        else
+        else if(IsPreStageUnlocked())
             _color.MyColorType = ColorType.Light;
+        else
+            _color.MyColorType = ColorType.Dark;
     }
     protected void SettingText()
     {
@@ -32,7 +41,19 @@ public class StageButton : BaseButton
     }
     protected override void OnClick()
     {
+        base.OnClick();
+        if (!IsPreStageUnlocked()) return; //ÀÌ°Å ÆË¾÷¶ç¿ì±â
         EventManager.Instance.Invoke<NormalStageData>("SelectStage", _data);
         EventManager.Instance.Invoke<bool>("IsStageSelect",true);
+    }
+    private bool IsPreStageUnlocked()
+    {
+        List<ClearStage> stage = DataManager.Instance.GameData.ClearStage;
+        foreach (var st in stage)
+        {
+            if (_preStage == "" || _preStage == "Stage1-0") return true;
+            if(st.StageId == _preStage) return true;
+        }
+        return false;
     }
 }

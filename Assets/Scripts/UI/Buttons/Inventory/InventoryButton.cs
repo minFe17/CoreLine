@@ -6,6 +6,7 @@ public class InventoryButton : BaseButton
 {
     protected override void OnClick()
     {
+        base.OnClick();
         UIManager.Instance.AddPanelStack(PanelStatus.InventoryPanel);
     }
 }

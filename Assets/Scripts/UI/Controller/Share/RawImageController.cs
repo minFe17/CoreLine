@@ -5,7 +5,7 @@ public class RawImageController : MonoBehaviour
 {
     private enum TextureType
     {
-        BackGroundTexture,UnitTexture
+        BackGroundTexture,UnitTexture,MonsterTexture
     }
     [SerializeField]
     private TextureType _type;

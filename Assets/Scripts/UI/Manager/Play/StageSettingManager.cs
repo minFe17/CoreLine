@@ -48,11 +48,13 @@ public class StageSettingManager : MonoBehaviour
     {
         StageType stage = NormalStageManager.Instance.StageType;
         List<NormalStageData> stages = DataManager.Instance.GetStages(stage);
-
+        string preStage = "";
         foreach (var stageData in stages)
         {
             StageButton btn = _buttons.Pop().GetComponent<StageButton>();
             btn.Data = stageData;
+            btn.PreStage = preStage;
+            preStage = stageData.Id;
         }
     }
     private void DisableButtons()

@@ -22,7 +22,8 @@ public class StoreButton : BaseButton
     }
     protected override void OnClick()
     {
-        switch(_data.StoreType)
+        base.OnClick();
+        switch (_data.StoreType)
         {
             case StoreType.Money:
                 DataManager.Instance.GameData.PlayerMoney += _data.Quantity;

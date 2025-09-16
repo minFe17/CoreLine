@@ -18,6 +18,7 @@ public class LogInButton : BaseButton
     }
     protected override void OnClick()
     {
+        base.OnClick();
         FireBaseManager.Instance.LogInToEmail(_email.text, _password.text, (success) =>
         {
             if (success)

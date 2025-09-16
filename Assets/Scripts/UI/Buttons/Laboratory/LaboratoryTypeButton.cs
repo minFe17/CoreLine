@@ -7,6 +7,7 @@ public class LaboratoryTypeButton : BaseButton
 
     protected override void OnClick()
     {
+        base.OnClick();
         EventManager.Instance.Invoke<LaboratoryType>("ChoiceContent", _type);
         EventManager.Instance.Invoke<bool>("SettingInformation", false);
     }
