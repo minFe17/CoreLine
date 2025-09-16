@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utils;
+using System;
+using System.Reflection;
 
 [DefaultExecutionOrder(-1000)]
 public class GameManager : MonoSingleton<GameManager>
@@ -24,6 +26,8 @@ public class GameManager : MonoSingleton<GameManager>
     [SerializeField] private bool useTutorialStage = true;          // 튜토리얼을 별도 스테이지로 운용할지
     [SerializeField] private string TutorialStageId = "Stage1-0";   // 데이터/어드레서블 ID (튜토리얼)
     [SerializeField] private string FirstNormalStageId = "Stage1-1"; // 튜토리얼 다음 메인 스테이지
+
+    private const string TutorialClearedPrefsKey = "Tutorial_Cleared3Star";
 
     // 씬에 존재한다고 가정(없으면 기능 일부 생략)
     private Camera _cam;
@@ -105,9 +109,16 @@ public class GameManager : MonoSingleton<GameManager>
         // ★ 선택이 비어있다면 튜토리얼/1-1 중 하나로 자동 선택 (튜토리얼은 3★ 완료 전까지 강제)
         EnsureInitialSelection();
 
+        // ★ 사용자가 1-1을 골라도, 튜토리얼 미완료면 1-0으로 다시 보정
+        CoerceSelectionForTutorialIfNeeded();
+
         // 선택된 스테이지 기준으로 로드
         await LoadStageByCurrentSelection();
+
+        // 인풋 등 나머지 설정 (원본 유지)
+        // ...
     }
+
 
     private void Update()
     {
@@ -169,58 +180,211 @@ public class GameManager : MonoSingleton<GameManager>
         else SelectByIdIfFound(FirstNormalStageId);
     }
 
+    // GameManager.cs
+    // 튜토리얼 3별 여부 확인(필드/프로퍼티 모두 지원)
     private bool IsStageThreeStar(string stageId)
     {
-        var gd = DataManager.Instance?.GameData;
-        if (gd?.ClearStage == null) return false;
+        DataManager dataManager = DataManager.Instance;
+        if (dataManager == null || dataManager.GameData == null || string.IsNullOrEmpty(stageId))
+            return false;
 
-        for (int i = 0; i < gd.ClearStage.Count; i++)
+        object gameData = dataManager.GameData;
+
+        object clearStageListObject = GetMemberValue(gameData, "ClearStage"); // 필드/프로퍼티 케어
+        System.Collections.IList list = clearStageListObject as System.Collections.IList;
+        if (list == null) return false;
+
+        for (int i = 0; i < list.Count; i++)
         {
-            var cs = gd.ClearStage[i];
-            if (cs.StageId == stageId && cs.MaxStarNum >= 3) return true;
+            object item = list[i];
+            if (item == null) continue;
+
+            object idObject = GetMemberValue(item, "StageId");
+            string idString = idObject as string;
+            if (string.IsNullOrEmpty(idString) ||
+                !string.Equals(idString, stageId, System.StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // 1) MaxStarNum으로 우선 판정
+            object maxStarObject = GetMemberValue(item, "MaxStarNum");
+            if (maxStarObject is int maxStar && maxStar >= 3) return true;
+
+            // 2) Star 구조로 보조 판정
+            object starObject = GetMemberValue(item, "Star");
+            if (starObject != null)
+            {
+                bool first = GetBoolMember(starObject, "FirstStar");
+                bool second = GetBoolMember(starObject, "SecondStar");
+                bool third = GetBoolMember(starObject, "ThirdStar");
+                if (first && second && third) return true;
+            }
+
+            return false; // 이 스테이지 항목은 찾았지만 3별은 아님
         }
-        return false;
+
+        return false; // 목록에 해당 스테이지 항목이 없음
     }
+
+    // ── 아래는 보조 유틸: 필드/프로퍼티 호환 ──
+    private object GetMemberValue(object instance, string name)
+    {
+        if (instance == null) return null;
+        System.Type type = instance.GetType();
+
+        System.Reflection.PropertyInfo prop = type.GetProperty(name);
+        if (prop != null) return prop.GetValue(instance, null);
+
+        System.Reflection.FieldInfo field = type.GetField(name);
+        if (field != null) return field.GetValue(instance);
+
+        return null;
+    }
+
+    private void SetMemberValue(object instance, string name, object value)
+    {
+        if (instance == null) return;
+        System.Type type = instance.GetType();
+
+        System.Reflection.PropertyInfo prop = type.GetProperty(name);
+        if (prop != null) { prop.SetValue(instance, value, null); return; }
+
+        System.Reflection.FieldInfo field = type.GetField(name);
+        if (field != null) { field.SetValue(instance, value); }
+    }
+
+    private bool GetBoolMember(object instance, string name)
+    {
+        object val = GetMemberValue(instance, name);
+        return val is bool b && b;
+    }
+
 
     private void SelectByIdIfFound(string stageId)
     {
         if (string.IsNullOrEmpty(stageId)) return;
 
-        var nsm = NormalStageManager.Instance;
-        if (nsm.TryFindStageById(stageId, out var stage, out _))
+        NormalStageManager normalStageManager = NormalStageManager.Instance;
+        if (normalStageManager == null) return;
+
+        NormalStageData foundStage;
+        WorldStageData foundWorld; 
+
+        if (normalStageManager.TryFindStageById(stageId, out foundStage, out foundWorld))
         {
-            EventManager.Instance?.Invoke<NormalStageData>("SelectStage", stage);
+            EventManager.Instance?.Invoke<NormalStageData>("SelectStage", foundStage);
+            return;
         }
-        else
+
+        if (useTutorialStage &&
+            string.Equals(stageId, TutorialStageId, System.StringComparison.OrdinalIgnoreCase))
         {
-            Debug.LogWarning($"[GameManager] stageId '{stageId}' 을 WorldStageDatas에서 찾지 못했습니다.");
+            NormalStageData injected = BuildInjectedTutorialStage();
+
+            // struct는 null 비교 불가 → Id가 비었는지로 유효성 판단
+            if (!string.IsNullOrEmpty(injected.Id))
+            {
+                Debug.Log("[GameManager] Tutorial stage not found in data. Injecting runtime stage data.");
+                EventManager.Instance?.Invoke<NormalStageData>("SelectStage", injected);
+                return;
+            }
+        }
+
+        Debug.LogWarning($"[GameManager] stageId '{stageId}' 을 WorldStageDatas에서 찾지 못했습니다.");
+    }
+
+
+    private NormalStageData BuildInjectedTutorialStage()
+    {
+        // 튜토리얼 스테이지(1-0) 런타임 주입용 최소 데이터
+        NormalStageData stage = new NormalStageData();
+        stage.Id = TutorialStageId;                 // "Stage1-0"
+        stage.Name = "Stage 1-0";
+
+        // 조건 1개 주입: MoneySave / "클리어하기" / Value=0
+        List<Condition> conditions = new List<Condition>();
+
+        Condition condition1 = new Condition();
+        condition1.ClearType = ClearType.MoneySave;
+        condition1.Info = "클리어하기";
+        condition1.Value = 1f;
+        conditions.Add(condition1);
+
+        Condition condition2 = new Condition();
+        condition2.ClearType = ClearType.MoneySave;
+        condition2.Info = "클리어하기";
+        condition2.Value = 1f;
+        conditions.Add(condition2);
+
+        Condition condition3 = new Condition();
+        condition3.ClearType = ClearType.MoneySave;
+        condition3.Info = "클리어하기";
+        condition3.Value = 1f;
+        conditions.Add(condition3);
+
+        stage.Condition = conditions;
+
+        stage.Gold = 0;
+        stage.Gem = 0;
+        stage.UnlockCharacter = null;
+
+        return stage;
+    }
+
+    private void CoerceSelectionForTutorialIfNeeded()
+    {
+        if (!useTutorialStage) return;
+
+        NormalStageManager normalStageManager = NormalStageManager.Instance;
+        if (normalStageManager == null) return;
+
+        // ★ 세션 플래그(또는 GameData 3★) 켜져 있으면 보정 중단
+        if (IsTutorialClearedThisSession()) return;
+
+        if (!string.IsNullOrEmpty(normalStageManager.SelectedStage.Id) &&
+            string.Equals(normalStageManager.SelectedStage.Id, FirstNormalStageId, System.StringComparison.OrdinalIgnoreCase))
+        {
+            // 사용자가 1-1을 골랐지만 튜토리얼 미완료면 1-0으로 바꿔치기
+            SelectByIdIfFound(TutorialStageId);
         }
     }
+
 
     // ───────── 데이터 기반 스테이지 로드 ─────────
     private async Task LoadStageByCurrentSelection()
     {
-        var mgr = NormalStageManager.Instance;
-        if (mgr == null)
+        NormalStageManager normalStageManager = NormalStageManager.Instance;
+        if (normalStageManager == null)
         {
             Debug.LogError("[GameManager] NormalStageManager 가 없습니다.");
             return;
         }
 
-        if (string.IsNullOrEmpty(mgr.SelectedStage.Id))
+        if (string.IsNullOrEmpty(normalStageManager.SelectedStage.Id))
         {
             Debug.LogError("[GameManager] SelectedStage.Id 가 비어있습니다. SelectStage 이벤트로 먼저 선택하세요.");
             return;
         }
 
-        GameObject prefab = await StagePrefabResolver.LoadById(mgr.SelectedStage.Id);
+        string stageIdToLoad = normalStageManager.SelectedStage.Id;
+
+        // ★ 로드 직전에 한 번 더 보정하되, 세션 플래그를 먼저 본다
+        if (useTutorialStage && !IsTutorialClearedThisSession())
+        {
+            if (string.Equals(stageIdToLoad, FirstNormalStageId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                SelectByIdIfFound(TutorialStageId);
+                stageIdToLoad = TutorialStageId;
+            }
+        }
+
+        GameObject prefab = await StagePrefabResolver.LoadById(stageIdToLoad);
         if (prefab == null)
         {
-            Debug.LogError($"[GameManager] 스테이지 프리팹 로드 실패: {mgr.SelectedStage.Id}");
+            Debug.LogError($"[GameManager] 스테이지 프리팹 로드 실패: {stageIdToLoad}");
             return;
         }
 
-        LoadStageWithEvent(prefab, mgr.SelectedStage.Id);
+        LoadStageWithEvent(prefab, normalStageManager.SelectedStage.Id);
     }
 
     private void LoadStageWithEvent(GameObject prefab, string stageId)
@@ -483,6 +647,15 @@ public class GameManager : MonoSingleton<GameManager>
             CostManager.Instance?.PrepareForNewStage(resetToZero: true);
         else
             CostManager.Instance?.PrepareForNewStage(resetToZero: false);
+    }
+    private bool IsTutorialClearedThisSession()
+    {
+        // PlayerPrefs 플래그가 1이면 true
+        if (PlayerPrefs.GetInt(TutorialClearedPrefsKey, 0) == 1)
+            return true;
+
+        // 보조: GameData에도 3★가 있으면 true
+        return IsStageThreeStar(TutorialStageId);
     }
 
     // ───────── 프리팹 로더 ─────────

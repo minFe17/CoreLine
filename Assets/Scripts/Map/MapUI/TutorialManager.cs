@@ -2,7 +2,9 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 using Utils; // ConditionControl, SimpleSingleton 등 쓰는 프로젝트라면 필요
+using System.Reflection;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -113,16 +115,161 @@ public class TutorialManager : MonoBehaviour
         ShowPanel("기지가 파괴되면 패배입니다.\n이번 튜토리얼은 여기까지입니다.");
         yield return WaitButtonThenResume();
 
-        // 승리로 변환
-        var nsm = NormalStageManager.Instance;
-        if (nsm != null)
+        ForceSaveThreeStars("Stage1-0");
+
+        NormalStageManager normalStageManager = NormalStageManager.Instance;
+        if (normalStageManager != null)
         {
-            var snap = ConditionControl.BuildFor(stage);
-            nsm.CompleteStageSuccess(snap); // → GameManager.OnStageCleared에서 승리 패널 표시
+            NormalStageManager.StageEndSnapshot snapshot = ConditionControl.BuildFor(stage);
+            normalStageManager.CompleteStageSuccess(snapshot); // 승리 패널 표시
         }
 
         _handlingDefeat = false;
     }
+    // TutorialManager.cs
+    // 튜토리얼 3별 강제 저장(필드/프로퍼티 모두 지원)
+    private void ForceSaveThreeStars(string stageId)
+    {
+        DataManager dataManager = DataManager.Instance;
+        if (dataManager == null || dataManager.GameData == null || string.IsNullOrEmpty(stageId)) return;
+
+        object gameData = dataManager.GameData;
+
+        object clearStageListObject = GetMemberValue(gameData, "ClearStage");
+        System.Collections.IList list = clearStageListObject as System.Collections.IList;
+        if (list == null) return;
+
+        bool updated = false;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            object item = list[i];
+            if (item == null) continue;
+
+            object idObject = GetMemberValue(item, "StageId");
+            string idString = idObject as string;
+            if (!string.IsNullOrEmpty(idString) &&
+                string.Equals(idString, stageId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                SetMemberValue(item, "MaxStarNum", 3);
+
+                object starObject = GetMemberValue(item, "Star");
+                if (starObject == null)
+                {
+                    System.Type starType = GetMemberType(item, "Star");
+                    if (starType != null)
+                    {
+                        object newStar = System.Activator.CreateInstance(starType);
+                        SetMemberValue(newStar, "FirstStar", true);
+                        SetMemberValue(newStar, "SecondStar", true);
+                        SetMemberValue(newStar, "ThirdStar", true);
+                        SetMemberValue(item, "Star", newStar);
+                    }
+                }
+                else
+                {
+                    SetMemberValue(starObject, "FirstStar", true);
+                    SetMemberValue(starObject, "SecondStar", true);
+                    SetMemberValue(starObject, "ThirdStar", true);
+                }
+
+                updated = true;
+                break;
+            }
+        }
+
+        if (!updated)
+        {
+            System.Type itemType = list.GetType().GetGenericArguments()[0];
+            object added = System.Activator.CreateInstance(itemType);
+            SetMemberValue(added, "StageId", stageId);
+            SetMemberValue(added, "MaxStarNum", 3);
+
+            System.Type starTypeForNew = GetMemberType(added, "Star");
+            if (starTypeForNew != null)
+            {
+                object newStar = System.Activator.CreateInstance(starTypeForNew);
+                SetMemberValue(newStar, "FirstStar", true);
+                SetMemberValue(newStar, "SecondStar", true);
+                SetMemberValue(newStar, "ThirdStar", true);
+                SetMemberValue(added, "Star", newStar);
+            }
+
+            list.Add(added);
+        }
+
+        // 저장 루틴이 있으면 호출(없으면 조용히 무시)
+        try
+        {
+            System.Reflection.MethodInfo mi = dataManager.GetType().GetMethod("SaveData", System.Type.EmptyTypes);
+            if (mi != null) mi.Invoke(dataManager, null);
+        }
+        catch { }
+
+        // ★ 세션 보장 플래그: 이번 실행부터는 무조건 1-1로 가게
+        PlayerPrefs.SetInt("Tutorial_Cleared3Star", 1);
+        PlayerPrefs.Save();
+
+        Debug.Log("[Tutorial] Stage1-0을 3별로 기록했습니다. (세션 플래그 on)");
+    }
+
+
+    // 보조: 멤버 타입 얻기(필드/프로퍼티)
+    private Type GetMemberType(object instance, string name)
+    {
+        if (instance == null) return null;
+        Type type = instance.GetType();
+
+        PropertyInfo prop = type.GetProperty(name);
+        if (prop != null) return prop.PropertyType;
+
+        FieldInfo field = type.GetField(name);
+        if (field != null) return field.FieldType;
+
+        return null;
+    }
+
+    private void TrySaveData(DataManager dataManager)
+    {
+        try
+        {
+            MethodInfo mi = dataManager.GetType().GetMethod("SaveData", Type.EmptyTypes);
+            if (mi != null) mi.Invoke(dataManager, null);
+        }
+        catch
+        {
+            // 로컬/클라우드 저장이 비활성일 수 있음 → 무시
+        }
+    }
+
+    // GameManager.cs 쪽 유틸과 동일한 버전이 없다면 여기도 포함
+    private object GetMemberValue(object instance, string name)
+    {
+        if (instance == null) return null;
+        Type type = instance.GetType();
+
+        PropertyInfo prop = type.GetProperty(name);
+        if (prop != null) return prop.GetValue(instance, null);
+
+        FieldInfo field = type.GetField(name);
+        if (field != null) return field.GetValue(instance);
+
+        return null;
+    }
+
+    private void SetMemberValue(object instance, string name, object value)
+    {
+        if (instance == null) return;
+        Type type = instance.GetType();
+
+        PropertyInfo prop = type.GetProperty(name);
+        if (prop != null) { prop.SetValue(instance, value, null); return; }
+
+        FieldInfo field = type.GetField(name);
+        if (field != null) { field.SetValue(instance, value); }
+    }
+
+
 
     // ───────── 공통 UI 제어 ─────────
     private void ShowPanel(string msg)
