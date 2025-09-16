@@ -1,0 +1,6 @@
+﻿MonsterId,Prefab,Count,Interval,Delay
+EBlock,Assets/Prefabs/Monster/Prefab/EBlock.prefab,6,2.2,3
+ESlime,Assets/Prefabs/Monster/Prefab/ESlime.prefab,7,2,6
+ESkeleton,Assets/Prefabs/Monster/Prefab/ESkeleton.prefab,9,1.5,4
+EWolf,Assets/Prefabs/Monster/Prefab/EWolf.prefab,5,0.9,4
+ETree,Assets/Prefabs/Monster/Prefab/ETree.prefab,4,2,3
