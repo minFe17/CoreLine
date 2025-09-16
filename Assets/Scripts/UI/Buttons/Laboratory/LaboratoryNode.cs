@@ -32,7 +32,6 @@ public class LaboratoryNode : BaseButton
         set 
         {
             _isUnlocked = value;
-            ChangeColor();
         }
     }
     
@@ -62,6 +61,10 @@ public class LaboratoryNode : BaseButton
         
         if(unlocked.Contains(_data.Id))
             _isUnlocked = true;
+    }
+    private void Update()
+    {
+        ChangeColor();
     }
     protected override void OnClick()
     {
@@ -108,6 +111,8 @@ public class LaboratoryNode : BaseButton
         {
             _color.MyColorType = ColorType.Light;
         }
+        else if(CheckParent())
+            _color.MyColorType = ColorType.Normal;
         else
             _color.MyColorType = ColorType.Dark;
     }
