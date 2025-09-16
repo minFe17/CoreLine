@@ -25,7 +25,7 @@ public class MapManager : MonoBehaviour
     private Vector3Int _playerBaseCell;
     private Transform _objectsRoot;
     private readonly HashSet<Vector3Int> _objectCells = new();
-
+    private GameObject _playerBaseGO;
     public bool HasPlayerBase => _hasPlayerBase;
     public Vector3Int PlayerBaseCell => _playerBaseCell;
     public Vector3 PlayerBaseWorld => IsReady && _hasPlayerBase ? CellCenterWorld(_playerBaseCell) : Vector3.zero;
@@ -49,7 +49,7 @@ public class MapManager : MonoBehaviour
 
     public void LoadStage(GameObject stagePrefab)
     {
-        UnloadStage();
+        //UnloadStage();
         _stageRoot = Instantiate(stagePrefab);
         _stageRoot.name = stagePrefab.name;
 
@@ -62,7 +62,7 @@ public class MapManager : MonoBehaviour
 
     public void BindStageRoot(Transform stageRoot)
     {
-        UnloadStage();
+        //UnloadStage();
         _stageRoot = stageRoot.gameObject;
 
         CacheMapsFrom(stageRoot);
@@ -72,27 +72,39 @@ public class MapManager : MonoBehaviour
         InitBossSpawnCell();
     }
 
+    // MapManager.cs
+    // UnloadStage() 보강
     public void UnloadStage()
     {
+        Debug.Log($"[Map] UnloadStage 시작, hadBase={_hasPlayerBase} cell={_playerBaseCell}");
+
+        //1) 제일 먼저 ‘실제 베이스 제거’ (오브젝트 + 점유 + 알림)
+        ResetPlayerBasePlacement(releaseOccupation: true);
+
+        //2) 나머지 캐시 정리
         _occupied.Clear();
+        _objectCells.Clear();
         _towers.Clear();
 
-        _hasPlayerBase = false;
-        _playerBaseCell = default;
-        _hasSpawn = false;
-        _spawnCell = default;
-        _hasBossSpawn = false;
-        _bossSpawnCell = default;
+        _hasSpawn = false; _spawnCell = default;
+        _hasBossSpawn = false; _bossSpawnCell = default;
 
+        // 3) 타일맵/루트 정리
         _grid = null;
         _tmBuildable = _tmUnbuildable = _tmWall = _tmDestructible = _tmDeco = null;
+        _tmKing = null;
+        _tmObjects = null;
+        _tmMonsterSpawn = null;
+        _tmBossSpawn = null;
+        _objectsRoot = null;
 
-        if (_stageRoot != null)
-        {
-            Destroy(_stageRoot);
-            _stageRoot = null;
-        }
+        if (_stageRoot != null) { Destroy(_stageRoot); _stageRoot = null; }
+
+        Debug.Log("[Map] UnloadStage 끝");
     }
+
+
+
     private void InitSpawnCell()
     {
         _hasSpawn = false;
@@ -210,14 +222,12 @@ public class MapManager : MonoBehaviour
     }
     public bool SelectPlayerBase(Vector3Int selectedCell, GameObject basePrefab = null, bool occupyBaseCell = true)
     {
-        if (_tmKing == null) return false;
-        if (!_tmKing.HasTile(selectedCell)) return false;
-        if (PauseControl.IsPaused) return false;
+        if (_tmKing == null || !_tmKing.HasTile(selectedCell) || PauseControl.IsPaused) return false;
 
-        List<Vector3Int> kings = GetAllKingCells();
+        var kings = GetAllKingCells();
         if (kings.Count == 0) return false;
 
-        foreach (Vector3Int cell in kings)
+        foreach (var cell in kings)
         {
             _tmKing.SetTile(cell, null);
 
@@ -225,26 +235,26 @@ public class MapManager : MonoBehaviour
             {
                 if (basePrefab != null)
                 {
-                    Vector3 pos = CellCenterWorld(cell);
-                    GameObject gameObject = Instantiate(basePrefab, pos, Quaternion.identity, _stageRoot?.transform);
-                    gameObject.name = basePrefab.name;
+                    //기존 Instantiate만 하던 코드 → 생성 레퍼런스 보관
+                    if (_playerBaseGO != null) Destroy(_playerBaseGO);
+                    var pos = CellCenterWorld(cell);
+                    _playerBaseGO = Instantiate(basePrefab, pos, Quaternion.identity, _stageRoot?.transform);
+                    _playerBaseGO.name = basePrefab.name;
                 }
 
-                if (occupyBaseCell)
-                    MarkOccupied(cell);        // 설치 제한은 유지하고
+                if (occupyBaseCell) MarkOccupied(cell);
 
-                _playerBaseCell = cell;       // ★ 목적지로 쓸 셀 저장
+                _playerBaseCell = cell;
                 _hasPlayerBase = true;
             }
 
-            OnCellChanged?.Invoke(cell);      // (있던) 네비 갱신은 그대로
+            OnCellChanged?.Invoke(cell);
         }
 
-        if (_hasPlayerBase)
-            OnPlayerBasePlaced?.Invoke(_playerBaseCell); // 플레이어 베이스 배치 알림
-
+        if (_hasPlayerBase) OnPlayerBasePlaced?.Invoke(_playerBaseCell);
         return true;
     }
+
 
     public readonly struct NavInfo
     {
@@ -362,6 +372,58 @@ public class MapManager : MonoBehaviour
     public void DestroyWallAtWorld(Vector3 worldPos)
     {
         DestroyWallAt(WorldToCell(worldPos));
+    }
+    // MapManager.cs 내부에 추가
+
+    /// <summary>
+    /// 베이스 배치 상태를 초기화합니다. (점유 해제 포함)
+    /// </summary>
+    public void ResetPlayerBasePlacement(bool releaseOccupation = true)
+    {
+        if (_playerBaseGO != null)
+        {
+            Destroy(_playerBaseGO);
+            _playerBaseGO = null;
+        }
+
+        if (_hasPlayerBase)
+        {
+            var prev = _playerBaseCell;
+
+            _hasPlayerBase = false;
+            _playerBaseCell = default;
+
+            if (releaseOccupation)
+            {
+                _occupied.Remove(prev);
+                OnCellChanged?.Invoke(prev);
+            }
+        }
+        Debug.Log($"[Map] ResetPlayerBasePlacement() go={_playerBaseGO != null}, hadBase={_hasPlayerBase}, cell={_playerBaseCell}");
+
+    }
+
+
+    /// <summary>
+    /// 현재 맵에 등록된 모든 타워를 파괴하고 점유를 해제합니다.
+    /// </summary>
+    public void ClearAllTowers()
+    {
+        if (_towers.Count == 0) return;
+
+        List<Vector3Int> keys = new List<Vector3Int>(_towers.Keys);
+        for (int i = 0; i < keys.Count; i++)
+        {
+            Vector3Int cell = keys[i];
+            GameObject towerObject;
+            if (_towers.TryGetValue(cell, out towerObject))
+            {
+                if (towerObject != null) UnityEngine.Object.Destroy(towerObject);
+            }
+            _occupied.Remove(cell);
+            OnCellChanged?.Invoke(cell);
+        }
+        _towers.Clear();
     }
 
     // ───────────────────────────────────────────────────────────────────────

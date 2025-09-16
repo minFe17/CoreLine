@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -62,7 +63,7 @@ public class ClearPanelControl : MonoBehaviour
         StartCoroutine(CoRepositionAfterLayout());
     }
 
-    private System.Collections.IEnumerator CoRepositionAfterLayout()
+    private IEnumerator CoRepositionAfterLayout()
     {
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRoot);
@@ -77,93 +78,115 @@ public class ClearPanelControl : MonoBehaviour
         if (_autoRepositionOnResize && isActiveAndEnabled) RepositionStars();
     }
 
+    // ClearPanelControl.cs
     private void AutoWire()
     {
         _panelRoot = GetComponent<RectTransform>();
 
-        Transform tStageName = transform.Find("StageName");
-        if (tStageName != null) _stageNameText = tStageName.GetComponent<TMP_Text>();
+        Transform transformStageName = transform.Find("StageName");
+        if (transformStageName != null)
+            _stageNameText = transformStageName.GetComponent<TMP_Text>();
 
-        Transform tStarPos = transform.Find("StarPos");
-        if (tStarPos != null) _starGroup = tStarPos.GetComponent<RectTransform>();
+        Transform transformStarPos = transform.Find("StarPos");
+        if (transformStarPos != null)
+            _starGroup = transformStarPos.GetComponent<RectTransform>();
 
-        Transform tRewardBack = transform.Find("RewardBack");
-        if (tRewardBack != null)
+        Transform transformRewardBack = transform.Find("RewardBack");
+        if (transformRewardBack != null)
         {
-            _rewardBack = tRewardBack.GetComponent<RectTransform>();
+            _rewardBack = transformRewardBack.GetComponent<RectTransform>();
 
-            // Rewards 컨테이너 확보(없으면 생성)
-            Transform tRewards = transform.Find("RewardBack/Rewards");
-            if (tRewards == null)
+            // Rewards 컨테이너 확보(없으면 생성) → 필드명은 _rewardsRoot 사용
+            Transform transformRewards = _rewardBack.Find("Rewards");
+            if (transformRewards == null)
             {
-                GameObject go = new GameObject("Rewards", typeof(RectTransform));
-                tRewards = go.transform;
-                tRewards.SetParent(_rewardBack, false);
+                GameObject rewardsObject = new GameObject("Rewards", typeof(RectTransform));
+                RectTransform rewardsRectTransform = rewardsObject.GetComponent<RectTransform>();
+                rewardsRectTransform.SetParent(_rewardBack, false);
+                rewardsRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                rewardsRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                rewardsRectTransform.pivot = new Vector2(0.5f, 0.5f);
+                _rewardsRoot = rewardsRectTransform;
             }
-            _rewardsRoot = tRewards as RectTransform;
-            _rewardsRoot.anchorMin = _rewardsRoot.anchorMax = new Vector2(0.5f, 0.5f);
-            _rewardsRoot.pivot = new Vector2(0.5f, 0.5f);
-            _rewardsRoot.anchoredPosition = Vector2.zero;
-
-            // RewardBack에 붙어 있던 레이아웃 제거(늘어남/줄어듦 방지)
-            DestroyImmediate(_rewardBack.GetComponent<HorizontalLayoutGroup>());
-            DestroyImmediate(_rewardBack.GetComponent<ContentSizeFitter>());
-
-            // Rewards에만 레이아웃 부착
-            _rewardHLG = _rewardsRoot.GetComponent<HorizontalLayoutGroup>();
-            if (_rewardHLG == null) _rewardHLG = _rewardsRoot.gameObject.AddComponent<HorizontalLayoutGroup>();
-            _rewardHLG.childAlignment = TextAnchor.MiddleCenter;
-            _rewardHLG.spacing = _rewardSpacing;
-            _rewardHLG.childControlWidth = true;
-            _rewardHLG.childControlHeight = true;
-            _rewardHLG.childForceExpandWidth = false;
-            _rewardHLG.childForceExpandHeight = false;
-
-            _rewardCSF = _rewardsRoot.GetComponent<ContentSizeFitter>();
-            if (_rewardCSF == null) _rewardCSF = _rewardsRoot.gameObject.AddComponent<ContentSizeFitter>();
-            _rewardCSF.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            _rewardCSF.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
-
-            // 데코는 레이아웃 제외
-            Transform tOutline = transform.Find("RewardBack/RewardOutLine");
-            if (tOutline != null)
+            else
             {
-                var le = tOutline.GetComponent<LayoutElement>() ?? tOutline.gameObject.AddComponent<LayoutElement>();
-                le.ignoreLayout = true;
-                tOutline.SetSiblingIndex(0);
+                _rewardsRoot = transformRewards.GetComponent<RectTransform>();
+            }
+
+            // 선언해 둔 레이아웃 컴포넌트들도 여기서 확보(없으면 추가)
+            if (_rewardsRoot != null)
+            {
+                _rewardHLG = _rewardsRoot.GetComponent<HorizontalLayoutGroup>();
+                if (_rewardHLG == null)
+                    _rewardHLG = _rewardsRoot.gameObject.AddComponent<HorizontalLayoutGroup>();
+
+                _rewardCSF = _rewardsRoot.GetComponent<ContentSizeFitter>();
+                if (_rewardCSF == null)
+                    _rewardCSF = _rewardsRoot.gameObject.AddComponent<ContentSizeFitter>();
+
+                _rewardCSF.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+                _rewardCSF.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             }
         }
 
-        // StarCondition
-        Transform tCond = transform.Find("StarCondition");
-        if (tCond != null)
+        // ----- Buttons -----
+        Button nextButton = null;
+        Button lobbyButton = null;
+
+        Transform transformNext = transform.Find("NextStageButton");
+        if (transformNext != null) nextButton = transformNext.GetComponent<Button>();
+
+        Transform transformLobby = transform.Find("ClearLobbyButton");
+        if (transformLobby != null) lobbyButton = transformLobby.GetComponent<Button>();
+
+        // 이름이 다를 수 있으니 폴백(모든 자식 버튼 중에서 키워드로 탐색)
+        if (nextButton == null || lobbyButton == null)
         {
-            _condRoot = tCond;
+            Button[] allButtons = GetComponentsInChildren<Button>(true);
+            for (int i = 0; i < allButtons.Length; i++)
+            {
+                Button button = allButtons[i];
+                if (button == null || button.transform == null) continue;
 
-            Transform t = tCond.Find("FirstStarText"); if (t) _firstCondText = t.GetComponent<TMP_Text>();
-            t = tCond.Find("SecondStarText"); if (t) _secondCondText = t.GetComponent<TMP_Text>();
-            t = tCond.Find("ThirdStarText"); if (t) _thirdCondText = t.GetComponent<TMP_Text>();
-
-            t = tCond.Find("FirstStar"); if (t) _firstCondIcon = t.gameObject;
-            t = tCond.Find("SecondStar"); if (t) _secondCondIcon = t.gameObject;
-            t = tCond.Find("ThirdStar"); if (t) _thirdCondIcon = t.gameObject;
+                string objectName = button.transform.name;
+                if (nextButton == null &&
+                    !string.IsNullOrEmpty(objectName) &&
+                    (objectName.IndexOf("Next", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     objectName.IndexOf("NextStage", System.StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    nextButton = button;
+                }
+                else if (lobbyButton == null &&
+                         !string.IsNullOrEmpty(objectName) &&
+                         (objectName.IndexOf("Lobby", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                          objectName.IndexOf("Home", System.StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    lobbyButton = button;
+                }
+            }
         }
 
-        // Buttons
-        var tNext = transform.Find("NextStageButton");
-        var tLobby = transform.Find("ClearLobbyButton");
-        if (tNext) _nextButton = tNext.GetComponent<Button>();
-        if (tLobby) _lobbyButton = tLobby.GetComponent<Button>();
+        _nextButton = nextButton;
+        _lobbyButton = lobbyButton;
 
         if (_nextButton != null)
         {
             _nextButton.onClick.RemoveAllListeners();
             _nextButton.onClick.AddListener(OnClickNext);
         }
+        else
+        {
+            Debug.LogWarning("[ClearPanel] Next 버튼을 찾지 못했습니다. 이름을 'NextStageButton'으로 하거나 'Next'가 포함되도록 해 주세요.");
+        }
+
         if (_lobbyButton != null)
         {
             _lobbyButton.onClick.RemoveAllListeners();
             _lobbyButton.onClick.AddListener(OnClickLobby);
+        }
+        else
+        {
+            Debug.LogWarning("[ClearPanel] Lobby 버튼을 찾지 못했습니다. 이름을 'ClearLobbyButton'으로 하거나 'Lobby/Home'이 포함되도록 해 주세요.");
         }
     }
 
@@ -356,6 +379,7 @@ public class ClearPanelControl : MonoBehaviour
     // ───────── 버튼 핸들러 ─────────
     private void OnClickNext()
     {
+        Debug.Log("[ClearPanel] NextStage 버튼 클릭됨");
         NextStageRequested?.Invoke();
     }
 
