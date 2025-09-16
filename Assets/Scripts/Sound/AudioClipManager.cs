@@ -1,7 +1,7 @@
 using UnityEngine;
 using Utils;
 
-public class AudioClipManager :MonoBehaviour ,IMediatorEvent
+public class AudioClipManager : MonoBehaviour, IMediatorEvent
 {
     SoundController _soundController;
     GameObject _soundControllerPrefab;
@@ -24,35 +24,14 @@ public class AudioClipManager :MonoBehaviour ,IMediatorEvent
         }
     }
 
-    public void PlayBGM(EBGMType type)
-    {
-        _soundController.StartBGM(_prefabLoad.GetAudioPrefab(type));
-    }
+    public void PlayBGM(EBGMType type) => _soundController.StartBGM(_prefabLoad.GetAudioPrefab(type));
+    public void PlaySFX(ESFXType type) => _soundController.PlaySFXAudio(_prefabLoad.GetAudioPrefab(type));
 
-    public void PlaySFX(ESFXType type)
-    {
-        _soundController.PlaySFXAudio(_prefabLoad.GetAudioPrefab(type));
-    }
+    public void StopBGM() => _soundController.StopBGM();
+    public void StopSFX() => _soundController.StopSFXAudio();
 
-    public void StopSFX()
-    {
-        _soundController.StopSFXAudio();
-    }
-
-    public void StopBGM()
-    {
-        _soundController.StopBGM();
-    }
-
-    public void ChangeBGMVolume(float value)
-    {
-        _soundController.ChangeBGMVolume(value);
-    }
-
-    public void ChangeSFXVolume(float value)
-    {
-        _soundController.ChangeSFXVolume(value);
-    }
+    public void ChangeBGMVolume(float value) => _soundController.ChangeBGMVolume(value);
+    public void ChangeSFXVolume(float value) => _soundController.ChangeSFXVolume(value);
 
     void IMediatorEvent.HandleEvent(object data)
     {
