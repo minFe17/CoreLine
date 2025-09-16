@@ -96,7 +96,14 @@ public abstract class BossSkillBase : MonoBehaviour
     protected void PlaySfx()
     {
         if (_sfx != null && _audio != null)
+        {
             _audio.PlayOneShot(_sfx, _sfxVolume);
+            Debug.Log("[BossSkill] " + GetType().Name +
+                  " clip=" + _sfx.name +
+                  " sourceVol=" + _audio.volume.ToString("F2") +
+                  " scale=" + _sfxVolume.ToString("F2") +
+                  " final=" + (_audio.volume * _sfxVolume).ToString("F2"));
+        }
     }
 
     protected abstract void Perform(BossController controller);

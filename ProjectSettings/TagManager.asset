@@ -8,6 +8,7 @@ TagManager:
   - BarPanel
   - Monster
   - FxTemporaire
+  - Boss
   layers:
   - Default
   - TransparentFX

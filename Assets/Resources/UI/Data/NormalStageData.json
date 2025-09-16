@@ -5,30 +5,6 @@
         "Stages": 
         [
             {
-                "ID" : "Stage1-0",
-                "Name" : "스테이지 1-0",
-                "Gold": 50,
-                "Gem": 0,
-                "Condition" : 
-                [
-                    {
-                        "ClearType" : "MoneySave",
-                        "Info" : "클리어하기",
-                        "Value" : 0
-                    },
-                    {
-                        "ClearType" : "MoneySave",
-                        "Info" : "클리어하기",
-                        "Value" : 0
-                    },
-                    {
-                        "ClearType" : "MoneySave",
-                        "Info" : "클리어하기",
-                        "Value" : 0
-                    }
-                ]
-            },
-            {
                 "ID" : "Stage1-1",
                 "Name" : "스테이지 1-1",
                 "Gold": 300,

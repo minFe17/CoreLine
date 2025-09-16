@@ -16,7 +16,7 @@ public class SettingPopUp : PopUp
         _bgmSlider = transform.Find("Panel/BGM/BGMSound").GetComponent<Slider>();
         _effectSlider = transform.Find("Panel/Effect/EffectSound").GetComponent<Slider>();
 
-        ReadSoundData();
+        SettingSoundVolume();
     }
 
     void ReadSoundData()
@@ -26,12 +26,17 @@ public class SettingPopUp : PopUp
         if(_path == null)
             _path = Application.persistentDataPath + "SaveSoundDataFile.json";
 
-        if (File.Exists(_path))
-        {
-            string json = File.ReadAllText(_path);
-            JsonUtility.FromJsonOverwrite(json, _soundData);
-        }
-        
+        if (!File.Exists(_path))
+            return;
+        string json = File.ReadAllText(_path);
+        JsonUtility.FromJsonOverwrite(json, _soundData);
+    }
+
+    void SettingSoundVolume()
+    {
+        MonoSingleton<AudioClipManager>.Instance.Init();
+        ReadSoundData();
+
         _bgmSlider.value = _soundData.BgmVolume;
         _effectSlider.value = _soundData.SfxVolume;
         ChangeBGMVolume();

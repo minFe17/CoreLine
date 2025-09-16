@@ -181,7 +181,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 0}
-  _moveSpeed: 1.5
+  _moveSpeed: 1.2
   _arriveEps: 0.02
   _minMoveSpeed: 0.5
   _attackRangeCell: 1
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1b66af5bbf3592498200ba602b2bb14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHp: 100
+  _maxHp: 260
   _baseAttack: 10
 --- !u!114 &1166780986553402214
 MonoBehaviour:

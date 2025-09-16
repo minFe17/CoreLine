@@ -376,6 +376,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706cfd64218a738449283534c48db7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useTutorialStage: 1
+  TutorialStageId: Stage1-0
+  FirstNormalStageId: Stage1-1
 --- !u!4 &515757424
 Transform:
   m_ObjectHideFlags: 0
@@ -422,7 +425,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseColor: {r: 0, g: 1, b: 0.6, a: 0.55}
-  _baseWidth: 0.03
   _hoverColor: {r: 0.2, g: 1, b: 0.9, a: 1}
   _hoverWidth: 0.05
   _hoverPulse: 1
@@ -556,6 +558,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1356733908}
   - component: {fileID: 1356733907}
+  - component: {fileID: 1356733909}
   m_Layer: 0
   m_Name: MonsterManager
   m_TagString: Untagged
@@ -602,6 +605,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1356733909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1356733906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23b4bd950824e64bbd2aaf83280a0a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1787626299
 GameObject:
   m_ObjectHideFlags: 0
