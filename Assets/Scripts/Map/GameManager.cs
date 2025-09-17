@@ -17,7 +17,7 @@ public class GameManager : MonoSingleton<GameManager>
     public static bool IsStageLoaded { get; private set; }
     public static string LastLoadedStageId { get; private set; }
 
-    private const string LobbySceneName  = "LobbyScene";
+    private const string LobbySceneName = "LobbyScene";
 
     [Header("Tutorial Stage Boot")]
     [SerializeField] private bool useTutorialStage = true;
@@ -458,10 +458,14 @@ public class GameManager : MonoSingleton<GameManager>
 
     private void OnClickLobbyFromClear()
     {
-        Time.timeScale = 1f;
-        PauseControl.SetPaused(false);
+        // 공통 정리 + 타임스케일 복구 + 인게임 오브젝트/풀 정리
+        BeginSceneChange();          // ← ResetRunState(false) 포함
+
+        // 로비 씬으로 전환 (Single 로드)
         if (!string.IsNullOrEmpty(LobbySceneName))
-            SceneManager.LoadScene(LobbySceneName);
+            SceneManager.LoadScene(LobbySceneName, LoadSceneMode.Single);
+        else
+            SceneManager.LoadScene(0, LoadSceneMode.Single);
     }
 
     private void OnClickNextStage()
