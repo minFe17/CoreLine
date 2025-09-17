@@ -9,21 +9,11 @@
             "AttackSpeedLevel":1
         }
     ],
-    "UnlockedLaboratoryId" : ["Attack_Num1"],
+    "UnlockedLaboratoryId" : [],
     "PlayerMoney":100000,
     "PlayerGem":100000,
     "PlayerInfinityKey":0,
     "ClearStage":
     [
-        {
-            "StageId" : "Stage1-1",
-            "MaxStarNum":0,
-            "Star":
-            {
-                "FirstStar":false,
-                "SecondStar":false,
-                "ThirdStar":false
-            }
-        }
     ]
 }

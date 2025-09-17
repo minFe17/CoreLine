@@ -13,7 +13,7 @@ public enum PopUpStatus
 {
     NoMoneyAlret, NoChoiceUnitAlret, NoChoiceStageAlret, SettingPopUp,
     NoWriteAlret, NoLogInAlret, NoCreateAlret,SuccessCreateAlret,
-    NoClearStageAlret, WaitAlret, MaxLevelAlret
+    NoClearStageAlret, WaitAlret, MaxLevelAlret, WaitingNextUpdate
 }
 public class UIManager : SimpleSingleton<UIManager>
 {
@@ -109,6 +109,10 @@ public class UIManager : SimpleSingleton<UIManager>
 
         _popUp.SwitchOff();
         _popUp = null;
+    }
+    public PanelStatus FrontPanel()
+    {
+        return _panelStack.Peek().Status;
     }
 
 }

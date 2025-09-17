@@ -3,37 +3,69 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Utils;
 
 public class BackGroundController : MonoBehaviour
 {
-    private Dictionary<StageType, Image> _images = new();
+    public float speed = 3f;
+    private Dictionary<StageType, Transform> _stages = new();
     private StageType _curType = StageType.Stage1;
+    private Vector3 _position = new Vector3();
+
 
     private void Start()
     {
-        //SettingImage();
-        //ChangeImage(StageType.Stage1);
+        SettingStage();
+        ChangeImage(StageType.Stage1);
     }
     private void OnEnable()
     {
-        //EventManager.Instance.Subscribe<StageType>("ChangeStage", ChangeImage);
+        EventManager.Instance.Subscribe<StageType>("ChangeStage", ChangeImage);
     }
     private void OnDisable()
     {
-       // EventManager.Instance.UnSubscribe("ChangeStage", (Action<StageType>)ChangeImage);
+        EventManager.Instance.UnSubscribe("ChangeStage", (Action<StageType>)ChangeImage);
     }
-    private void SettingImage()
+    private void Update()
     {
-        foreach (var stage in DataManager.Instance.WorldStageDatas)
-        {
-            _images[stage.StageType] = GameObject.Find("BackGround/" + stage.StageType.ToString()).GetComponent<Image>();
-        }
+        if (UIManager.Instance.FrontPanel() == PanelStatus.UpgradePanel ||
+            UIManager.Instance.FrontPanel() == PanelStatus.SettingPanel)
+            return;
+        _position.x -= speed * Time.deltaTime;
 
+        if (_position.x < -24.5)
+            _position.x = 25;
+        
+        _stages[_curType].position = _position;
+    }
+    private void SettingStage()
+    {
+        Transform background = GameObject.Find("BackGround")?.transform;
+
+        if (background != null)
+        {
+            foreach (Transform child in background)
+            {
+                StageType type;
+                if (Enum.TryParse(child.name, out type))
+                {
+                    _stages[type] = child;
+                    _stages[type].gameObject.SetActive(false);
+                }
+                else
+                {
+                    Debug.LogWarning("BackGround 하위에 StageType에 없는 이름이 있습니다: " + child.name);
+                }
+            }
+        }
     }
     private void ChangeImage(StageType type)
     {
-        _images[_curType].gameObject.SetActive(false);
+        _position = new Vector3(0,0,0);
+        _stages[_curType].position = new Vector3(0,0,0);
+        _stages[_curType].gameObject.SetActive(false);
         _curType = type;
-        _images[type].gameObject.SetActive(true);
+        _stages[type].gameObject.SetActive(true);
     }
 }

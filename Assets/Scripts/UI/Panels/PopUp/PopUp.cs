@@ -16,7 +16,8 @@ public  class PopUp : MonoBehaviour
     public void SwitchOn()
     {
         gameObject.SetActive(true);
-        //MonoSingleton<AudioClipManager>.Instance.StopSFX();
+
+        if (_status == PopUpStatus.WaitAlret) return;
         MonoSingleton<AudioClipManager>.Instance.PlaySFX(ESFXType.UI_PopUp);
     }
     public void SwitchOff()
