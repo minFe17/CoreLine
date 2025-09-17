@@ -49,9 +49,9 @@ public class StageButton : BaseButton
     private bool IsPreStageUnlocked()
     {
         List<ClearStage> stage = DataManager.Instance.GameData.ClearStage;
+        if (_preStage == "") return true;
         foreach (var st in stage)
         {
-            if (_preStage == "" || _preStage == "Stage1-0") return true;
             if(st.StageId == _preStage) return true;
         }
         return false;

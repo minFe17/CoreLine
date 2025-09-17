@@ -60,10 +60,20 @@ public class StarController : MonoBehaviour
             switch (star.First)
             {
                 case 1:
-                case 2:
-                case 3:
                     {
                         if (stage.Star.FirstStar)
+                            star.Second.sprite = SpriteReturn("ItemIcon_Star");
+                        continue;
+                    }
+                case 2:
+                    {
+                        if (stage.Star.SecondStar)
+                            star.Second.sprite = SpriteReturn("ItemIcon_Star");
+                        continue;
+                    }
+                case 3:
+                    {
+                        if (stage.Star.ThirdStar)
                             star.Second.sprite = SpriteReturn("ItemIcon_Star");
                         continue ;
                     }

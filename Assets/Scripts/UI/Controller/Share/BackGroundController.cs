@@ -8,7 +8,10 @@ using Utils;
 
 public class BackGroundController : MonoBehaviour
 {
-    public float speed = 3f;
+    private readonly float MAX_RANGE = 25;
+    private readonly float MIN_RANGE = -24.5f;
+    private float speed = 3f;
+    
     private Dictionary<StageType, Transform> _stages = new();
     private StageType _curType = StageType.Stage1;
     private Vector3 _position = new Vector3();
@@ -34,8 +37,8 @@ public class BackGroundController : MonoBehaviour
             return;
         _position.x -= speed * Time.deltaTime;
 
-        if (_position.x < -24.5)
-            _position.x = 25;
+        if (_position.x < MIN_RANGE)
+            _position.x = MAX_RANGE;
         
         _stages[_curType].position = _position;
     }
