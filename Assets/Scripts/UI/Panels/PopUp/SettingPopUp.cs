@@ -24,7 +24,7 @@ public class SettingPopUp : PopUp
         if(_soundData == null)
             _soundData = SimpleSingleton<SoundData>.Instance;
         if(_path == null)
-            _path = Application.persistentDataPath + "SaveSoundDataFile.json";
+            _path =  Path.Combine(Application.persistentDataPath,"SaveSoundDataFile.json");
 
         if (!File.Exists(_path))
             return;
