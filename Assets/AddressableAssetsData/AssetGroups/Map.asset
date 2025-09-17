@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Map
   m_GUID: 2f27fc4f5adcc0745a3044081256c146
   m_SerializeEntries:
+  - m_GUID: 05195107012468b469995effd6e59021
+    m_Address: Stage1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 071e0587438ba6b4d971b36978b706d1
     m_Address: Stage1-3
     m_ReadOnly: 0
@@ -37,6 +42,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bb34205b59d7cd14d9078e7321fa86e4
     m_Address: Stage1-0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ccbd1365bd4a16043b659404b71009da
+    m_Address: Stage1-5
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
