@@ -170,13 +170,27 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
             idx = gd.ClearStage.Count - 1;
         }
 
-        int prevBest = cs.MaxStarNum;
-        int newBest = Mathf.Max(prevBest, starsEarned);
+        // 기존 별 상태 백업(내려가지 않도록 보존)
+        bool wasFirst = cs.Star.FirstStar;
+        bool wasSecond = cs.Star.SecondStar;
+        bool wasThird = cs.Star.ThirdStar;
 
+        // 이번 클리어 결과로 "켜기만" 한다 (이미 true는 그대로 유지)
+        bool gainFirst = starsEarned >= 1;
+        bool gainSecond = starsEarned >= 2;
+        bool gainThird = starsEarned >= 3;
+
+        cs.Star.FirstStar = cs.Star.FirstStar || gainFirst;
+        cs.Star.SecondStar = cs.Star.SecondStar || gainSecond;
+        cs.Star.ThirdStar = cs.Star.ThirdStar || gainThird;
+
+        // 별 개수는 플래그 합산으로 재계산(절대 다운그레이드 없음)
+        int newBest = (cs.Star.FirstStar ? 1 : 0) + (cs.Star.SecondStar ? 1 : 0) + (cs.Star.ThirdStar ? 1 : 0);
+        if (newBest > maxPossible) newBest = maxPossible;
+
+        int prevBest = cs.MaxStarNum;
+        if (newBest < prevBest) newBest = prevBest; // 안전망(논리상 내려갈 수 없지만 방어적으로 유지)
         cs.MaxStarNum = newBest;
-        cs.Star.FirstStar = newBest >= 1;
-        cs.Star.SecondStar = newBest >= 2;
-        cs.Star.ThirdStar = newBest >= 3;
 
         // 골드: 기본 매 클리어 지급
         if (giveGoldEveryClear && stage.Gold > 0)
@@ -185,8 +199,8 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
             rewardResult.GoldGained = stage.Gold;
         }
 
-        // 젬: 3성 최초 달성 1회만
-        bool justHitThree = (prevBest < 3) && (newBest >= 3);
+        // 젬: "3성 최초 달성" 시 1회만
+        bool justHitThree = (!wasThird) && cs.Star.ThirdStar;
         if (justHitThree && stage.Gem > 0)
         {
             gd.PlayerGem += stage.Gem;
@@ -196,11 +210,18 @@ public sealed class NormalStageManager : SimpleSingleton<NormalStageManager>
 
         gd.ClearStage[idx] = cs;
         DataManager.Instance.SaveData();
+        Debug.Log(
+    $"[ApplyClearAndSave] SAVED stage={stage.Id} starsEarned={starsEarned} " +
+    $"newBest={cs.MaxStarNum} gold+={rewardResult.GoldGained} gem+={rewardResult.GemGained} " +
+    $"first3?={rewardResult.FirstTimeThreeStar}"
+);
+        Action progressEv = OnStageProgressChanged;
+        if (progressEv != null) progressEv.Invoke();
 
-        OnStageProgressChanged?.Invoke();
-        rewardResult.NewBestStars = newBest;
+        rewardResult.NewBestStars = cs.MaxStarNum;
         return rewardResult;
     }
+
 
     // ─────────────────────────────────────────────────────────────────────
     // 조회/검색

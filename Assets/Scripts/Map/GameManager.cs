@@ -17,7 +17,7 @@ public class GameManager : MonoSingleton<GameManager>
     public static bool IsStageLoaded { get; private set; }
     public static string LastLoadedStageId { get; private set; }
 
-    private const string LobbySceneName = "LobbyScene";
+    private const string LobbySceneName  = "LobbyScene";
 
     [Header("Tutorial Stage Boot")]
     [SerializeField] private bool useTutorialStage = true;
