@@ -1,13 +1,13 @@
 [
     {
-        "UnitType" : "Archer",
-        "UnlockPrice":500,
-        "Information":"궁수 입니다"
-    },
-    {
         "UnitType" : "Warrior",
         "UnlockPrice":1000,
         "Information":"전사 입니다"
+    },
+    {
+        "UnitType" : "Archer",
+        "UnlockPrice":500,
+        "Information":"궁수 입니다"
     },
     {
         "UnitType" : "Wizard",

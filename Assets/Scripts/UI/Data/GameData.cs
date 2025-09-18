@@ -10,6 +10,7 @@ public class GameData
     public int PlayerGem;
     public int PlayerInfinityKey;
     public List<ClearStage> ClearStage;
+    public SoundData Sound;
 }
 [System.Serializable]
 public class UnlockedUnit

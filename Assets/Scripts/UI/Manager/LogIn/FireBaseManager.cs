@@ -10,6 +10,7 @@ using Firebase.Auth;
 using Firebase.Extensions;
 using Firebase.Database;
 
+
 public class FireBaseManager : SimpleSingleton<FireBaseManager>
 {
     private string _databaseURL = "https://coreline-4f199-default-rtdb.firebaseio.com/";
@@ -17,13 +18,31 @@ public class FireBaseManager : SimpleSingleton<FireBaseManager>
     private FirebaseUser _user;
     private FirebaseDatabase _database;
 
-    public FireBaseManager()
+    public void Init()
     {
-        FirebaseApp.DefaultInstance.Options.DatabaseUrl = new Uri(_databaseURL);
-        Debug.Log("Firebase 초기화 완료");
-        _auth = FirebaseAuth.DefaultInstance;
-        _database = FirebaseDatabase.DefaultInstance;
-    }//파이어베이스 셋팅
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
+        {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == DependencyStatus.Available)
+            {
+                // 로그 레벨 세팅
+                Firebase.FirebaseApp.LogLevel = Firebase.LogLevel.Debug;
+
+                // Database URL 설정
+                FirebaseApp.DefaultInstance.Options.DatabaseUrl = new Uri(_databaseURL);
+
+                // Auth, Database 초기화
+                _auth = FirebaseAuth.DefaultInstance;
+                _database = FirebaseDatabase.DefaultInstance;
+
+                Debug.Log("🔥 Firebase 초기화 완료");
+            }
+            else
+            {
+                Debug.LogError($"Firebase 초기화 실패: {dependencyStatus}");
+            }
+        });
+    }
 
     //이메일 회원가입
     public void CreateToEmail(string email, string password)
@@ -34,8 +53,8 @@ public class FireBaseManager : SimpleSingleton<FireBaseManager>
             Debug.LogWarning("이메일과 비밀번호를 입력해주세요.");
             return;
         }
-        
-        _auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith(task =>
+
+        _auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task =>
         {
             if (task.IsCanceled)
             {
@@ -49,13 +68,11 @@ public class FireBaseManager : SimpleSingleton<FireBaseManager>
                 Debug.LogError("회원가입 실패: " + task.Exception);
                 return;
             }
-        
-            Firebase.Auth.AuthResult authResult = task.Result;
-            Firebase.Auth.FirebaseUser newUser = authResult.User;
+
+            Firebase.Auth.FirebaseUser newUser = task.Result.User;
             Debug.Log("회원가입 성공! UID: " + newUser.UserId);
             UIManager.Instance.OpenPopUp(PopUpStatus.SuccessCreateAlret);
             SetDataBase(newUser.UserId);
-
         });
     }
 
@@ -195,7 +212,7 @@ public class FireBaseManager : SimpleSingleton<FireBaseManager>
             PlayerMoney = 0,
             PlayerGem = 0,
             PlayerInfinityKey = 0,
-        
+
             UnlockedUnit = new List<UnlockedUnit>
             {
                 new UnlockedUnit
@@ -207,10 +224,11 @@ public class FireBaseManager : SimpleSingleton<FireBaseManager>
                     AttackSpeedLevel = 1
                 }
             },
-        
+
             UnlockedLaboratoryId = new List<string>(),
-        
-            ClearStage = new List<ClearStage>()
+
+            ClearStage = new List<ClearStage>(),
+            Sound = new SoundData()
         };
         
         string json = JsonConvert.SerializeObject(testData, new JsonSerializerSettings

@@ -84,6 +84,8 @@ public class DataManager : SimpleSingleton<DataManager>
             data.ClearStage = new();
         if (data.UnlockedUnit == null)
             data.UnlockedUnit = new();
+        if(data.Sound == null)
+            data.Sound = new();
 
         _gameData = data;
     }

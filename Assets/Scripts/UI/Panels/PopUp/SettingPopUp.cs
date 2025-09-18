@@ -7,36 +7,27 @@ public class SettingPopUp : PopUp
 {
     private Slider _bgmSlider;
     private Slider _effectSlider;
-
-    SoundData _soundData;
+    private SoundData _sound;
     string _path;
 
     protected void Start()
     {
         _bgmSlider = transform.Find("Panel/BGM/BGMSound").GetComponent<Slider>();
         _effectSlider = transform.Find("Panel/Effect/EffectSound").GetComponent<Slider>();
-
-        _bgmSlider.value = _soundData.BgmVolume;
-        _effectSlider.value = _soundData.SfxVolume;
-    }
-
-    void WriteSoundData()
-    {
-        string json = JsonUtility.ToJson(_soundData, true);
-        File.WriteAllText(_path, json);
+        _sound = DataManager.Instance.GameData.Sound;
+        _bgmSlider.value = _sound.BgmVolume;
+        _effectSlider.value = _sound.SfxVolume;
     }
 
     public void ChangeBGMVolume()
     {
         MonoSingleton<AudioClipManager>.Instance.ChangeBGMVolume(_bgmSlider.value);
-        _soundData.BgmVolume = _bgmSlider.value;
-        WriteSoundData();
+        _sound.BgmVolume = _bgmSlider.value;
     }
 
     public void ChangeSFXVolume()
     {
         MonoSingleton<AudioClipManager>.Instance.ChangeSFXVolume(_effectSlider.value);
-        _soundData.SfxVolume = _effectSlider.value;
-        WriteSoundData();
+        _sound.SfxVolume = _effectSlider.value;
     }
 }

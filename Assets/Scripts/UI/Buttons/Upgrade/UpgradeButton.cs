@@ -46,15 +46,19 @@ public class UpgradeButton : BaseButton
         EventManager.Instance.Invoke<UpgradeType>("UpgradeUnit", _status);
         EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", UnitManager.Instance.ChoiceUnit.UnitType);
     }
+    protected override void Awake()
+    {
+        base.Awake();
+        MatchText();
+    }
     protected void Start()
     {
-        MatchText();
-        ChangeText(UnitManager.Instance.ChoiceUnit.UnitType);
         ChangeColor();
     }
     private void OnEnable()
     {
         EventManager.Instance.Subscribe<EUnitType>("ChangeChoiceUnitData", ChangeText);
+        ChangeText(UnitManager.Instance.ChoiceUnit.UnitType);
     }
     private void OnDisable()
     {
@@ -173,7 +177,7 @@ public class UpgradeButton : BaseButton
                 break;
             case UpgradeType.AttackRange:
                 if (unit.AttackRangeLevel < _data.MaxLevel)
-                    _texts["PriceText"].text = _data.Cost[unit.AttackDamageLevel - 1].ToString();
+                    _texts["PriceText"].text = _data.Cost[unit.AttackRangeLevel - 1].ToString();
                 else
                     _texts["PriceText"].text = "최대강화";
                 _texts["LevelText"].text = "+"+unit.AttackRangeLevel.ToString();
