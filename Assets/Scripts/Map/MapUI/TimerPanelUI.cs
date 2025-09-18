@@ -24,7 +24,7 @@ public class TimerPanelUI : MonoBehaviour
     [SerializeField] private RectTransform _arrow;   // 화살표 이미지 (버튼 하위)
 
     [Header("Progress Settings")]
-    private float _durationSeconds = 10f; // 꽉 차는 데 걸리는 시간(초)
+    private float _durationSeconds = 120f; // 꽉 차는 데 걸리는 시간(초)
     [SerializeField] private bool _autoStart = true;        // 시작 시 자동 진행
 
     [Header("Panel Slide")]

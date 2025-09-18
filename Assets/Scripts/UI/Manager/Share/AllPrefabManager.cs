@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using Utils;
+using Firebase.Auth;
 
 public class AllPrefabManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class AllPrefabManager : MonoBehaviour
     }
     private void OnApplicationQuit()
     {
-        FireBaseManager.Instance.SaveGameData(DataManager.Instance.GameData);
+        if(FirebaseAuth.DefaultInstance.CurrentUser != null)
+            FireBaseManager.Instance.SaveGameData(DataManager.Instance.GameData);
     }
 }

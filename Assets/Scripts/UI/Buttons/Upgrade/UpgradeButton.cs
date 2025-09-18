@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using TMPro;
+using System;
 
 public class UpgradeButton : BaseButton
 {
@@ -44,13 +45,20 @@ public class UpgradeButton : BaseButton
         EventManager.Instance.Invoke("UpdateMoneyText");
         EventManager.Instance.Invoke<UpgradeType>("UpgradeUnit", _status);
         EventManager.Instance.Invoke<EUnitType>("ChangeChoiceUnitData", UnitManager.Instance.ChoiceUnit.UnitType);
-        ChangeText();
     }
     protected void Start()
     {
         MatchText();
-        ChangeText();
+        ChangeText(UnitManager.Instance.ChoiceUnit.UnitType);
         ChangeColor();
+    }
+    private void OnEnable()
+    {
+        EventManager.Instance.Subscribe<EUnitType>("ChangeChoiceUnitData", ChangeText);
+    }
+    private void OnDisable()
+    {
+        EventManager.Instance.UnSubscribe("ChangeChoiceUnitData", (Action<EUnitType>)ChangeText);
     }
     private bool CheckMoney(out int money, out bool isMaxLevel)
     {
@@ -133,9 +141,9 @@ public class UpgradeButton : BaseButton
         }
     }
    
-    private void ChangeText()
+    private void ChangeText(EUnitType type)
     {
-        UnlockedUnit unit = UnitManager.Instance.GetUnlockedUnit(UnitManager.Instance.ChoiceUnit.UnitType);
+        UnlockedUnit unit = UnitManager.Instance.GetUnlockedUnit(type);
         print(_status);
         switch(_status)
         {
