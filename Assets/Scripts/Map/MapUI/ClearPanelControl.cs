@@ -10,7 +10,7 @@ public class ClearPanelControl : MonoBehaviour
 {
     // ----- config -----
     private float _starSpacing = 200f;                 // -200 / 0 / +200
-    private float _starYBetweenCenterAndTop = 0.58f;   // 0.5=중앙, 1.0=최상단
+    private float _starYBetweenCenterAndTop = 0.555f;   // 0.5=중앙, 1.0=최상단
     private bool _autoRepositionOnResize = true;
     private float _rewardSpacing = 200f;               // 보상 간격
 

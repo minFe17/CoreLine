@@ -37,6 +37,19 @@ public class StarUI : MonoBehaviour
             }
         }
     }
+    private void Start()
+    {
+        RectTransform parent = GameObject.Find("InGameUI(Clone)/ClearPanel/StarPos").GetComponent<RectTransform>();
+        float x = (parent.rect.width / 5) * 300;
+        RectTransform baseRect = baseStar.GetComponent<RectTransform>();
+        RectTransform fillRect = fillStar.GetComponent<RectTransform>();
+
+        if (x < 0)
+            x *= -1;
+        baseRect.sizeDelta = new Vector2(x, x);
+        fillRect.sizeDelta = new Vector2(x, x);
+
+    }
 
     /// <summary>초기 상태로: 채움 0 (은색만 보임)</summary>
     public void InitIdle()

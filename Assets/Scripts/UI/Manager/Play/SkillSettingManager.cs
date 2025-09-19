@@ -18,11 +18,12 @@ public class SkillSettingManager : MonoBehaviour
     }
     private void Start()
     {
+
         SettingSkill();
-       
     }
     private void OnEnable()
     {
+        SettingSkill();
         EventManager.Instance.Subscribe<SkillSelectButton>("ChoiceSkillButton", UpdateInfoBox);
         EventManager.Instance.Subscribe<SkillSelectButton>("ChoiceSkillButton", SelectButton);
     }
@@ -30,6 +31,13 @@ public class SkillSettingManager : MonoBehaviour
     {
         EventManager.Instance.UnSubscribe("ChoiceSkillButton", (Action<SkillSelectButton>)UpdateInfoBox);
         EventManager.Instance.UnSubscribe("ChoiceSkillButton", (Action<SkillSelectButton>)SelectButton);
+    }
+    private void ClearButton()
+    {
+        foreach (var button in _buttons[false].GetAllToActiveTrue())
+            button.gameObject.SetActive(false);
+        foreach (var button in _buttons[true].GetAllToActiveTrue())
+            button.gameObject.SetActive(false);
     }
     private void CreateButtons()
     {
@@ -41,6 +49,7 @@ public class SkillSettingManager : MonoBehaviour
     }
     private void SettingSkill()
     {
+        ClearButton();
         //셋팅된거있으면 가져오기
         //스킬매니저에서 등록된 애들 가져오기
         IReadOnlyList<SelectedSkill> loadData = SkillManager.Instance._loadout;
@@ -52,6 +61,7 @@ public class SkillSettingManager : MonoBehaviour
             SkillSelectButton btn = _buttons[true].Pop().GetComponent<SkillSelectButton>();
             btn.Data = LaboratoryManager.Instance.GetBuyLaboratoryData(skill.Id);
             btn.IsSetting = true;
+            unlockedSkill.Remove(skill.Id);
         }
 
         foreach (string skill in unlockedSkill)

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Utils;
 
-public  class PopUp : MonoBehaviour
+public class PopUp : MonoBehaviour
 {
     [SerializeField]
     protected PopUpStatus _status;

@@ -7,7 +7,7 @@ public class SkillUI : MonoBehaviour
     private enum ArrowDefaultDirection { Up, Right, Down, Left }
 
     // 고정 파라미터
-    private const float SlideDistance = 984f;     // 닫기: +984, 열기: -984
+    private float SlideDistance = 984f;     // 닫기: +984, 열기: -984
     private const float Duration = 0.25f;         // 슬라이드 시간
     private const float ToggleRotateZ = -90f;     // SkillControlButton만 시계 90도 회전
     private const bool StartOpen = true;          // 시작 시 열림
@@ -35,6 +35,9 @@ public class SkillUI : MonoBehaviour
             Debug.LogError("[SkillUI] RectTransform not found on SkillPanel.");
             enabled = false; return;
         }
+
+        //여기 추가함 수정필요할수도있음
+        SlideDistance = GetComponent<RectTransform>().rect.width;
 
         // 토글 버튼 & 화살표 (계층: SkillPanel/SkillControlButton/Arrow)
         Transform toggleTf = transform.Find("SkillControlButton");

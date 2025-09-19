@@ -23,7 +23,7 @@ public class CostManager : MonoSingleton<CostManager>
     private WalletSettings unitSettings = new WalletSettings
     {
         autoGain = true,
-        gainPerSecond = 8f,
+        gainPerSecond = 13f,
         useUnscaledTime = false,
         startValue = 0
     };

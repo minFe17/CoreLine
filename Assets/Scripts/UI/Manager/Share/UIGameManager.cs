@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utils;
+using static SkillManager;
 
 public class UIGameManager : MonoBehaviour
 {
@@ -21,5 +22,6 @@ public class UIGameManager : MonoBehaviour
 
         MonoSingleton<AudioClipManager>.Instance.StopBGM();
         MonoSingleton<AudioClipManager>.Instance.PlayBGM(EBGMType.UI_BGM2);
+        //SkillManager.Instance.ClearLoadout();
     }
 }
