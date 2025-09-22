@@ -773,7 +773,7 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
-    Purchasing: 0
+    Purchasing: 1
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -795,11 +795,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 8e37766f-2654-4b6c-91c9-ae0478700c52
+  cloudProjectId: d5425f2a-0080-4964-83f9-994eb529e8f7
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: CoreLine
-  organizationId: rnjstnqls323
+  organizationId: minfe
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
